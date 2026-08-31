@@ -15,7 +15,13 @@ import {
 } from '../../../components/Filters/Filters.js';
 import { Timeline } from './Timeline.js';
 import { OperationDetailSidesheet } from './OperationDetailSidesheet.js';
-import { MOCK_CHANGE_HISTORY, type ChangeHistoryOperation, type OperationType } from './mockChangeHistory.js';
+import {
+  MOCK_CHANGE_HISTORY,
+  MOCK_USER_ACTIVITY,
+  type ChangeHistoryGroup,
+  type ChangeHistoryOperation,
+  type OperationType,
+} from './mockChangeHistory.js';
 import styles from './HistoryTab.module.css';
 
 const VIEW_ITEMS = [
@@ -104,15 +110,13 @@ function getFieldValue(op: ChangeHistoryOperation, fieldId: string): string {
   }
 }
 
-const ALL_OPERATIONS = MOCK_CHANGE_HISTORY.flatMap((group) => group.operations);
-
-/** Builds `{value, label}` options from every distinct value present in the
- *  mock data for a given field — keeps the "Add filter" menu functional
- *  without inventing data that isn't already on `ChangeHistoryOperation`. */
-function uniqueOptions(fieldId: string): { value: string; label: string }[] {
+/** Builds `{value, label}` options from every distinct value present in a
+ *  given operation list for a given field — keeps the "Add filter" menu
+ *  functional without inventing data that isn't already on the operation. */
+function uniqueOptions(operations: ChangeHistoryOperation[], fieldId: string): { value: string; label: string }[] {
   const seen = new Set<string>();
   const options: { value: string; label: string }[] = [];
-  for (const op of ALL_OPERATIONS) {
+  for (const op of operations) {
     const value = getFieldValue(op, fieldId);
     if (value && !seen.has(value)) {
       seen.add(value);
@@ -147,31 +151,37 @@ const DATE_RULE_LABELS: Record<DateRule, string> = {
   exactly: 'is',
 };
 
-const LATEST_OPERATION_DATE = ALL_OPERATIONS.reduce(
-  (latest, op) => Math.max(latest, new Date(op.date).getTime()),
-  0,
-);
-/** yyyy-MM-DDTHH:mm (local time) for the latest mock date, used as the
- *  default value for the before/after/exactly/between date-time inputs. */
+/** yyyy-MM-DDTHH:mm (local time), used as the default value for the
+ *  before/after/exactly/between date-time inputs. */
 function toDatetimeLocal(timestamp: number): string {
   const d = new Date(timestamp);
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-const LATEST_OPERATION_DATE_INPUT = toDatetimeLocal(LATEST_OPERATION_DATE);
 
-const FILTER_FIELDS: FilterFieldConfig[] = [
-  { id: 'name', label: 'Name', options: uniqueOptions('name') },
-  { id: 'reason', label: 'Reason', options: uniqueOptions('reason') },
-  { id: 'operationId', label: 'Operation ID', options: uniqueOptions('operationId') },
-  { id: 'requestedBy', label: 'Requested by', options: uniqueOptions('requestedBy') },
-  { id: 'status', label: 'Status', options: uniqueOptions('status') },
-  { id: 'logonComputer', label: 'Logon computer', options: uniqueOptions('logonComputer') },
-  { id: 'logonSite', label: 'Logon site', options: uniqueOptions('logonSite') },
-  { id: 'activeRolesAdmin', label: 'Active Roles Admin', options: uniqueOptions('activeRolesAdmin') },
-  { id: 'targetObject', label: 'Target object', options: uniqueOptions('targetObject') },
-  { id: 'lastUpdatedOn', label: 'Last updated on', options: uniqueOptions('lastUpdatedOn') },
-];
+/** Everything derived from a single operations list (dataset-dependent, so
+ *  Change History and User Activity each get their own). */
+function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
+  const allOperations = dataset.flatMap((group) => group.operations);
+  const latestDate = allOperations.reduce((latest, op) => Math.max(latest, new Date(op.date).getTime()), 0);
+  const filterFields: FilterFieldConfig[] = [
+    { id: 'name', label: 'Name', options: uniqueOptions(allOperations, 'name') },
+    { id: 'reason', label: 'Reason', options: uniqueOptions(allOperations, 'reason') },
+    { id: 'operationId', label: 'Operation ID', options: uniqueOptions(allOperations, 'operationId') },
+    { id: 'requestedBy', label: 'Requested by', options: uniqueOptions(allOperations, 'requestedBy') },
+    { id: 'status', label: 'Status', options: uniqueOptions(allOperations, 'status') },
+    { id: 'logonComputer', label: 'Logon computer', options: uniqueOptions(allOperations, 'logonComputer') },
+    { id: 'logonSite', label: 'Logon site', options: uniqueOptions(allOperations, 'logonSite') },
+    {
+      id: 'activeRolesAdmin',
+      label: 'Active Roles Admin',
+      options: uniqueOptions(allOperations, 'activeRolesAdmin'),
+    },
+    { id: 'targetObject', label: 'Target object', options: uniqueOptions(allOperations, 'targetObject') },
+    { id: 'lastUpdatedOn', label: 'Last updated on', options: uniqueOptions(allOperations, 'lastUpdatedOn') },
+  ];
+  return { allOperations, latestDate, latestDateInput: toDatetimeLocal(latestDate), filterFields };
+}
 
 /**
  * HistoryTab — the User Detail page's "History" tab. Hosts the Change
@@ -185,12 +195,34 @@ export function HistoryTab() {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [dateRule, setDateRule] = useState<DateRule | null>(null);
   const [dateRelativeId, setDateRelativeId] = useState<(typeof DATE_RELATIVE_OPTIONS)[number]['id']>('last30');
-  const [dateFrom, setDateFrom] = useState(LATEST_OPERATION_DATE_INPUT);
-  const [dateTo, setDateTo] = useState(LATEST_OPERATION_DATE_INPUT);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const filterIdRef = useRef(0);
 
-  const allOperations = MOCK_CHANGE_HISTORY.flatMap((group) => group.operations);
+  const activeDataset = view === 'changeHistory' ? MOCK_CHANGE_HISTORY : MOCK_USER_ACTIVITY;
+  const { allOperations, latestDate, latestDateInput, filterFields } = useMemo(
+    () => buildDatasetContext(activeDataset),
+    [activeDataset],
+  );
+
+  // Switching views swaps the whole dataset out from under any active
+  // filters, so reset them rather than leaving stale/mismatched selections.
+  const prevView = useRef(view);
+  if (prevView.current !== view) {
+    prevView.current = view;
+    setActiveTypes([]);
+    setActiveFilters([]);
+    setDateRule(null);
+    setDateFrom(latestDateInput);
+    setDateTo(latestDateInput);
+    setSelectedOpId(null);
+  }
+  if (dateFrom === '' && dateTo === '') {
+    setDateFrom(latestDateInput);
+    setDateTo(latestDateInput);
+  }
+
   const selectedIndex = allOperations.findIndex((op) => op.id === selectedOpId);
   const selectedOperation: ChangeHistoryOperation | null =
     selectedIndex >= 0 ? allOperations[selectedIndex] : null;
@@ -201,9 +233,9 @@ export function HistoryTab() {
   const fromTime = dateFrom ? new Date(dateFrom).getTime() : null;
   const toTime = dateTo ? new Date(dateTo).getTime() : null;
   const relativeCutoff =
-    LATEST_OPERATION_DATE - (DATE_RELATIVE_OPTIONS.find((f) => f.id === dateRelativeId)?.days ?? 0) * 86_400_000;
+    latestDate - (DATE_RELATIVE_OPTIONS.find((f) => f.id === dateRelativeId)?.days ?? 0) * 86_400_000;
   const filteredGroups = useMemo(() => {
-    return MOCK_CHANGE_HISTORY.map((group) => ({
+    return activeDataset.map((group) => ({
       ...group,
       operations: group.operations.filter((op) => {
         const matchesQuery =
@@ -225,7 +257,7 @@ export function HistoryTab() {
         return matchesQuery && matchesType && matchesFilters && matchesDate;
       }),
     })).filter((group) => group.operations.length > 0);
-  }, [trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromTime, toTime]);
+  }, [activeDataset, trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromTime, toTime]);
 
   const toggleType = (value: string) => {
     setActiveTypes((prev) =>
@@ -242,7 +274,7 @@ export function HistoryTab() {
   const removeFilter = (id: string) => setActiveFilters((prev) => prev.filter((f) => f.id !== id));
   const clearFilters = () => setActiveFilters([]);
 
-  const addFilterMenuItems = FILTER_FIELDS.map((field) => {
+  const addFilterMenuItems = filterFields.map((field) => {
     const supported = fieldHasValueUi(field);
     return {
       kind: 'item' as const,
@@ -402,7 +434,7 @@ export function HistoryTab() {
         {activeFilters.length > 0 && (
           <Filters
             filters={activeFilters}
-            fields={FILTER_FIELDS}
+            fields={filterFields}
             onAddFilter={addFilter}
             onValueChange={setFilterValue}
             onRemove={removeFilter}
@@ -413,18 +445,14 @@ export function HistoryTab() {
       </>
 
       <div className={styles.body}>
-        {view === 'changeHistory' ? (
-          filteredGroups.length > 0 ? (
-            <Timeline
-              groups={filteredGroups}
-              onSelectOperation={(op) => setSelectedOpId(op.id)}
-              forceExpandAll={hasActiveFilters}
-            />
-          ) : (
-            <p className={styles.placeholder}>No operations match the current search and filters.</p>
-          )
+        {filteredGroups.length > 0 ? (
+          <Timeline
+            groups={filteredGroups}
+            onSelectOperation={(op) => setSelectedOpId(op.id)}
+            forceExpandAll={hasActiveFilters}
+          />
         ) : (
-          <p className={styles.placeholder}>Coming soon.</p>
+          <p className={styles.placeholder}>No operations match the current search and filters.</p>
         )}
       </div>
 
