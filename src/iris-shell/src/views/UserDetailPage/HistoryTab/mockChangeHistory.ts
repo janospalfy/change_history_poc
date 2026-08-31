@@ -81,11 +81,11 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
   { type: 'created', label: 'Created' },
   { type: 'changeUser', label: 'Update user' },
   { type: 'changeUser', label: 'Update user' },
-  { type: 'moved', label: 'Moved' },
+  { type: 'moved', label: 'Move user' },
   { type: 'groupMembershipChange', label: 'Group membership change' },
   { type: 'deprovision', label: 'Deprovision user' },
   { type: 'undoDeprovision', label: 'Undo deprovisioning' },
-  { type: 'deleted', label: 'Deleted' },
+  { type: 'deleted', label: 'Delete user' },
 ];
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
@@ -277,7 +277,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4047',
         time: '14:42:12',
         type: 'deleted',
-        label: 'Deleted',
+        label: 'Delete user',
         actor: 'administrator (O1D.local)',
         status: 'Denied',
         date: 'November 5, 2026',
@@ -540,7 +540,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         id: 'ID: 1-5024',
         time: '10:04:47',
         type: 'deleted',
-        label: 'Deleted',
+        label: 'Delete user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
         date: 'October 30, 2026',
