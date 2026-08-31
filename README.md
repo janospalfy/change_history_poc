@@ -1,4 +1,4 @@
-# change_history_poc
+# ARS Change history PC
 
 POC prototype for the ARS **Change History** feature — a "History" tab on the User Detail page that shows a grouped, expandable timeline of operations performed on a user, with a details side panel for drilling into a single operation.
 
@@ -19,20 +19,6 @@ The Figma file is an exploration page with many design variants. The four frames
 
 All four live under the **History → Change History** tab of the existing User Detail page (`#/users/:id`) — this is *not* a new top-level nav item. A **User Activity** sub-tab exists alongside Change History but is out of scope for this pass (left as a placeholder).
 
-## Implementation status
-
-Tracked as a discrepancy audit against the Figma design; built one row at a time with a local build + visual check-in after each.
-
-- [x] Toolbar — Change History / User Activity toggle, search, filter button, Export button
-- [ ] Filter strip (chips: Created, Modified, Remove/delete, Lifecycle)
-- [ ] Grouped timeline shell (date headers + connector line + expand/collapse)
-- [ ] Timeline event item (expanded row)
-- [ ] Row hover affordance
-- [ ] Details Sidesheet header (status, title, prev/next paging, close)
-- [ ] Sidesheet — Operation Summary section
-- [ ] Sidesheet — Properties Changed table
-- [ ] Sidesheet — Operation Details (secondary) section
-- [ ] Sidesheet — footer
 
 ## Getting started
 
