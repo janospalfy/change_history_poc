@@ -432,15 +432,18 @@ export function HistoryTab() {
             </div>        </div>
 
         {activeFilters.length > 0 && (
-          <Filters
-            filters={activeFilters}
-            fields={filterFields}
-            onAddFilter={addFilter}
-            onValueChange={setFilterValue}
-            onRemove={removeFilter}
-            onClear={clearFilters}
-            className={styles.propertyFilters}
-          />
+          <>
+            <hr className={styles.filterRowDivider} />
+            <Filters
+              filters={activeFilters}
+              fields={filterFields}
+              onAddFilter={addFilter}
+              onValueChange={setFilterValue}
+              onRemove={removeFilter}
+              onClear={clearFilters}
+              className={styles.propertyFilters}
+            />
+          </>
         )}
       </>
 

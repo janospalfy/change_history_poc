@@ -44,10 +44,22 @@
 }
 
 /* Filters is built for the full-width Users page; drop its outer padding
-   and border so it sits flush within the History tab's own content area. */
+   and border so it sits flush within the History tab's own content area.
+   padding-top is zeroed too, so the gap above/below .filterRowDivider (set
+   by .root's flex gap) is the only spacing \u2014 keeping it symmetric. */
 .propertyFilters {
   padding-inline: 0;
+  padding-top: 0;
   border-top: none;
+}
+
+/* Separates the quick-filter chips from the custom filters row below. */
+.filterRowDivider {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: none;
+  border-top: var(--oi-border-width-default) solid var(--oi-border-color-muted);
 }
 
 /* ---------- filter strip ---------- */
