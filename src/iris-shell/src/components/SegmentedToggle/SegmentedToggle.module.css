@@ -1,0 +1,59 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--oi-spacing-zero);
+}
+
+/* Sliding chip behind the selected segment. JS writes offsetLeft /
+   offsetWidth inline; CSS owns the tween. */
+.pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  border-radius: var(--oi-border-radius-l);
+  background-color: var(--oi-background-color-secondary);
+  transform: translateX(0);
+  transition:
+    transform var(--oi-motion-duration-default) cubic-bezier(0.22, 1, 0.36, 1),
+    width var(--oi-motion-duration-default) cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, width;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    transition: none;
+  }
+}
+
+.item {
+  position: relative;
+  z-index: 1;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--oi-border-radius-l);
+  background-color: transparent;
+  color: var(--oi-content-color-tertiary);
+  padding-inline: var(--oi-spacing-m);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  font-weight: var(--oi-text-body-s-font-weight);
+  transition: color var(--oi-motion-duration-short) var(--oi-motion-ease-default);
+  white-space: nowrap;
+}
+
+.item:hover {
+  color: var(--oi-content-color-primary);
+}
+
+.selected,
+.selected:hover {
+  color: var(--oi-content-color-primary);
+  font-weight: var(--oi-text-body-s-strong-font-weight);
+}

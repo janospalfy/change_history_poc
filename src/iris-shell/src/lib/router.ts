@@ -26,8 +26,7 @@ export type Route =
   | { name: 'insights'; params: Record<string, never> }
   | { name: 'services'; params: Record<string, never> }
   | { name: 'identityHome'; params: Record<string, never> }
-  | { name: 'safeguardHome'; params: Record<string, never> }
-  | { name: 'changeHistory'; params: Record<string, never> };
+  | { name: 'safeguardHome'; params: Record<string, never> };
 
 export type RouteName = Route['name'];
 
@@ -54,7 +53,6 @@ const ROUTES: RouteDef[] = [
   { name: 'services', pattern: /^#\/services$/, keys: [] },
   { name: 'identityHome', pattern: /^#\/identity$/, keys: [] },
   { name: 'safeguardHome', pattern: /^#\/safeguard$/, keys: [] },
-  { name: 'changeHistory', pattern: /^#\/change-history$/, keys: [] },
 ];
 
 const DEFAULT = '#/insights';

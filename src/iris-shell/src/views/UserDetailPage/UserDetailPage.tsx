@@ -15,6 +15,7 @@ import { Tooltip } from '../../components/Tooltip/Tooltip.js';
 import { EditPropertiesSheet } from './EditPropertiesSheet.js';
 import { ResetPasswordModal } from './ResetPasswordModal/ResetPasswordModal.js';
 import { DeleteUserModal } from './DeleteUserModal/DeleteUserModal.js';
+import { HistoryTab } from './HistoryTab/HistoryTab.js';
 import type { User } from '../UsersPage/mockUsers.js';
 import styles from './UserDetailPage.module.css';
 
@@ -176,7 +177,8 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
             onDelete={() => setDeleteOpen(true)}
           />
         )}
-        {tab !== 'overview' && (
+        {tab === 'history' && <HistoryTab />}
+        {tab !== 'overview' && tab !== 'history' && (
           <Card title={TABS.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>
           </Card>
