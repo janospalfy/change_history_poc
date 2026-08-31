@@ -1,4 +1,4 @@
-# ARS Change history PC
+# ARS Change history POC
 
 POC prototype for the ARS **Change History** feature — a "History" tab on the User Detail page that shows a grouped, expandable timeline of operations performed on a user, with a details side panel for drilling into a single operation.
 
