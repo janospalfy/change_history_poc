@@ -1,0 +1,4 @@
+project-name = change_history_poc
+project-description = POC prototype for ARS Change history feature
+git-remote = https://github.com/janospalfy/change_history_poc
+figma-url = https://www.figma.com/design/CrYylB0Tp9GJjNKiOBUryf/ARS_WebUI2_Change_History?node-id=1012-2258&t=bSvZVdaRNepbOL2z-1
