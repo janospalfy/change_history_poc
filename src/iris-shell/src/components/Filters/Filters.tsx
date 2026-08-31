@@ -207,7 +207,7 @@ export function Filters({
               aria-haspopup="menu"
               aria-expanded={expanded}
             >
-              <Icon name="PlusSquare" size="16px" />
+              <Icon name="Plus" size="16px" />
               <span>Add</span>
             </button>
           )}

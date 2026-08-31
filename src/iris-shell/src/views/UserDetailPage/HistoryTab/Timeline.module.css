@@ -1,0 +1,243 @@
+.wrap {
+  position: relative;
+  width: 100%;
+}
+
+.line {
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 11px;
+  width: 2px;
+  border-radius: 1px;
+  background-color: var(--oi-border-color-default);
+}
+
+.list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Infinite-scroll trigger. Zero-height when idle so it doesn't add visible
+   whitespace; only the "Loading more" text (while fetching) takes space. */
+.sentinel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding-top: var(--oi-spacing-m);
+}
+
+.loadingText {
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Collapsed groups sit closer together; an expanded group keeps the full
+   gap so its revealed events read as clearly separate from what follows. */
+.groupSpacingTight {
+  margin-bottom: var(--oi-spacing-xs);
+}
+
+.groupSpacingNormal {
+  margin-bottom: var(--oi-spacing-l);
+}
+
+/* Grid-rows collapse trick: animates from 0fr to 1fr so the events block's
+   real (auto) height can transition smoothly without measuring it in JS. */
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--oi-motion-duration-short) var(--oi-motion-ease-default);
+}
+
+.collapsibleExpanded {
+  grid-template-rows: 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible {
+    transition: none;
+  }
+}
+
+/* Event rows sit indented under their header, matching the Figma spec
+   (header spans the full width; its events block starts 32px in). The
+   grid item itself must clip overflow for the row-collapse transition to
+   hide its content instead of just squashing it. */
+.eventsBlock {
+  display: flex;
+  flex-direction: column;
+  margin-left: 32px;
+  padding-top: var(--oi-spacing-s);
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ---------- header row (date group) ---------- */
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-m);
+  height: 36px;
+  width: 100%;
+  padding-left: var(--oi-spacing-xs);
+  padding-right: var(--oi-spacing-m);
+  border-radius: var(--oi-border-radius-default);
+  background-color: var(--oi-background-color-primary);
+  color: inherit;
+  text-align: left;
+}
+
+.headerRow:hover {
+  background-color: var(--oi-background-color-secondary);
+}
+
+.marker {
+  width: 16px;
+  height: 12px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marker::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--oi-border-radius-max);
+  background-color: var(--oi-border-color-strong);
+}
+
+.chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: transform var(--oi-motion-duration-short) var(--oi-motion-ease-default);
+}
+
+.chevronExpanded {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+.date {
+  min-width: 165px;
+  font-size: var(--oi-text-heading-05-font-size);
+  line-height: var(--oi-text-heading-05-line-height);
+  font-weight: var(--oi-text-heading-05-font-weight);
+  color: var(--oi-content-color-primary);
+  white-space: nowrap;
+}
+
+.count {
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+  white-space: nowrap;
+}
+
+/* ---------- event item (expanded operation row) ---------- */
+
+.eventItem {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-m);
+  height: 44px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  padding-inline: var(--oi-spacing-s);
+  border-bottom: var(--oi-border-width-default) solid var(--oi-border-color-default);
+  background-color: var(--oi-background-color-primary);
+}
+
+.eventItem:hover {
+  background-color: var(--oi-background-color-secondary);
+}
+
+.eventTime {
+  min-width: 50px;
+  flex-shrink: 0;
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+  white-space: nowrap;
+}
+
+.eventMarker {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--oi-border-radius-max);
+}
+
+.eventLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  color: var(--oi-content-color-primary);
+}
+
+.eventDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--oi-spacing-m);
+  min-width: 350px;
+  width: 350px;
+  flex-shrink: 0;
+}
+
+.eventId {
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+  white-space: nowrap;
+}
+
+.eventActor {
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  color: var(--oi-content-color-secondary);
+  white-space: nowrap;
+}
+
+.eventBadge {
+  flex-shrink: 0;
+}
+
+.dotCreate {
+  background-color: var(--oi-color-green-500);
+}
+
+.dotEdit {
+  background-color: var(--oi-color-blue-600);
+}
+
+.dotRemove {
+  background-color: var(--oi-color-red-600);
+}
+
+.dotDeprovision {
+  background-color: var(--oi-color-purple-600);
+}

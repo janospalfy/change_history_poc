@@ -1,0 +1,128 @@
+.titleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oi-spacing-s);
+}
+
+.marker {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--oi-border-radius-max);
+}
+
+.dotCreate {
+  background-color: var(--oi-color-green-500);
+}
+
+.dotEdit {
+  background-color: var(--oi-color-blue-600);
+}
+
+.dotRemove {
+  background-color: var(--oi-color-red-600);
+}
+
+.dotDeprovision {
+  background-color: var(--oi-color-purple-600);
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oi-spacing-xs);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oi-spacing-m);
+}
+
+.section + .section {
+  margin-top: var(--oi-spacing-xl);
+  padding-top: var(--oi-spacing-xl);
+  border-top: var(--oi-border-width-default) solid var(--oi-border-color-muted);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--oi-text-heading-05-font-size);
+  line-height: var(--oi-text-heading-05-line-height);
+  font-weight: var(--oi-text-heading-05-font-weight);
+  color: var(--oi-content-color-primary);
+}
+
+.sectionTitleSecondary {
+  margin: 0;
+  font-size: var(--oi-text-body-s-strong-font-size);
+  line-height: var(--oi-text-body-s-strong-line-height);
+  font-weight: var(--oi-text-body-s-strong-font-weight);
+  color: var(--oi-content-color-secondary);
+}
+
+/* ---------- properties changed table ---------- */
+
+.changesTable {
+  display: flex;
+  flex-direction: column;
+  border: var(--oi-border-width-default) solid var(--oi-border-color-muted);
+  border-radius: var(--oi-border-radius-default);
+  overflow: hidden;
+}
+
+.changesHeaderRow,
+.changeRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--oi-spacing-m);
+  padding: var(--oi-spacing-s) var(--oi-spacing-m);
+}
+
+.changesHeaderRow {
+  background-color: var(--oi-background-color-secondary);
+  font-size: var(--oi-text-caption-strong-font-size);
+  line-height: var(--oi-text-caption-strong-line-height);
+  font-weight: var(--oi-text-caption-strong-font-weight);
+  color: var(--oi-content-color-tertiary);
+}
+
+.changeRow {
+  border-top: var(--oi-border-width-default) solid var(--oi-border-color-muted);
+  align-items: start;
+}
+
+.changeProperty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oi-spacing-xs);
+  min-width: 0;
+}
+
+.changePropertyName {
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  color: var(--oi-content-color-primary);
+}
+
+.changeAttribute,
+.changeNote {
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+}
+
+.changeValue {
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  color: var(--oi-content-color-secondary);
+  word-break: break-word;
+}
+
+/* ---------- operation details (secondary) ---------- */
+
+.detailsPanel {
+  padding: var(--oi-spacing-m);
+  background-color: var(--oi-background-color-secondary);
+  border-radius: var(--oi-border-radius-default);
+}

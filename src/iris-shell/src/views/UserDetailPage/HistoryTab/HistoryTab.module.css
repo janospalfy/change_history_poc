@@ -2,12 +2,28 @@
   display: flex;
   flex-direction: column;
   gap: var(--oi-spacing-m);
+  height: 100%;
+  min-height: 0;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
   gap: var(--oi-spacing-m);
+  flex-shrink: 0;
+}
+
+/* Scrolls internally so the toolbar above it never loses width to a
+   reserved scrollbar gutter (it would otherwise sit inside the same
+   scroll container as the toolbar, shifting its width vs. other tabs). */
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.toolbar > * {
+  flex-shrink: 0;
 }
 
 .search {
@@ -20,6 +36,200 @@
   height: var(--oi-spacing-l);
   background-color: var(--oi-border-color-muted);
   flex-shrink: 0;
+}
+
+.filterButtonActive {
+  background-color: var(--oi-background-color-tertiary);
+  color: var(--oi-content-color-primary);
+}
+
+/* Filters is built for the full-width Users page; drop its outer padding
+   and border so it sits flush within the History tab's own content area. */
+.propertyFilters {
+  padding-inline: 0;
+  border-top: none;
+}
+
+/* ---------- filter strip ---------- */
+
+.filterStrip {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-s);
+  flex-wrap: wrap;
+}
+
+/* Inline counterpart to .customFiltersLabel, disambiguating this row from
+   the custom filters row below it. */
+.quickFiltersLabel {
+  font-size: var(--oi-text-body-xs-font-size, 11px);
+  font-weight: var(--oi-text-heading-05-font-weight);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--oi-content-color-tertiary);
+  flex-shrink: 0;
+}
+
+.allChip {
+  padding-inline: var(--oi-spacing-m);
+}
+
+/* ---------- merged date filter tag (Figma node 1487:26333) ---------- */
+
+.dateFilterTag {
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--oi-size-s);
+  border-radius: 4px;
+  border: var(--oi-border-width-default) solid var(--oi-border-color-default);
+  background-color: var(--oi-background-color-primary);
+}
+
+.dateFilterTagActive {
+  border-color: var(--oi-border-color-strong);
+}
+
+.dateFilterSegment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oi-spacing-xs);
+  border: none;
+  border-right: var(--oi-border-width-default) solid var(--oi-border-color-default);
+  background: none;
+  padding-inline: var(--oi-spacing-m);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  font-family: inherit;
+  color: var(--oi-content-color-tertiary);
+}
+
+.dateFilterSegment:first-child {
+  color: var(--oi-content-color-primary);
+  font-weight: var(--oi-text-heading-05-font-weight);
+}
+
+.dateFilterRule {
+  margin-left: var(--oi-spacing-xs);
+  padding-left: var(--oi-spacing-s);
+  border-left: var(--oi-border-width-default) solid var(--oi-border-color-default);
+  color: var(--oi-content-color-tertiary);
+  font-weight: var(--oi-text-body-s-font-weight);
+}
+
+.dateFilterValueSegment {
+  color: var(--oi-content-color-primary);
+  border-right: none;
+  padding-inline: var(--oi-spacing-s);
+}
+
+.dateFilterAnd {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--oi-spacing-xs);
+  color: var(--oi-content-color-tertiary);
+  font-size: var(--oi-text-body-s-font-size);
+}
+
+.dateInput {
+  border-radius: 0;
+  cursor: pointer;
+  width: 146px;
+  padding-right: 18px;
+  font-size: 12px;
+}
+
+/* Keep the native indicator's full click target (just invisible) exactly
+   where the Iris CalendarBlank icon is drawn, right after the date text. */
+.dateInput::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dateInputWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dateInputIcon {
+  position: absolute;
+  right: 2px;
+  color: var(--oi-content-color-tertiary);
+  pointer-events: none;
+}
+
+.typeChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oi-spacing-s);
+  height: var(--oi-size-s);
+  border-radius: 4px;
+  border: var(--oi-border-width-default) solid var(--oi-border-color-default);
+  background-color: var(--oi-background-color-primary);
+  color: var(--oi-content-color-tertiary);
+  padding: var(--oi-spacing-xs) var(--oi-spacing-m);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+}
+
+.typeChipSelected {
+  color: var(--oi-content-color-primary);
+  font-weight: var(--oi-text-heading-05-font-weight);
+}
+
+.typeChipCreateSelected {
+  border-color: var(--oi-border-color-badge-success);
+  background-color: var(--oi-color-green-50);
+}
+
+.typeChipEditSelected {
+  border-color: var(--oi-border-color-badge-info);
+  background-color: var(--oi-color-blue-50);
+}
+
+.typeChipRemoveSelected {
+  border-color: var(--oi-border-color-badge-error);
+  background-color: var(--oi-color-red-50);
+}
+
+.typeChipDeprovisionSelected {
+  border-color: var(--oi-color-purple-300);
+  background-color: var(--oi-color-purple-50);
+}
+
+/* "All" has no Figma-defined color variant; use a neutral selected style. */
+.allChipSelected {
+  border-color: var(--oi-border-color-strong);
+  background-color: var(--oi-background-color-secondary);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--oi-border-radius-max);
+  flex-shrink: 0;
+}
+
+.dotCreate {
+  background-color: var(--oi-color-green-500);
+}
+
+.dotEdit {
+  background-color: var(--oi-color-blue-600);
+}
+
+.dotRemove {
+  background-color: var(--oi-color-red-600);
+}
+
+.dotDeprovision {
+  background-color: var(--oi-color-purple-600);
 }
 
 .placeholder {
