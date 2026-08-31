@@ -60,7 +60,7 @@ function DateValueInput({
  *  chip is a broad bucket covering one or more granular operation types. */
 const OPERATION_TYPES = [
   { value: 'create', label: 'Create', dotClassName: 'dotCreate', selectedClassName: 'typeChipCreateSelected' },
-  { value: 'edit', label: 'Edit', dotClassName: 'dotEdit', selectedClassName: 'typeChipEditSelected' },
+  { value: 'edit', label: 'Modify', dotClassName: 'dotEdit', selectedClassName: 'typeChipEditSelected' },
   { value: 'remove', label: 'Remove', dotClassName: 'dotRemove', selectedClassName: 'typeChipRemoveSelected' },
   {
     value: 'deprovision',
@@ -284,6 +284,12 @@ export function HistoryTab() {
     };
   });
 
+  const exportMenuItems = [
+    { kind: 'item' as const, label: 'Export as HTML', icon: 'FileHtml' },
+    { kind: 'item' as const, label: 'Export as CSV', icon: 'FileCsv' },
+    { kind: 'item' as const, label: 'Export as PDF', icon: 'FilePdf' },
+  ];
+
   const dateMenuItems = [
     { kind: 'item' as const, label: 'All time', selected: dateRule === null, onSelect: () => setDateRule(null) },
     { kind: 'divider' as const },
@@ -338,9 +344,23 @@ export function HistoryTab() {
             </Tooltip>
           )}
         />
-        <Button iconLead="Export" variant="secondary">
-          Export
-        </Button>
+        <Menu
+          ariaLabel="Export"
+          align="end"
+          items={exportMenuItems}
+          trigger={({ ref, onClick, expanded }) => (
+            <Button
+              ref={ref as Ref<HTMLButtonElement>}
+              iconLead="Export"
+              variant="secondary"
+              aria-haspopup="menu"
+              aria-expanded={expanded}
+              onClick={onClick}
+            >
+              Export
+            </Button>
+          )}
+        />
       </div>
 
       <>
