@@ -85,7 +85,7 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
   { type: 'groupMembershipChange', label: 'Group membership change' },
   { type: 'deprovision', label: 'Deprovision user' },
   { type: 'undoDeprovision', label: 'Undo deprovisioning' },
-  { type: 'deleted', label: 'Delete user' },
+  { type: 'created', label: 'Created' },
 ];
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
@@ -558,6 +558,68 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
             attribute: '(distinguishedName)',
             changeNote: 'Remove object · Operation initiator',
             oldValue: 'CN=AccessRequest-4821,OU=Test OU',
+            newValue: '<removed>',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    date: 'October 22, 2026',
+    operations: [
+      {
+        id: 'ID: 1-5017',
+        time: '16:38:29',
+        type: 'deleted',
+        label: 'Delete user',
+        actor: 'administrator (O1D.local)',
+        status: 'Completed',
+        date: 'October 22, 2026',
+        name: 'Isabella Clark (O1D.local/Test OU)',
+        reason: 'Admin removed unused MFA device',
+        requestedAt: 'October 22, 2026 16:38:29 UTC',
+        logonComputer: 'ActiveRolesVm.O1D.local',
+        logonSite: 'Default-First-Site-Name',
+        activeRolesAdmin: 'Yes',
+        targetObject: 'MFA Device - iPhone 14 (O1D.local/Test OU)',
+        lastUpdatedOn: 'October 22, 2026 16:38:29 UTC',
+        changes: [
+          {
+            property: 'Object',
+            attribute: '(distinguishedName)',
+            changeNote: 'Remove object · Operation initiator',
+            oldValue: 'CN=MfaDevice-iPhone14,OU=Test OU',
+            newValue: '<removed>',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    date: 'October 14, 2026',
+    operations: [
+      {
+        id: 'ID: 1-5009',
+        time: '11:52:03',
+        type: 'deleted',
+        label: 'Delete user',
+        actor: 'peter.kim (O1D.local)',
+        status: 'Denied',
+        date: 'October 14, 2026',
+        name: 'Isabella Clark (O1D.local/Test OU)',
+        reason: 'Helpdesk removed stale access token on request',
+        requestedAt: 'October 14, 2026 11:52:03 UTC',
+        logonComputer: 'ActiveRolesVm2.O1D.local',
+        logonSite: 'Default-First-Site-Name',
+        activeRolesAdmin: 'No',
+        targetObject: 'Access Token - CI Pipeline (O1D.local/Test OU)',
+        lastUpdatedOn: 'October 14, 2026 11:52:03 UTC',
+        changes: [
+          {
+            property: 'Object',
+            attribute: '(distinguishedName)',
+            changeNote: 'Remove object · Operation initiator',
+            oldValue: 'CN=AccessToken-CiPipeline,OU=Test OU',
             newValue: '<removed>',
           },
         ],

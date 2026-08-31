@@ -61,7 +61,7 @@ function DateValueInput({
 const OPERATION_TYPES = [
   { value: 'create', label: 'Create', dotClassName: 'dotCreate', selectedClassName: 'typeChipCreateSelected' },
   { value: 'edit', label: 'Modify', dotClassName: 'dotEdit', selectedClassName: 'typeChipEditSelected' },
-  { value: 'remove', label: 'Remove', dotClassName: 'dotRemove', selectedClassName: 'typeChipRemoveSelected' },
+  { value: 'remove', label: 'Delete', dotClassName: 'dotRemove', selectedClassName: 'typeChipRemoveSelected' },
   {
     value: 'deprovision',
     label: 'Deprovision',
