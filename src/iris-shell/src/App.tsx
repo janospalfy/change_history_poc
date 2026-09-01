@@ -1,5 +1,6 @@
 import { useRoute } from './lib/router.js';
 import { UsersProvider } from './lib/usersStore.js';
+import { GroupsProvider } from './lib/groupsStore.js';
 import { DirectoryProvider } from './lib/directoryStore.js';
 import { FIRST_NODE_ID } from './lib/directoryData.js';
 import { AppShellProvider } from './lib/appShellContext.js';
@@ -16,13 +17,18 @@ import { InsightsPage } from './views/InsightsPage/InsightsPage.js';
 import { ServicesPage } from './views/ServicesPage/ServicesPage.js';
 import { IdentityManagerPage } from './views/IdentityManagerPage/IdentityManagerPage.js';
 import { SafeguardPage } from './views/SafeguardPage/SafeguardPage.js';
+import { GroupsPage } from './views/GroupsPage/GroupsPage.js';
+import { GroupDetailPage } from './views/GroupsPage/GroupDetailPage.js';
+import { AdvancedSearchProvider } from './lib/advancedSearchStore.js';
 
 export default function App() {
   const route = useRoute();
   const toast = useToastMessage();
   return (
     <UsersProvider>
-      <DirectoryProvider>
+      <GroupsProvider>
+        <DirectoryProvider>
+        <AdvancedSearchProvider>
         <AppShellProvider>
           {route.name === 'userDetail' && <UserDetailPage userId={route.params.id} />}
           {route.name === 'usersList' && <UsersPage />}
@@ -35,7 +41,8 @@ export default function App() {
             <TreeDetailPage nodeId={route.params.nodeId} objectId={route.params.objectId} />
           )}
           {route.name === 'favoritesList' && <FavoritesPage />}
-          {route.name === 'groups' && <WipPage title="Groups" icon="UsersThree" />}
+          {route.name === 'groups' && <GroupsPage />}
+          {route.name === 'groupDetail' && <GroupDetailPage groupId={route.params.id} />}
           {route.name === 'devices' && <WipPage title="Devices" icon="Devices" />}
           {route.name === 'agents' && <WipPage title="Agents" icon="Robot" />}
           {route.name === 'applications' && <WipPage title="Applications" icon="Browsers" />}
@@ -50,9 +57,11 @@ export default function App() {
           {route.name === 'identityHome' && <IdentityManagerPage />}
           {route.name === 'safeguardHome' && <SafeguardPage />}
           <CommandPalette />
-          <Toast message={toast.message} description={toast.description} onDismiss={toast.dismiss} />
+          <Toast message={toast.message} supportingText={toast.supportingText} action={toast.action} actionLabel={toast.actionLabel} secondaryAction={toast.secondaryAction} secondaryLabel={toast.secondaryLabel} onDismiss={toast.dismiss} />
         </AppShellProvider>
-      </DirectoryProvider>
+        </AdvancedSearchProvider>
+        </DirectoryProvider>
+      </GroupsProvider>
     </UsersProvider>
   );
 }

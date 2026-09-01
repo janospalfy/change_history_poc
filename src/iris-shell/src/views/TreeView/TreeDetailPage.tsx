@@ -17,6 +17,7 @@ import { Menu } from '../../components/Menu/Menu.js';
 import type { Crumb } from '../../components/AppHeader/AppHeader.js';
 import { ResetPasswordModal } from '../UserDetailPage/ResetPasswordModal/ResetPasswordModal.js';
 import { DeleteUserModal } from '../UserDetailPage/DeleteUserModal/DeleteUserModal.js';
+import { UserMemberships } from '../UserDetailPage/UserMemberships.js';
 import { tabsForType, PRIMARY_TAB } from './detailTabs.js';
 import styles from './TreeView.module.css';
 
@@ -30,7 +31,7 @@ export interface TreeDetailPageProps {
  * scaffold with a type-driven tab set + an Object Management side panel.
  */
 export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
-  const { getObject, getSiblings, getPath, getNodeName } = useDirectory();
+  const { getObject, getSiblings, getPath, getNodeName, updateObjectDetails } = useDirectory();
   const object = getObject(nodeId, objectId);
   const { isFavorite, toggle: toggleFavorite } = useFavorites();
 
@@ -95,6 +96,7 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
   const pathTail = getPath(nodeId).slice(-2).map((n) => n.name).join(' / ');
   const tabs = tabsForType(object.type);
   const canReset = object.type === 'user' || object.type === 'contact';
+  const isAdNode = getPath(nodeId).some((crumb) => /active director|o1d|o2d|ad-\d/i.test(crumb.name));
 
   return (
     <AppShell breadcrumb={breadcrumb}>
@@ -175,6 +177,11 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
             onReset={() => setResetOpen(true)}
             onDelete={() => setDeleteOpen(true)}
           />
+        ) : tab === 'memberships' && (object.type === 'user' || object.type === 'contact') ? (
+          <UserMemberships
+            user={{ name: object.name, groupMembershipIds: object.details.groupMembershipIds }}
+            onMembershipChange={(groupMembershipIds) => updateObjectDetails(object.id, { groupMembershipIds })}
+          />
         ) : (
           <Card title={tabs.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>
@@ -183,7 +190,17 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
       </div>
 
       {resetOpen && (
-        <ResetPasswordModal open onClose={() => setResetOpen(false)} user={{ name: object.name }} />
+        <ResetPasswordModal
+          open
+          onClose={() => setResetOpen(false)}
+          user={{
+            name: object.name,
+            username: object.details.userPrincipalName,
+            displayName: object.details.displayName,
+            location: object.details.location,
+          }}
+          mode={isAdNode ? 'ad' : 'entra'}
+        />
       )}
       {deleteOpen && (
         <DeleteUserModal open onClose={() => setDeleteOpen(false)} user={{ name: object.name }} />
@@ -212,7 +229,7 @@ function GeneralTab({ object, canReset, onReset, onDelete }: GeneralTabProps) {
         { label: 'First name', value: d.firstName ?? '—' },
         { label: 'Last name', value: d.lastName ?? '—' },
         { label: 'Display name', value: d.displayName ?? '—' },
-        { label: 'User principle name', value: d.userPrincipalName ?? '—' },
+        { label: 'User principal name', value: d.userPrincipalName ?? '—' },
         { label: 'Authorization info', value: d.authorizationInfo || '—' },
         { label: 'Description', value: d.description },
       ]
@@ -240,7 +257,7 @@ function GeneralTab({ object, canReset, onReset, onDelete }: GeneralTabProps) {
       </Card>
 
       <Card
-        title="Object Management"
+              title="Object management"
         helper="Manage this object's access, location, and restriction to the domain."
       >
         <div className={styles.linkGroups}>
@@ -248,7 +265,7 @@ function GeneralTab({ object, canReset, onReset, onDelete }: GeneralTabProps) {
             links={[
               { label: 'Reset password', onClick: onReset, disabled: !canReset },
               { label: 'Reset Entra ID MFA', disabled: true },
-              { label: 'Revoke Sessions', disabled: true },
+              { label: 'Revoke sessions', disabled: true },
             ]}
           />
           <LinkList

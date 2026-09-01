@@ -11,13 +11,14 @@ import { useEffect, useState } from 'react';
  */
 
 export type Route =
-  | { name: 'userDetail'; params: { id: string } }
+  | { name: 'userDetail'; params: { id: string; tab?: string } }
   | { name: 'usersList'; params: Record<string, never> }
   | { name: 'treeRoot'; params: Record<string, never> }
   | { name: 'treeList'; params: { nodeId: string } }
   | { name: 'treeDetail'; params: { nodeId: string; objectId: string } }
   | { name: 'favoritesList'; params: Record<string, never> }
   | { name: 'groups'; params: Record<string, never> }
+  | { name: 'groupDetail'; params: { id: string; tab?: string } }
   | { name: 'devices'; params: Record<string, never> }
   | { name: 'agents'; params: Record<string, never> }
   | { name: 'applications'; params: Record<string, never> }
@@ -37,13 +38,14 @@ interface RouteDef {
 }
 
 const ROUTES: RouteDef[] = [
-  { name: 'userDetail', pattern: /^#\/users\/([^/]+)$/, keys: ['id'] },
+  { name: 'userDetail', pattern: /^#\/users\/([^/?]+)(?:\?tab=([^&]+))?$/, keys: ['id', 'tab'] },
   { name: 'usersList', pattern: /^#\/users$/, keys: [] },
   { name: 'treeDetail', pattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'] },
   { name: 'treeList', pattern: /^#\/tree\/([^/]+)$/, keys: ['nodeId'] },
   { name: 'treeRoot', pattern: /^#\/tree$/, keys: [] },
   { name: 'favoritesList', pattern: /^#\/favorites$/, keys: [] },
   { name: 'groups', pattern: /^#\/groups$/, keys: [] },
+  { name: 'groupDetail', pattern: /^#\/groups\/([^/?]+)(?:\?tab=([^&]+))?$/, keys: ['id', 'tab'] },
   { name: 'devices', pattern: /^#\/devices$/, keys: [] },
   { name: 'agents', pattern: /^#\/agents$/, keys: [] },
   { name: 'applications', pattern: /^#\/applications$/, keys: [] },

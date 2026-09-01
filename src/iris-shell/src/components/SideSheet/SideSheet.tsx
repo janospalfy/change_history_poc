@@ -14,9 +14,12 @@ export interface SideSheetProps {
   headerActions?: ReactNode;
   children?: ReactNode;
   footer?: ReactNode;
+  bodyClassName?: string;
   /** Override aria-labelledby with a literal label. */
   ariaLabel?: string;
   className?: string;
+  /** Render above an already-open Modal (z-index 70) — for a picker launched from within a dialog. */
+  elevated?: boolean;
 }
 
 /**
@@ -38,14 +41,12 @@ export function SideSheet({
   headerActions,
   children,
   footer,
+  bodyClassName,
   ariaLabel,
   className,
+  elevated,
 }: SideSheetProps) {
   const [mounted, setMounted] = useState(open);
-  // Separate from `mounted` so opening renders one frame in the closed
-  // position first, letting the transform/opacity transition actually play
-  // instead of mounting straight into its open state.
-  const [visuallyOpen, setVisuallyOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const titleId = useId();
@@ -63,13 +64,8 @@ export function SideSheet({
   useEffect(() => {
     if (open) {
       setMounted(true);
-      // Flip the open class on the next frame so the browser has already
-      // painted the closed position once — otherwise the transition has
-      // nothing to animate from and the panel just appears instantly.
-      const raf = requestAnimationFrame(() => setVisuallyOpen(true));
-      return () => cancelAnimationFrame(raf);
+      return undefined;
     }
-    setVisuallyOpen(false);
     const t = setTimeout(() => setMounted(false), 200);
     return () => clearTimeout(t);
   }, [open]);
@@ -137,7 +133,7 @@ export function SideSheet({
 
   return createPortal(
     <div
-      className={cx(styles.root, visuallyOpen && styles.rootOpen)}
+      className={cx(styles.root, open && styles.rootOpen, elevated && styles.rootElevated)}
       // Scrim click closes; clicks inside panel stopPropagation below.
       onClick={onClose}
     >
@@ -147,7 +143,7 @@ export function SideSheet({
         aria-modal="true"
         aria-labelledby={ariaLabel ? undefined : titleId}
         aria-label={ariaLabel}
-        className={cx(styles.panel, visuallyOpen && styles.panelOpen, className)}
+        className={cx(styles.panel, open && styles.panelOpen, className)}
         onClick={(e) => e.stopPropagation()}
       >
         <header className={styles.header}>
@@ -164,7 +160,7 @@ export function SideSheet({
           <IconButton icon="X" ariaLabel="Close" onClick={onClose} />
         </header>
 
-        <div ref={bodyRef} className={styles.body}>{children}</div>
+        <div ref={bodyRef} className={cx(styles.body, bodyClassName)}>{children}</div>
 
         {footer && <footer className={styles.footer}>{footer}</footer>}
       </div>

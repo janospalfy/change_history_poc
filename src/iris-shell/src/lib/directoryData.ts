@@ -15,7 +15,9 @@ export type DirectoryObjectType =
   | 'computer'
   | 'group'
   | 'contact'
-  | 'gmsa';
+  | 'gmsa'
+  | 'agent'
+  | 'application';
 
 export interface DirectoryObjectDetails {
   firstName?: string;
@@ -27,6 +29,7 @@ export interface DirectoryObjectDetails {
   created?: string;
   memberCount?: number;
   location?: string;
+  groupMembershipIds?: string[];
 }
 
 export interface DirectoryObject {
@@ -43,13 +46,15 @@ export interface DirectoryObject {
 
 /** Presentation metadata per object type (label + shared-manifest icon). */
 export const OBJECT_TYPE_META: Record<DirectoryObjectType, { label: string; icon: string }> = {
-  ou: { label: 'Organizational Unit', icon: 'Folder' },
+  ou: { label: 'Organizational unit', icon: 'Folder' },
   container: { label: 'Container', icon: 'Folder' },
   user: { label: 'User', icon: 'User' },
   computer: { label: 'Computer', icon: 'Devices' },
   group: { label: 'Group', icon: 'UsersThree' },
   contact: { label: 'Contact', icon: 'AddressBook' },
-  gmsa: { label: 'Group Management Service Account', icon: 'UserCircle' },
+  gmsa: { label: 'Group management service account', icon: 'UserCircle' },
+  agent: { label: 'Agent', icon: 'Robot' },
+  application: { label: 'Application', icon: 'Browsers' },
 };
 
 /* ------------------------------------------------------------------ */
@@ -64,12 +69,13 @@ interface RawNode {
   icon?: string;
   /** How many leaf objects to synthesize for this node's listing. */
   leafCount?: number;
+  objectType?: DirectoryObjectType;
   children?: RawNode[];
 }
 
 const TREE: RawNode[] = [
   { id: 'access-templates', name: 'Access Templates', type: 'container', description: 'Reusable access-control templates.', icon: 'UserCircleCheck', leafCount: 24 },
-  { id: 'managed-units', name: 'Managed Units', type: 'container', description: 'Delegated administrative units.', icon: 'FolderStar', leafCount: 18 },
+  { id: 'managed-units', name: 'Managed units', type: 'container', description: 'Delegated administrative units.', icon: 'FolderStar', leafCount: 18 },
   {
     id: 'managed-directories',
     name: 'Managed Directories',
@@ -121,7 +127,20 @@ const TREE: RawNode[] = [
         type: 'container',
         description: 'Microsoft Entra ID tenants.',
         children: [
-          { id: 'entra-3bf67d', name: '3bf67d.onmicrosoft.com', type: 'container', description: 'Primary Entra tenant.', icon: 'SquaresFour', leafCount: 128 },
+          {
+            id: 'entra-3bf67d',
+            name: '3bf67d.onmicrosoft.com',
+            type: 'container',
+            description: 'Primary Entra tenant.',
+            icon: 'SquaresFour',
+            children: [
+              { id: 'entra-users', name: 'Users', type: 'container', description: 'Entra user objects.', icon: 'Users', leafCount: 32, objectType: 'user' },
+              { id: 'entra-groups', name: 'Groups', type: 'container', description: 'Entra group objects.', icon: 'UsersThree', leafCount: 18, objectType: 'group' },
+              { id: 'entra-devices', name: 'Devices', type: 'container', description: 'Entra device objects.', icon: 'Devices', leafCount: 24, objectType: 'computer' },
+              { id: 'entra-agents', name: 'Agents', type: 'container', description: 'Entra agent objects.', icon: 'Robot', leafCount: 12, objectType: 'agent' },
+              { id: 'entra-applications', name: 'Applications', type: 'container', description: 'Entra application objects.', icon: 'Browsers', leafCount: 20, objectType: 'application' },
+            ],
+          },
         ],
       },
     ],
@@ -207,6 +226,12 @@ export function getNodePath(nodeId: string): RawNode[] {
   return path;
 }
 
+export function isActiveDirectoryLocation(location?: string): boolean {
+  if (!location) return false;
+  if (/^AD-\d/i.test(location) || /^o[12]d-/i.test(location)) return true;
+  return getNodePath(location).some((node) => /active director|o1d|o2d|ad-\d/i.test(node.name));
+}
+
 /* ------------------------------------------------------------------ */
 /*  Deterministic leaf generation                                     */
 /* ------------------------------------------------------------------ */
@@ -258,7 +283,7 @@ const LEAF_TYPES: DirectoryObjectType[] = [
 const pick = <T,>(rng: () => number, arr: T[]): T => arr[Math.floor(rng() * arr.length)];
 
 function makeLeaf(node: RawNode, index: number, rng: () => number, path: string): DirectoryObject {
-  const type = pick(rng, LEAF_TYPES);
+  const type = node.objectType ?? pick(rng, LEAF_TYPES);
   const description = pick(rng, DESCRIPTIONS);
   const id = `${node.id}-o${index}`;
 
@@ -276,6 +301,15 @@ function makeLeaf(node: RawNode, index: number, rng: () => number, path: string)
     return {
       id, name, type, description, parentId: node.id, isContainer: false,
       details: { description, location: path, memberCount: 1 + Math.floor(rng() * 40), created: '2024-08-14' },
+    };
+  }
+  if (type === 'agent' || type === 'application') {
+    const name = type === 'agent'
+      ? `${pick(rng, ['Sync', 'Provisioning', 'Directory'])} Agent ${index + 1}`
+      : `${pick(rng, ['Access', 'Identity', 'Admin'])} Application ${index + 1}`;
+    return {
+      id, name, type, description, parentId: node.id, isContainer: false,
+      details: { description, location: path, created: '2024-09-18' },
     };
   }
   // user / contact
@@ -305,6 +339,15 @@ function makeLeaf(node: RawNode, index: number, rng: () => number, path: string)
 }
 
 const leafCache = new Map<string, DirectoryObject[]>();
+const movedObjectParents = new Map<string, string>();
+const movedObjects = new Map<string, DirectoryObject>();
+const createdObjects = new Map<string, DirectoryObject>();
+const detailOverrides = new Map<string, Partial<DirectoryObjectDetails>>();
+
+function withDetailOverrides(object: DirectoryObject): DirectoryObject {
+  const override = detailOverrides.get(object.id);
+  return override ? { ...object, details: { ...object.details, ...override } } : object;
+}
 
 function getLeaves(node: RawNode): DirectoryObject[] {
   const cached = leafCache.get(node.id);
@@ -339,13 +382,30 @@ export function getChildren(nodeId: string): DirectoryObject[] {
   const node = nodeById.get(nodeId);
   if (!node) return [];
   const containers = (node.children ?? []).map(nodeAsObject);
-  return [...containers, ...getLeaves(node)];
+  const leaves = getLeaves(node).filter((object) => (movedObjectParents.get(object.id) ?? object.parentId) === nodeId);
+  const movedIn = Array.from(movedObjects.values()).filter((object) => movedObjectParents.get(object.id) === nodeId && !leaves.some((item) => item.id === object.id));
+  const created = Array.from(createdObjects.values()).filter((object) => object.parentId === nodeId);
+  return [...containers, ...leaves, ...movedIn, ...created].map(withDetailOverrides);
+}
+
+export function addDirectoryObject(object: DirectoryObject): void {
+  createdObjects.set(object.id, object);
+}
+
+/** Merge a details patch onto an object (e.g. group membership changes). */
+export function updateObjectDetails(objectId: string, patch: Partial<DirectoryObjectDetails>): void {
+  detailOverrides.set(objectId, { ...detailOverrides.get(objectId), ...patch });
+}
+
+export function moveDirectoryObject(object: DirectoryObject, targetNodeId: string): void {
+  movedObjectParents.set(object.id, targetNodeId);
+  movedObjects.set(object.id, { ...object, parentId: targetNodeId, details: { ...object.details, location: getNodePath(targetNodeId).map((node) => node.name).join(' / ') } });
 }
 
 /** Leaf objects only — the set the detail prev/next pager iterates. */
 export function getLeafObjects(nodeId: string): DirectoryObject[] {
   const node = nodeById.get(nodeId);
-  return node ? getLeaves(node) : [];
+  return node ? getLeaves(node).map(withDetailOverrides) : [];
 }
 
 export function getObject(nodeId: string, objectId: string): DirectoryObject | undefined {

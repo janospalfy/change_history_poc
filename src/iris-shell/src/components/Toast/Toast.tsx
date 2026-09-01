@@ -7,11 +7,14 @@ import styles from './Toast.module.css';
 export interface ToastProps {
   /** Truthy = visible. Setting a new message resets the auto-dismiss timer. */
   message: string | null;
-  /** Optional second line — the Figma `Toast` component's supporting text. */
-  description?: string;
   /** Called when the auto-dismiss timer fires or the user clicks the dismiss
    *  button. Owner clears its own `message` state in response. */
   onDismiss: () => void;
+  supportingText?: string;
+  action?: () => void;
+  actionLabel?: string;
+  secondaryAction?: () => void;
+  secondaryLabel?: string;
   /** Auto-dismiss delay in ms. */
   durationMs?: number;
 }
@@ -28,12 +31,11 @@ export interface ToastProps {
  * AI panel, modals, and side sheets without inheriting their stacking
  * context.
  */
-export function Toast({ message, description, onDismiss, durationMs = 3000 }: ToastProps) {
+export function Toast({ message, supportingText, action, actionLabel = 'View', secondaryAction, secondaryLabel = 'Dismiss', onDismiss, durationMs = 5000 }: ToastProps) {
   // Two-stage state so the leave transition has time to play after the
   // owner clears `message`. `shown` holds the last non-null text and is
   // cleared on a short delay after the prop goes null.
   const [shown, setShown] = useState<string | null>(null);
-  const [shownDescription, setShownDescription] = useState<string | undefined>(undefined);
   // Drives `data-visible`. Held false on the first committed frame so the
   // rise-from-below enter transition actually plays (a node mounted directly
   // in its final state animates nothing) — flipped true on the next frame.
@@ -53,7 +55,6 @@ export function Toast({ message, description, onDismiss, durationMs = 3000 }: To
   useEffect(() => {
     if (!message) return;
     setShown(message);
-    setShownDescription(description);
     // Flip to visible on the next frame so the enter transition runs from
     // the resting (below + faded + blurred) state.
     const raf = requestAnimationFrame(() => setVisible(true));
@@ -62,7 +63,7 @@ export function Toast({ message, description, onDismiss, durationMs = 3000 }: To
       cancelAnimationFrame(raf);
       clearTimeout(id);
     };
-  }, [message, description, durationMs]);
+  }, [message, durationMs]);
 
   // Hide local copy once the owner clears the prop, after a short delay
   // so the CSS opacity/transform transition can play out.
@@ -83,12 +84,18 @@ export function Toast({ message, description, onDismiss, durationMs = 3000 }: To
       aria-live="polite"
       data-visible={visible ? 'true' : 'false'}
     >
-      <span className={styles.iconBadge} aria-hidden="true">
+      <span className={styles.icon} aria-hidden="true">
         <Icon name="CheckCircle" size="20px" />
       </span>
       <div className={styles.content}>
         <p className={styles.message}>{shown}</p>
-        {shownDescription && <p className={styles.description}>{shownDescription}</p>}
+        {supportingText && <p className={styles.supporting}>{supportingText}</p>}
+        {action && (
+          <div className={styles.actions}>
+            <button type="button" className={styles.view} onClick={action}>{actionLabel}</button>
+            <button type="button" className={styles.dismissText} onClick={secondaryAction ?? onDismiss}>{secondaryLabel}</button>
+          </div>
+        )}
       </div>
       <IconButton
         icon="X"

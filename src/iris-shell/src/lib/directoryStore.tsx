@@ -1,14 +1,17 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import {
   NODE_TREE,
-  getChildren,
+  getChildren as getChildrenData,
   getLeafObjects,
   getNode,
   getNodeIcon,
   getNodePath,
-  getObject,
+  getObject as getObjectData,
   isContainerNode,
+  moveDirectoryObject,
+  addDirectoryObject,
+  updateObjectDetails as updateObjectDetailsData,
   type DirectoryNodeView,
   type DirectoryObject,
 } from './directoryData.js';
@@ -38,24 +41,51 @@ export interface DirectoryContextValue {
   getNodeIcon: (nodeId: string) => string;
   /** Leaf siblings of an object (for the detail prev/next pager). */
   getSiblings: (nodeId: string) => DirectoryObject[];
+  moveObject: (object: DirectoryObject, targetNodeId: string) => void;
+  addObject: (object: DirectoryObject) => void;
+  updateObjectDetails: (objectId: string, patch: Partial<DirectoryObject['details']>) => void;
+  selectedDirectories: Set<string>;
+  setSelectedDirectories: (directories: Set<string>) => void;
 }
 
 const DirectoryContext = createContext<DirectoryContextValue | null>(null);
 
 export function DirectoryProvider({ children }: { children: ReactNode }) {
+  const [dataRevision, setDataRevision] = useState(0);
+  const [selectedDirectories, setSelectedDirectories] = useState<Set<string>>(
+    () => new Set(['entra-1', 'entra-2', 'ad-1', 'ad-2']),
+  );
   // The underlying data is static + memoized, so the value never changes.
+  // `getChildren`/`getObject`/`getSiblings` are re-wrapped on every
+  // `dataRevision` bump so their identity changes — consumers that memoize
+  // on them (e.g. a page's `useMemo([..., getChildren, ...])`) correctly
+  // recompute after a move instead of serving stale, pre-move data.
   const value = useMemo<DirectoryContextValue>(
     () => ({
       nodeTree: NODE_TREE,
       isContainer: isContainerNode,
       getPath: (nodeId) => getNodePath(nodeId).map((n) => ({ id: n.id, name: n.name })),
-      getChildren,
-      getObject,
+      getChildren: (nodeId) => getChildrenData(nodeId),
+      getObject: (nodeId, objectId) => getObjectData(nodeId, objectId),
       getNodeName: (nodeId) => getNode(nodeId)?.name,
       getNodeIcon,
-      getSiblings: getLeafObjects,
+      getSiblings: (nodeId) => getLeafObjects(nodeId),
+      moveObject: (object, targetNodeId) => {
+        moveDirectoryObject(object, targetNodeId);
+        setDataRevision((revision) => revision + 1);
+      },
+      addObject: (object) => {
+        addDirectoryObject(object);
+        setDataRevision((revision) => revision + 1);
+      },
+      updateObjectDetails: (objectId, patch) => {
+        updateObjectDetailsData(objectId, patch);
+        setDataRevision((revision) => revision + 1);
+      },
+      selectedDirectories,
+      setSelectedDirectories,
     }),
-    [],
+    [selectedDirectories, dataRevision],
   );
 
   return <DirectoryContext.Provider value={value}>{children}</DirectoryContext.Provider>;

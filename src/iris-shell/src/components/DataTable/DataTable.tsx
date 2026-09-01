@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react';
 import { cx } from '../../lib/cx.js';
 import { Checkbox } from '../Checkbox/Checkbox.js';
 import { IconButton } from '../IconButton/IconButton.js';
@@ -54,8 +54,19 @@ export interface DataTableProps<TRow extends DataTableRow> {
   /** Render a custom control (e.g. a menu trigger) in each row's trailing
    *  action cell. Takes precedence over the default `onRowAction` button. */
   rowActions?: (row: TRow, i: number) => ReactNode;
+  /** Extra DOM props (e.g. `onDragOver`/`onDrop`, `className`) merged onto a
+   *  row's outer element — for drop-target behaviour or similar per-row wiring. */
+  rowProps?: (row: TRow, i: number) => HTMLAttributes<HTMLDivElement>;
+  /** Optional control rendered in the top-right table header cell. */
+  headerAction?: ReactNode;
+  /** Visual density for table headers and rows. */
+  density?: 'default' | 'compact';
+  /** Visual surface treatment for the table. */
+  appearance?: 'default' | 'light';
   /** Rendered inside the table body when `rows` is empty. */
   emptyState?: DataTableEmptyState;
+  /** Replaces the standard empty-state copy when a view needs a custom result state. */
+  emptyContent?: ReactNode;
   className?: string;
 }
 
@@ -79,7 +90,12 @@ export function DataTable<TRow extends DataTableRow>({
   onSelectionChange,
   onRowAction,
   rowActions,
+  rowProps,
+  headerAction,
+  density = 'default',
+  appearance = 'default',
   emptyState,
+  emptyContent,
   className,
 }: DataTableProps<TRow>) {
   const selectable = !!selected && !!onSelectionChange;
@@ -143,7 +159,7 @@ export function DataTable<TRow extends DataTableRow>({
       data-ovf-end={overflow.end ? '' : undefined}
       {...(ariaLabel ? { role: 'region', 'aria-label': ariaLabel, tabIndex: 0 } : {})}
     >
-      <div className={cx(styles.table, className)} role="table">
+      <div className={cx(styles.table, density === 'compact' && styles.compact, appearance === 'light' && styles.light, className)} role="table">
       <div className={styles.head} role="row">
         {selectable && (
           <HeadCell width="40px" className={styles.checkboxCell} pin="startInner">
@@ -170,26 +186,30 @@ export function DataTable<TRow extends DataTableRow>({
             <span className={styles.headLabel}>{col.header}</span>
           </HeadCell>
         ))}
-        <HeadCell width="44px" className={styles.actionCell} pin="end" aria-label="Row actions" />
+        <HeadCell width="44px" className={styles.actionCell} pin="end" aria-label="Table settings">
+          {headerAction}
+        </HeadCell>
       </div>
 
       <div className={styles.body} role="rowgroup">
         {rows.length === 0 && emptyState && (
           <div role="row" className={styles.emptyRow}>
             <div role="cell" className={styles.emptyCell}>
-              <p className={styles.emptyTitle}>{emptyState.title}</p>
-              {emptyState.description && (
-                <p className={styles.emptyDescription}>{emptyState.description}</p>
-              )}
-              {emptyState.actionLabel && emptyState.onAction && (
-                <button
-                  type="button"
-                  className={styles.emptyAction}
-                  onClick={emptyState.onAction}
-                >
-                  {emptyState.actionLabel}
-                </button>
-              )}
+              {emptyContent ?? <>
+                <p className={styles.emptyTitle}>{emptyState.title}</p>
+                {emptyState.description && (
+                  <p className={styles.emptyDescription}>{emptyState.description}</p>
+                )}
+                {emptyState.actionLabel && emptyState.onAction && (
+                  <button
+                    type="button"
+                    className={styles.emptyAction}
+                    onClick={emptyState.onAction}
+                  >
+                    {emptyState.actionLabel}
+                  </button>
+                )}
+              </>}
             </div>
           </div>
         )}
@@ -197,12 +217,14 @@ export function DataTable<TRow extends DataTableRow>({
           const key = rowKey(row);
           const isSelected = selectable && selected!.has(key);
           const label = rowLabel ? rowLabel(row, i) : `row ${i + 1}`;
+          const { className: extraRowClassName, ...extraRowProps } = rowProps?.(row, i) ?? {};
           return (
             <div
               key={key}
               role="row"
               aria-selected={isSelected || undefined}
-              className={cx(styles.row, isSelected && styles.rowSelected)}
+              className={cx(styles.row, isSelected && styles.rowSelected, extraRowClassName)}
+              {...extraRowProps}
             >
               {selectable && (
                 <BodyCell width="40px" className={styles.checkboxCell} pin="startInner">

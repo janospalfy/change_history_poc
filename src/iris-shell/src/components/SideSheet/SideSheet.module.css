@@ -13,6 +13,12 @@
     var(--oi-motion-ease-default);
 }
 
+/* Used when the sheet must open above an already-open Modal (z-index 70),
+   e.g. a folder picker launched from within a create-object dialog. */
+.rootElevated {
+  z-index: 80;
+}
+
 .rootOpen {
   background-color: rgba(2, 6, 24, 0.4);
 }
@@ -31,12 +37,16 @@
   box-shadow: var(--oi-shadow-mid);
   overflow: hidden;
   transform: translateX(calc(100% + 6px));
-  transition: transform var(--oi-motion-duration-default)
-    var(--oi-motion-ease-default);
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    transform var(--oi-motion-duration-default) var(--oi-motion-ease-default),
+    opacity var(--oi-motion-duration-default) var(--oi-motion-ease-default);
 }
 
 .panelOpen {
   transform: translateX(0);
+  opacity: 1;
 }
 
 /* ---------- header ---------- */

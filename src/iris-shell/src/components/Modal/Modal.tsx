@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { cx } from '../../lib/cx.js';
 import { Icon } from '../Icon/Icon.js';
 import { IconButton } from '../IconButton/IconButton.js';
+import { Tooltip } from '../Tooltip/Tooltip.js';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
@@ -22,6 +23,7 @@ export interface ModalProps {
   children?: ReactNode;
   /** Footer slot — usually a row of Buttons. */
   footer?: ReactNode;
+  bodyClassName?: string;
   /** Element to focus when the modal opens. Defaults to the first focusable
    *  element in the dialog (usually the close button). */
   initialFocusRef?: RefObject<HTMLElement | null>;
@@ -44,6 +46,7 @@ export function Modal({
   size = 'm',
   children,
   footer,
+  bodyClassName,
   initialFocusRef,
   ariaLabel,
   className,
@@ -149,16 +152,18 @@ export function Modal({
             </h2>
             {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
           </div>
-          <IconButton
-            icon="X"
-            ariaLabel="Close"
-            size="s"
-            onClick={onClose}
-            className={styles.closeBtn}
-          />
+          <Tooltip label="Close">
+            <IconButton
+              icon="X"
+              ariaLabel="Close"
+              size="s"
+              onClick={onClose}
+              className={styles.closeBtn}
+            />
+          </Tooltip>
         </header>
 
-        <div className={styles.body}>{children}</div>
+        <div className={cx(styles.body, bodyClassName)}>{children}</div>
 
         {footer && <footer className={styles.footer}>{footer}</footer>}
       </div>

@@ -314,19 +314,19 @@ export function HistoryTab() {
       kind: 'item' as const,
       label: 'Export as HTML',
       icon: 'FileHtml',
-      onSelect: () => showToast('Export successful', `${exportSubjectLabel} has been exported as HTML.`),
+      onSelect: () => showToast('Export successful', undefined, `${exportSubjectLabel} has been exported as HTML.`),
     },
     {
       kind: 'item' as const,
       label: 'Export as CSV',
       icon: 'FileCsv',
-      onSelect: () => showToast('Export successful', `${exportSubjectLabel} has been exported as CSV.`),
+      onSelect: () => showToast('Export successful', undefined, `${exportSubjectLabel} has been exported as CSV.`),
     },
     {
       kind: 'item' as const,
       label: 'Export as PDF',
       icon: 'FilePdf',
-      onSelect: () => showToast('Export successful', `${exportSubjectLabel} has been exported as PDF.`),
+      onSelect: () => showToast('Export successful', undefined, `${exportSubjectLabel} has been exported as PDF.`),
     },
   ];
 

@@ -27,6 +27,13 @@
   overflow: hidden;
 }
 
+/* Highlights a folder row while a dragged object hovers over it. */
+.rowDropTarget {
+  outline: 2px solid var(--oi-button-background-primary);
+  outline-offset: -2px;
+  background-color: var(--oi-background-color-secondary);
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -46,6 +53,14 @@
   gap: var(--oi-spacing-s);
   font-weight: var(--oi-text-body-s-strong-font-weight);
   min-width: 0;
+}
+
+.nameCell[draggable='true'] {
+  cursor: grab;
+}
+
+.nameCell[draggable='true']:active {
+  cursor: grabbing;
 }
 
 .nameIcon {
