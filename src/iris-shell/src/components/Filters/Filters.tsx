@@ -90,17 +90,19 @@ export function Filters({
 
   const fieldById = new Map(fields.map((f) => [f.id, f]));
 
-  const addItems: MenuEntry[] = fields.map((f) => {
-    // Only fields with a value-selection UI can be meaningfully configured, so
-    // disable the rest until their UI exists.
-    const supported = fieldHasValueUi(f);
-    return {
-      kind: 'item',
-      label: f.label,
-      disabled: !supported,
-      onSelect: supported ? () => onAddFilter(f.id) : undefined,
-    };
-  });
+  const addItems: MenuEntry[] = [...fields]
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((f) => {
+      // Only fields with a value-selection UI can be meaningfully configured, so
+      // disable the rest until their UI exists.
+      const supported = fieldHasValueUi(f);
+      return {
+        kind: 'item',
+        label: f.label,
+        disabled: !supported,
+        onSelect: supported ? () => onAddFilter(f.id) : undefined,
+      };
+    });
 
   return (
     <div

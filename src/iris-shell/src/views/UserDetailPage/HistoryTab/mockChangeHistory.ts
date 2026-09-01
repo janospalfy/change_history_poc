@@ -34,6 +34,21 @@ export interface PropertyChange {
   newValue: string;
 }
 
+/** A single expandable row in the sidesheet's "Workflow Activities and Policy
+ *  Actions" accordion — shown for Deprovision operations only (Figma node
+ *  1312:12553). */
+export interface WorkflowActivity {
+  name: string;
+  timestamp: string;
+  /** Built-in/custom policy that ran this activity, rendered as a link. */
+  policy?: string;
+  /** Plain description lines, e.g. "The user account is disabled". */
+  notes: string[];
+  /** Trailing named change shown indented under the notes, e.g. the user's
+   *  DN being renamed to mark it as deprovisioned. */
+  change?: { label: string; oldValue: string; newValue: string };
+}
+
 /** Matches the sidesheet's "Operation summary" + "Operation details"
  *  sections exactly (Figma node 1454:27046) — not a generic key/value list. */
 export interface ChangeHistoryOperation {
@@ -57,12 +72,36 @@ export interface ChangeHistoryOperation {
   targetObject: string;
   lastUpdatedOn: string;
   changes: PropertyChange[];
+  /** Deprovision operations only — overrides DEFAULT_DEPROVISION_WORKFLOW. */
+  workflowActivities?: WorkflowActivity[];
 }
 
 export interface ChangeHistoryGroup {
   date: string;
   operations: ChangeHistoryOperation[];
 }
+
+/** Shared workflow steps shown for any Deprovision operation that doesn't
+ *  define its own `workflowActivities` (Figma node 1312:12553). */
+export const DEFAULT_DEPROVISION_WORKFLOW: WorkflowActivity[] = [
+  {
+    name: 'User Account Deprovisioning',
+    timestamp: '12:05:43',
+    policy: 'Built-in Policy - User Default Deprovisioning',
+    notes: [
+      'The user account is disabled',
+      "The user account's DN is set to a random value",
+      'User properties are changed.',
+      'The user name is changed',
+    ],
+    change: { label: 'The user name is changed', oldValue: 'alexvu', newValue: 'alexvu - Deprovisioned' },
+  },
+  { name: 'Group Membership Removal', timestamp: '12:05:12', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['All group memberships are removed.'] },
+  { name: 'Exchange Mailbox Deprovisioning', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The Exchange mailbox is hidden from address lists.'] },
+  { name: 'Home Folder Deprovisioning', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ["Access to the user's home folder is revoked."] },
+  { name: 'User Account Realocation', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The account is moved to the Deprovisioned Users container.'] },
+  { name: 'User Account Permanent Deletion', timestamp: '12:05:34', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The account is scheduled for permanent deletion after the retention period.'] },
+];
 
 
 /* ------------------------------------------------------------------ */
@@ -118,7 +157,10 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
     activeRolesAdmin: seed % 3 === 0 ? 'Yes' : 'No',
     targetObject: `user-${opId} (O1D.local/Test OU)`,
     lastUpdatedOn: requestedAt,
-    changes: [
+    // Create/Delete/Undo deprovision operations don't show a Properties
+    // changed section in the sidesheet — they act on the whole object, not
+    // individual properties.
+    changes: type === 'created' || type === 'undoDeprovision' || type === 'deleted' ? [] : [
       {
         property: 'Description',
         attribute: '(description)',
@@ -173,15 +215,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'Yes',
         targetObject: 'Peter Kim (O1D.local/Test OU)',
         lastUpdatedOn: 'November 13, 2026 09:12:03 UTC',
-        changes: [
-          {
-            property: 'User Principal Name',
-            attribute: '(userPrincipalName)',
-            changeNote: 'Set value · Operation initiator',
-            oldValue: '<not set>',
-            newValue: 'peter.kim@O1D.local',
-          },
-        ],
+        changes: [],
       },
       {
         id: 'ID: 1-4098',
@@ -289,15 +323,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'Yes',
         targetObject: 'svc-backup (O1D.local/Test OU)',
         lastUpdatedOn: 'November 5, 2026 14:42:12 UTC',
-        changes: [
-          {
-            property: 'Object',
-            attribute: '(distinguishedName)',
-            changeNote: 'Remove object · Operation initiator',
-            oldValue: 'CN=svc-backup,OU=Test OU',
-            newValue: '<removed>',
-          },
-        ],
+        changes: [],
       },
     ],
   },
@@ -320,15 +346,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'Yes',
         targetObject: 'Sara Ito (O1D.local/Test OU)',
         lastUpdatedOn: 'November 4, 2026 11:15:37 UTC',
-        changes: [
-          {
-            property: 'User Principal Name',
-            attribute: '(userPrincipalName)',
-            changeNote: 'Set value · Operation initiator',
-            oldValue: '<not set>',
-            newValue: 'sara.ito@O1D.local',
-          },
-        ],
+        changes: [],
       },
       {
         id: 'ID: 1-4018',
@@ -412,15 +430,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
         lastUpdatedOn: 'November 13, 2026 08:40:03 UTC',
-        changes: [
-          {
-            property: 'Account Status',
-            attribute: '(userAccountControl)',
-            changeNote: 'Replace value · Operation initiator',
-            oldValue: 'Locked out',
-            newValue: 'Enabled',
-          },
-        ],
+        changes: [],
       },
     ],
   },
@@ -552,15 +562,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'No',
         targetObject: 'Access Request #4821 (O1D.local/Test OU)',
         lastUpdatedOn: 'October 30, 2026 10:04:47 UTC',
-        changes: [
-          {
-            property: 'Object',
-            attribute: '(distinguishedName)',
-            changeNote: 'Remove object · Operation initiator',
-            oldValue: 'CN=AccessRequest-4821,OU=Test OU',
-            newValue: '<removed>',
-          },
-        ],
+        changes: [],
       },
     ],
   },
@@ -583,15 +585,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'Yes',
         targetObject: 'MFA Device - iPhone 14 (O1D.local/Test OU)',
         lastUpdatedOn: 'October 22, 2026 16:38:29 UTC',
-        changes: [
-          {
-            property: 'Object',
-            attribute: '(distinguishedName)',
-            changeNote: 'Remove object · Operation initiator',
-            oldValue: 'CN=MfaDevice-iPhone14,OU=Test OU',
-            newValue: '<removed>',
-          },
-        ],
+        changes: [],
       },
     ],
   },
@@ -614,15 +608,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'No',
         targetObject: 'Access Token - CI Pipeline (O1D.local/Test OU)',
         lastUpdatedOn: 'October 14, 2026 11:52:03 UTC',
-        changes: [
-          {
-            property: 'Object',
-            attribute: '(distinguishedName)',
-            changeNote: 'Remove object · Operation initiator',
-            oldValue: 'CN=AccessToken-CiPipeline,OU=Test OU',
-            newValue: '<removed>',
-          },
-        ],
+        changes: [],
       },
     ],
   },

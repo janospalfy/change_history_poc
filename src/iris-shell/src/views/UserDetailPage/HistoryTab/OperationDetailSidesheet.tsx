@@ -1,15 +1,16 @@
-import type { Ref } from 'react';
+import { useState, type Ref } from 'react';
 import { cx } from '../../../lib/cx.js';
 import { SideSheet } from '../../../components/SideSheet/SideSheet.js';
 import { IconButton } from '../../../components/IconButton/IconButton.js';
 import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
 import { Button } from '../../../components/Button/Button.js';
 import { Menu } from '../../../components/Menu/Menu.js';
+import { Icon } from '../../../components/Icon/Icon.js';
 import { DescriptionList } from '../../../components/DescriptionList/DescriptionList.js';
 import { Badge } from '../../../components/Badge/Badge.js';
 import { Link } from '../../../components/Link/Link.js';
 import { showToast } from '../../../lib/toastStore.js';
-import { OPERATION_TYPE_VERB, type ChangeHistoryOperation, type OperationType } from './mockChangeHistory.js';
+import { OPERATION_TYPE_VERB, DEFAULT_DEPROVISION_WORKFLOW, type ChangeHistoryOperation, type OperationType, type WorkflowActivity } from './mockChangeHistory.js';
 import styles from './OperationDetailSidesheet.module.css';
 
 const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
@@ -165,34 +166,111 @@ export function OperationDetailSidesheet({
         <DescriptionList items={summaryItems} />
       </section>
 
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Properties changed ({operation.changes.length})</h3>
-        <div className={styles.changesTable}>
-          <div className={styles.changesHeaderRow}>
-            <span>Property</span>
-            <span>Old value</span>
-            <span>New value</span>
-          </div>
-          {operation.changes.map((change) => (
-            <div key={change.property} className={styles.changeRow}>
-              <div className={styles.changeProperty}>
-                <span className={styles.changePropertyName}>{change.property}</span>
-                <span className={styles.changeAttribute}>{change.attribute}</span>
-                <span className={styles.changeNote}>{change.changeNote}</span>
-              </div>
-              <span className={styles.changeValue}>{change.oldValue}</span>
-              <span className={styles.changeValue}>{change.newValue}</span>
+      {operation.type === 'deprovision' && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Workflow Activities and Policy Actions</h3>
+          <WorkflowAccordion activities={operation.workflowActivities ?? DEFAULT_DEPROVISION_WORKFLOW} />
+        </section>
+      )}
+
+      {operation.changes.length > 0 && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Properties changed ({operation.changes.length})</h3>
+          <div className={styles.changesTable}>
+            <div className={styles.changesHeaderRow}>
+              <span>Property</span>
+              <span>Old value</span>
+              <span>New value</span>
             </div>
-          ))}
-        </div>
-      </section>
+            {operation.changes.map((change) => (
+              <div key={change.property} className={styles.changeRow}>
+                <div className={styles.changeProperty}>
+                  <span className={styles.changePropertyName}>{change.property}</span>
+                  <span className={styles.changeAttribute}>{change.attribute}</span>
+                  <span className={styles.changeNote}>{change.changeNote}</span>
+                </div>
+                <span className={styles.changeValue}>{change.oldValue}</span>
+                <span className={styles.changeValue}>{change.newValue}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className={styles.section}>
-        <h3 className={styles.sectionTitleSecondary}>Operation details</h3>
+        <h3 className={styles.sectionTitle}>Operation details</h3>
         <div className={styles.detailsPanel}>
           <DescriptionList items={detailItems} />
         </div>
       </section>
     </SideSheet>
+  );
+}
+
+/** Accordion list for the deprovision workflow steps (Figma node 1312:12553).
+ *  The first activity starts expanded, matching the reference; the rest
+ *  start collapsed. */
+function WorkflowAccordion({ activities }: { activities: WorkflowActivity[] }) {
+  const [expanded, setExpanded] = useState<Set<number>>(() => new Set([0]));
+  const toggle = (index: number) => {
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  return (
+    <div className={styles.workflowList}>
+      {activities.map((activity, index) => {
+        const isExpanded = expanded.has(index);
+        return (
+          <div key={activity.name} className={styles.workflowRow}>
+            <button
+              type="button"
+              className={styles.workflowHeader}
+              aria-expanded={isExpanded}
+              onClick={() => toggle(index)}
+            >
+              <span className={cx(styles.workflowChevron, isExpanded && styles.workflowChevronExpanded)}>
+                <Icon name="CaretRight" size="16px" />
+              </span>
+              <span className={styles.workflowName}>{activity.name}</span>
+              <span className={styles.workflowTimestamp}>{activity.timestamp}</span>
+            </button>
+            <div className={cx(styles.workflowCollapsible, isExpanded && styles.workflowCollapsibleExpanded)}>
+              <div className={styles.workflowBody}>
+                {activity.policy && (
+                  <p className={styles.workflowNote}>
+                    Policy:{' '}
+                    <Link href="#" onClick={(e) => e.preventDefault()}>
+                      {activity.policy}
+                    </Link>
+                  </p>
+                )}
+                {activity.notes.map((note) => (
+                  <p key={note} className={styles.workflowNote}>
+                    {note}
+                  </p>
+                ))}
+                {activity.change && (
+                  <div className={styles.workflowChange}>
+                    <div className={styles.workflowChangeRow}>
+                      <span className={styles.workflowChangeLabel}>Old value</span>
+                      <span>{activity.change.oldValue}</span>
+                    </div>
+                    <div className={styles.workflowChangeRow}>
+                      <span className={styles.workflowChangeLabel}>New value</span>
+                      <span>{activity.change.newValue}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

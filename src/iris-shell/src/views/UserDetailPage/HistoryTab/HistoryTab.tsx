@@ -298,15 +298,17 @@ export function HistoryTab() {
   const removeFilter = (id: string) => setActiveFilters((prev) => prev.filter((f) => f.id !== id));
   const clearFilters = () => setActiveFilters([]);
 
-  const addFilterMenuItems = filterFields.map((field) => {
-    const supported = fieldHasValueUi(field);
-    return {
-      kind: 'item' as const,
-      label: field.label,
-      disabled: !supported,
-      onSelect: supported ? () => addFilter(field.id) : undefined,
-    };
-  });
+  const addFilterMenuItems = [...filterFields]
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((field) => {
+      const supported = fieldHasValueUi(field);
+      return {
+        kind: 'item' as const,
+        label: field.label,
+        disabled: !supported,
+        onSelect: supported ? () => addFilter(field.id) : undefined,
+      };
+    });
 
   const exportSubjectLabel = view === 'changeHistory' ? 'Change history' : 'User activity';
   const exportMenuItems = [

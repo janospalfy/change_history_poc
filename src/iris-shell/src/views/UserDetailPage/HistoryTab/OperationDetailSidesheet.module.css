@@ -53,12 +53,117 @@
   color: var(--oi-content-color-primary);
 }
 
-.sectionTitleSecondary {
-  margin: 0;
+/* ---------- workflow activities accordion ---------- */
+
+.workflowList {
+  display: flex;
+  flex-direction: column;
+  border: var(--oi-border-width-default) solid var(--oi-border-color-muted);
+  border-radius: var(--oi-border-radius-default);
+  overflow: hidden;
+}
+
+.workflowRow + .workflowRow {
+  border-top: var(--oi-border-width-default) solid var(--oi-border-color-muted);
+}
+
+.workflowHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-s);
+  width: 100%;
+  padding: var(--oi-spacing-s) var(--oi-spacing-m);
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workflowChevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--oi-content-color-tertiary);
+  transition: transform var(--oi-motion-duration-short) var(--oi-motion-ease-default);
+}
+
+.workflowChevronExpanded {
+  transform: rotate(90deg);
+}
+
+.workflowName {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--oi-content-color-primary);
   font-size: var(--oi-text-body-s-strong-font-size);
   line-height: var(--oi-text-body-s-strong-line-height);
   font-weight: var(--oi-text-body-s-strong-font-weight);
+}
+
+.workflowTimestamp {
+  flex-shrink: 0;
+  color: var(--oi-content-color-tertiary);
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+}
+
+/* Grid-rows collapse trick (same as Timeline's group expand/collapse): 0fr
+   animates to 1fr so the real (auto) height transitions without measuring
+   it in JS. */
+.workflowCollapsible {
+  display: grid;
+  grid-template-rows: minmax(0, 0fr);
+  overflow: hidden;
+  transition: grid-template-rows var(--oi-motion-duration-short) var(--oi-motion-ease-default);
+}
+
+.workflowCollapsibleExpanded {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workflowCollapsible {
+    transition: none;
+  }
+}
+
+.workflowBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oi-spacing-xs);
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 var(--oi-spacing-m) var(--oi-spacing-m) calc(var(--oi-spacing-m) + var(--oi-spacing-l) + var(--oi-spacing-xs));
+}
+
+.workflowNote {
+  margin: 0;
   color: var(--oi-content-color-secondary);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+}
+
+.workflowChange {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--oi-spacing-xs);
+  padding-left: var(--oi-spacing-m);
+  border-left: var(--oi-border-width-default) solid var(--oi-border-color-muted);
+}
+
+.workflowChangeRow {
+  display: flex;
+  gap: var(--oi-spacing-xs);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  color: var(--oi-content-color-primary);
+}
+
+.workflowChangeLabel {
+  min-width: 72px;
+  color: var(--oi-content-color-tertiary);
 }
 
 /* ---------- properties changed table ---------- */
