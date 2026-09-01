@@ -1,11 +1,14 @@
+import type { Ref } from 'react';
 import { cx } from '../../../lib/cx.js';
 import { SideSheet } from '../../../components/SideSheet/SideSheet.js';
 import { IconButton } from '../../../components/IconButton/IconButton.js';
 import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
 import { Button } from '../../../components/Button/Button.js';
+import { Menu } from '../../../components/Menu/Menu.js';
 import { DescriptionList } from '../../../components/DescriptionList/DescriptionList.js';
 import { Badge } from '../../../components/Badge/Badge.js';
 import { Link } from '../../../components/Link/Link.js';
+import { showToast } from '../../../lib/toastStore.js';
 import { OPERATION_TYPE_VERB, type ChangeHistoryOperation, type OperationType } from './mockChangeHistory.js';
 import styles from './OperationDetailSidesheet.module.css';
 
@@ -79,6 +82,27 @@ export function OperationDetailSidesheet({
     { label: 'Last updated on', value: operation.lastUpdatedOn },
   ];
 
+  const exportMenuItems = [
+    {
+      kind: 'item' as const,
+      label: 'Export as HTML',
+      icon: 'FileHtml',
+      onSelect: () => showToast('Export successful', 'This operation has been exported as HTML.'),
+    },
+    {
+      kind: 'item' as const,
+      label: 'Export as CSV',
+      icon: 'FileCsv',
+      onSelect: () => showToast('Export successful', 'This operation has been exported as CSV.'),
+    },
+    {
+      kind: 'item' as const,
+      label: 'Export as PDF',
+      icon: 'FilePdf',
+      onSelect: () => showToast('Export successful', 'This operation has been exported as PDF.'),
+    },
+  ];
+
   return (
     <SideSheet
       open={open}
@@ -111,6 +135,23 @@ export function OperationDetailSidesheet({
               disabled={!hasNext}
             />
           </Tooltip>
+          <Menu
+            ariaLabel="Export"
+            align="end"
+            items={exportMenuItems}
+            trigger={({ ref, onClick, expanded }) => (
+              <Tooltip label="Export">
+                <IconButton
+                  ref={ref as Ref<HTMLButtonElement>}
+                  icon="Export"
+                  ariaLabel="Export"
+                  aria-haspopup="menu"
+                  aria-expanded={expanded}
+                  onClick={onClick}
+                />
+              </Tooltip>
+            )}
+          />
         </div>
       }
       footer={

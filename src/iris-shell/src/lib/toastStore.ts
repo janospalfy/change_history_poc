@@ -9,16 +9,22 @@ import { useCallback, useSyncExternalStore } from 'react';
  * holds the current message and a `dismiss` to clear it.
  */
 
-let current: string | null = null;
+let current: ToastPayload | null = null;
 const listeners = new Set<() => void>();
 
 function emit() {
   for (const l of listeners) l();
 }
 
+export interface ToastPayload {
+  message: string;
+  /** Optional second line, e.g. Figma's two-line "Export successful" toast. */
+  description?: string;
+}
+
 /** Show a toast from anywhere in the app. */
-export function showToast(message: string): void {
-  current = message;
+export function showToast(message: string, description?: string): void {
+  current = { message, description };
   emit();
 }
 
@@ -29,14 +35,15 @@ function subscribe(cb: () => void): () => void {
 
 export interface ToastController {
   message: string | null;
+  description?: string;
   dismiss: () => void;
 }
 
 export function useToastMessage(): ToastController {
-  const message = useSyncExternalStore(subscribe, () => current);
+  const payload = useSyncExternalStore(subscribe, () => current);
   const dismiss = useCallback(() => {
     current = null;
     emit();
   }, []);
-  return { message, dismiss };
+  return { message: payload?.message ?? null, description: payload?.description, dismiss };
 }

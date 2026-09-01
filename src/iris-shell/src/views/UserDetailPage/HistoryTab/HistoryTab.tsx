@@ -7,6 +7,7 @@ import { IconButton } from '../../../components/IconButton/IconButton.js';
 import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
 import { Menu } from '../../../components/Menu/Menu.js';
 import { Icon } from '../../../components/Icon/Icon.js';
+import { showToast } from '../../../lib/toastStore.js';
 import {
   Filters,
   fieldHasValueUi,
@@ -284,10 +285,26 @@ export function HistoryTab() {
     };
   });
 
+  const exportSubjectLabel = view === 'changeHistory' ? 'Change history' : 'User activity';
   const exportMenuItems = [
-    { kind: 'item' as const, label: 'Export as HTML', icon: 'FileHtml' },
-    { kind: 'item' as const, label: 'Export as CSV', icon: 'FileCsv' },
-    { kind: 'item' as const, label: 'Export as PDF', icon: 'FilePdf' },
+    {
+      kind: 'item' as const,
+      label: 'Export as HTML',
+      icon: 'FileHtml',
+      onSelect: () => showToast('Export successful', `${exportSubjectLabel} has been exported as HTML.`),
+    },
+    {
+      kind: 'item' as const,
+      label: 'Export as CSV',
+      icon: 'FileCsv',
+      onSelect: () => showToast('Export successful', `${exportSubjectLabel} has been exported as CSV.`),
+    },
+    {
+      kind: 'item' as const,
+      label: 'Export as PDF',
+      icon: 'FilePdf',
+      onSelect: () => showToast('Export successful', `${exportSubjectLabel} has been exported as PDF.`),
+    },
   ];
 
   const dateMenuItems = [

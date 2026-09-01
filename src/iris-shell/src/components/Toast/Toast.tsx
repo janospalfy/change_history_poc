@@ -7,6 +7,8 @@ import styles from './Toast.module.css';
 export interface ToastProps {
   /** Truthy = visible. Setting a new message resets the auto-dismiss timer. */
   message: string | null;
+  /** Optional second line — the Figma `Toast` component's supporting text. */
+  description?: string;
   /** Called when the auto-dismiss timer fires or the user clicks the dismiss
    *  button. Owner clears its own `message` state in response. */
   onDismiss: () => void;
@@ -26,11 +28,12 @@ export interface ToastProps {
  * AI panel, modals, and side sheets without inheriting their stacking
  * context.
  */
-export function Toast({ message, onDismiss, durationMs = 3000 }: ToastProps) {
+export function Toast({ message, description, onDismiss, durationMs = 3000 }: ToastProps) {
   // Two-stage state so the leave transition has time to play after the
   // owner clears `message`. `shown` holds the last non-null text and is
   // cleared on a short delay after the prop goes null.
   const [shown, setShown] = useState<string | null>(null);
+  const [shownDescription, setShownDescription] = useState<string | undefined>(undefined);
   // Drives `data-visible`. Held false on the first committed frame so the
   // rise-from-below enter transition actually plays (a node mounted directly
   // in its final state animates nothing) — flipped true on the next frame.
@@ -50,6 +53,7 @@ export function Toast({ message, onDismiss, durationMs = 3000 }: ToastProps) {
   useEffect(() => {
     if (!message) return;
     setShown(message);
+    setShownDescription(description);
     // Flip to visible on the next frame so the enter transition runs from
     // the resting (below + faded + blurred) state.
     const raf = requestAnimationFrame(() => setVisible(true));
@@ -58,7 +62,7 @@ export function Toast({ message, onDismiss, durationMs = 3000 }: ToastProps) {
       cancelAnimationFrame(raf);
       clearTimeout(id);
     };
-  }, [message, durationMs]);
+  }, [message, description, durationMs]);
 
   // Hide local copy once the owner clears the prop, after a short delay
   // so the CSS opacity/transform transition can play out.
@@ -79,10 +83,13 @@ export function Toast({ message, onDismiss, durationMs = 3000 }: ToastProps) {
       aria-live="polite"
       data-visible={visible ? 'true' : 'false'}
     >
-      <span className={styles.icon} aria-hidden="true">
-        <Icon name="Check" size="20px" />
+      <span className={styles.iconBadge} aria-hidden="true">
+        <Icon name="CheckCircle" size="20px" />
       </span>
-      <p className={styles.message}>{shown}</p>
+      <div className={styles.content}>
+        <p className={styles.message}>{shown}</p>
+        {shownDescription && <p className={styles.description}>{shownDescription}</p>}
+      </div>
       <IconButton
         icon="X"
         ariaLabel="Dismiss notification"

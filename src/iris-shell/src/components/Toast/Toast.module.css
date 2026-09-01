@@ -43,34 +43,44 @@
     filter var(--oi-motion-duration-long) var(--oi-motion-ease-default);
 }
 
-/* Featured success icon. Fixed 20px slot so the message column starts at a
-   stable x regardless of the icon glyph. Color is tinted green via the
-   success content token. */
-.icon {
+/* Featured success icon: circular tinted badge (Figma "Featured icon"),
+   not just a bare glyph. */
+.iconBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  padding: var(--oi-spacing-s);
+  border-radius: var(--oi-border-radius-max);
+  border: 0.5px solid var(--oi-border-color-badge-success);
+  background-color: var(--oi-background-color-success);
   color: var(--oi-content-color-success);
 }
 
-.message {
+.content {
   flex: 1 1 0;
   min-width: 0;
-  margin: 0;
-  /* Reserve enough room on the right that wrapped lines never slide under
-     the absolutely-positioned dismiss X. The button is 24px wide and sits
-     14px from the toast's right edge — so we need at least 14+24 = 38px of
-     dead space inside the message column. The toast's own 16px right
-     padding contributes 16px, the remaining ~22px (rounded up to
-     `--oi-spacing-xxl`, 32px) comes from this padding. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--oi-spacing-xs);
   padding-right: var(--oi-spacing-xxl);
+}
+
+.message {
+  margin: 0;
   color: var(--oi-content-color-primary);
   font-size: var(--oi-text-body-s-font-size);
   line-height: var(--oi-text-body-s-line-height);
   font-weight: var(--oi-text-body-s-strong-font-weight, 600);
+  word-break: break-word;
+}
+
+.description {
+  margin: 0;
+  color: var(--oi-content-color-secondary);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  font-weight: var(--oi-text-body-s-font-weight, 400);
   word-break: break-word;
 }
 
