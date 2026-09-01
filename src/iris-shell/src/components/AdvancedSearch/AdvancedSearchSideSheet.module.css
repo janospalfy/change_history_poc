@@ -23,13 +23,16 @@
 .header {
   display: flex;
   align-items: center;
-  gap: var(--oi-spacing-l);
-  min-height: 44px;
-  padding: 0 var(--oi-spacing-l);
+  gap: var(--oi-spacing-s);
+  padding: var(--oi-spacing-m);
   border-bottom: var(--oi-border-width-default) var(--oi-border-style-solid) var(--oi-border-color-muted);
+  flex-shrink: 0;
 }
 
 .headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -41,27 +44,35 @@
 
 .title {
   color: var(--oi-content-color-primary);
-  font-size: var(--oi-text-body-s-strong-font-size);
+  font-size: var(--oi-text-heading-05-font-size);
+  line-height: var(--oi-text-heading-05-line-height);
+  font-weight: var(--oi-text-heading-05-font-weight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .subtitle {
   color: var(--oi-content-color-tertiary);
   font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
 }
 
 .content {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 var(--oi-spacing-m) var(--oi-spacing-l);
+  padding: var(--oi-spacing-l) var(--oi-spacing-m) var(--oi-spacing-l);
 }
 
 .footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--oi-spacing-s);
   padding: var(--oi-spacing-m);
   border-top: var(--oi-border-width-default) var(--oi-border-style-solid) var(--oi-border-color-muted);
+  flex-shrink: 0;
 }
 
 .basic {

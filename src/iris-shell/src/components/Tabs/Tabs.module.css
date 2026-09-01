@@ -98,8 +98,8 @@
 }
 
 .tabContentSelected {
-  background-color: var(--oi-background-color-primary);
-  border-color: var(--oi-border-color-muted);
+  background-color: var(--oi-background-color-secondary);
+  border-color: transparent;
 }
 
 .label {
