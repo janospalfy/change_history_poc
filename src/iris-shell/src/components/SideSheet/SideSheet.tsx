@@ -47,6 +47,10 @@ export function SideSheet({
   elevated,
 }: SideSheetProps) {
   const [mounted, setMounted] = useState(open);
+  // Separate from `mounted` so opening renders one frame in the closed
+  // position first, letting the transform/opacity transition actually play
+  // instead of mounting straight into its open state.
+  const [visuallyOpen, setVisuallyOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const titleId = useId();
@@ -64,8 +68,13 @@ export function SideSheet({
   useEffect(() => {
     if (open) {
       setMounted(true);
-      return undefined;
+      // Flip the open class on the next frame so the browser has already
+      // painted the closed position once — otherwise the transition has
+      // nothing to animate from and the panel just appears instantly.
+      const raf = requestAnimationFrame(() => setVisuallyOpen(true));
+      return () => cancelAnimationFrame(raf);
     }
+    setVisuallyOpen(false);
     const t = setTimeout(() => setMounted(false), 200);
     return () => clearTimeout(t);
   }, [open]);
@@ -133,7 +142,7 @@ export function SideSheet({
 
   return createPortal(
     <div
-      className={cx(styles.root, open && styles.rootOpen, elevated && styles.rootElevated)}
+      className={cx(styles.root, visuallyOpen && styles.rootOpen, elevated && styles.rootElevated)}
       // Scrim click closes; clicks inside panel stopPropagation below.
       onClick={onClose}
     >
@@ -143,7 +152,7 @@ export function SideSheet({
         aria-modal="true"
         aria-labelledby={ariaLabel ? undefined : titleId}
         aria-label={ariaLabel}
-        className={cx(styles.panel, open && styles.panelOpen, className)}
+        className={cx(styles.panel, visuallyOpen && styles.panelOpen, className)}
         onClick={(e) => e.stopPropagation()}
       >
         <header className={styles.header}>
