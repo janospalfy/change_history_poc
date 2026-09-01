@@ -8,17 +8,17 @@ import type { DirectoryObjectType } from '../../lib/directoryData.js';
  */
 
 const USER_TABS: TabItem[] = [
-  { value: 'overview', label: 'Overview', icon: 'Briefcase' },
-  { value: 'general', label: 'General', icon: 'IdentificationCard' },
-  { value: 'user-details', label: 'User details', icon: 'IdentificationBadge' },
-  { value: 'account', label: 'Account', icon: 'UserCircle' },
-  { value: 'connections', label: 'Connections', icon: 'Plugs' },
-  { value: 'memberships', label: 'Memberships', icon: 'UsersThree' },
-  { value: 'managed-units', label: 'Managed units', icon: 'FolderStar' },
-  { value: 'roles', label: 'Roles', icon: 'ShieldCheck' },
-  { value: 'authorization', label: 'Authorization', icon: 'Key' },
-  { value: 'object', label: 'Object', icon: 'Cube' },
-  { value: 'history', label: 'History', icon: 'ClockCounterClockwise' },
+  { value: 'overview', label: 'Overview' },
+  { value: 'general', label: 'General' },
+  { value: 'user-details', label: 'User details' },
+  { value: 'account', label: 'Account' },
+  { value: 'connections', label: 'Connections' },
+  { value: 'memberships', label: 'Memberships' },
+  { value: 'managed-units', label: 'Managed units' },
+  { value: 'roles', label: 'Roles' },
+  { value: 'authorization', label: 'Authorization' },
+  { value: 'object', label: 'Object' },
+  { value: 'history', label: 'History' },
 ];
 
 const COMPUTER_TABS: TabItem[] = [

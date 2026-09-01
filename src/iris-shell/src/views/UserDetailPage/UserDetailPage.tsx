@@ -25,7 +25,7 @@ import styles from './UserDetailPage.module.css';
 import { isActiveDirectoryLocation } from '../../lib/directoryData.js';
 
 const TABS = [
-  { value: 'overview', label: 'Overview', icon: 'Briefcase' },
+  { value: 'overview', label: 'Overview' },
   { value: 'general', label: 'General' },
   { value: 'user-details', label: 'User details' },
   { value: 'account', label: 'Account' },
