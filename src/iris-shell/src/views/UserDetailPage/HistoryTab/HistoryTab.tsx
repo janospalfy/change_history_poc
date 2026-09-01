@@ -60,7 +60,7 @@ function DateValueInput({
  *  chip is a broad bucket covering one or more granular operation types. */
 const OPERATION_TYPES = [
   { value: 'create', label: 'Create', dotClassName: 'dotCreate', selectedClassName: 'typeChipCreateSelected' },
-  { value: 'edit', label: 'Modify', dotClassName: 'dotEdit', selectedClassName: 'typeChipEditSelected' },
+  { value: 'edit', label: 'Update', dotClassName: 'dotEdit', selectedClassName: 'typeChipEditSelected' },
   { value: 'remove', label: 'Delete', dotClassName: 'dotRemove', selectedClassName: 'typeChipRemoveSelected' },
   {
     value: 'deprovision',
