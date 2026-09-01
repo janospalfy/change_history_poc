@@ -139,8 +139,8 @@
 
 .date {
   min-width: 165px;
-  font-size: var(--oi-text-heading-05-font-size);
-  line-height: var(--oi-text-heading-05-line-height);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
   font-weight: var(--oi-text-heading-05-font-weight);
   color: var(--oi-content-color-primary);
   white-space: nowrap;
