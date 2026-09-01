@@ -89,7 +89,7 @@
   gap: var(--oi-spacing-xs);
   height: 28px;
   padding: var(--oi-spacing-xs) var(--oi-spacing-s);
-  border-radius: var(--oi-border-radius-l);
+  border-radius: var(--oi-border-radius-default);
   color: inherit;
   border: var(--oi-border-width-default) var(--oi-border-style-solid) transparent;
   transition: background-color var(--oi-motion-duration-short)
