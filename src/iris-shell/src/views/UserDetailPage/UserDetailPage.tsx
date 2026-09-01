@@ -1,6 +1,6 @@
 import { useEffect, useState, type MouseEvent, type Ref } from 'react';
 import { AppShell } from '../AppShell/AppShell.js';
-import { navigate, useRoute } from '../../lib/router.js';
+import { navigate, navigateReplace, useRoute } from '../../lib/router.js';
 import { useUsers, type UserPatch } from '../../lib/usersStore.js';
 import { isTypingTarget } from '../../lib/keyboard.js';
 import { Tabs } from '../../components/Tabs/Tabs.js';
@@ -52,6 +52,10 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
   const route = useRoute();
   const user = getUser(userId);
   const [tab, setTab] = useState(() => route.name === 'userDetail' ? route.params.tab ?? 'general' : 'general');
+  const handleTabChange = (value: string) => {
+    setTab(value);
+    navigateReplace(`#/users/${userId}?tab=${value}`);
+  };
   const [resetOpen, setResetOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
@@ -166,7 +170,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
             />
           </>
         }
-        tabs={<Tabs items={TABS} value={tab} onChange={setTab} ariaLabel="User detail sections" />}
+        tabs={<Tabs items={TABS} value={tab} onChange={handleTabChange} ariaLabel="User detail sections" />}
       />
 
       <div className={styles.content}>

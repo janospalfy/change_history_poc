@@ -87,6 +87,18 @@ export function navigate(path: string): void {
 }
 
 /**
+ * Swap in a new URL (e.g. to reflect the active tab) without pushing a new
+ * history entry or scrolling — unlike `navigate`, this is for in-place UI
+ * state that should be shareable/bookmarkable but shouldn't spam the
+ * back-button history on every click (tab switches, etc).
+ */
+export function navigateReplace(path: string): void {
+  if (typeof window === 'undefined') return;
+  if (window.location.hash === path) return;
+  window.history.replaceState(null, '', path);
+}
+
+/**
  * useRoute — returns the currently active route.
  */
 function normalizeAddressBar(): void {

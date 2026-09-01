@@ -22,8 +22,9 @@
 }
 
 .overviewAvatar {
-  width: 180px;
-  height: 180px;
+  width: 80px;
+  height: 80px;
+  background-color: var(--oi-background-color-primary);
 }
 
 .identityName,
