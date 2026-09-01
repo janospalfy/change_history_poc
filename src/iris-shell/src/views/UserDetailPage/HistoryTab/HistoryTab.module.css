@@ -197,22 +197,30 @@
 
 .typeChipCreateSelected {
   border-color: var(--oi-border-color-badge-success);
-  background-color: var(--oi-color-green-50);
+  background-color: var(--oi-background-color-success);
 }
 
 .typeChipEditSelected {
   border-color: var(--oi-border-color-badge-info);
-  background-color: var(--oi-color-blue-50);
+  background-color: var(--oi-background-color-info);
 }
 
 .typeChipRemoveSelected {
   border-color: var(--oi-border-color-badge-error);
-  background-color: var(--oi-color-red-50);
+  background-color: var(--oi-background-color-error);
 }
 
+/* No semantic "purple" token pair exists (only info/success/warning/error),
+   so pick dark-mode-safe values manually — same dark-saturated-bg +
+   bright-border pattern as the adaptive tokens above. */
 .typeChipDeprovisionSelected {
   border-color: var(--oi-color-purple-300);
   background-color: var(--oi-color-purple-50);
+}
+
+body:global(.theme-dark) .typeChipDeprovisionSelected {
+  border-color: var(--oi-color-purple-400);
+  background-color: var(--oi-color-purple-950);
 }
 
 /* "All" has no Figma-defined color variant; use a neutral selected style. */
