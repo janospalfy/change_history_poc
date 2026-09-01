@@ -18,6 +18,7 @@ import type { Crumb } from '../../components/AppHeader/AppHeader.js';
 import { ResetPasswordModal } from '../UserDetailPage/ResetPasswordModal/ResetPasswordModal.js';
 import { DeleteUserModal } from '../UserDetailPage/DeleteUserModal/DeleteUserModal.js';
 import { UserMemberships } from '../UserDetailPage/UserMemberships.js';
+import { HistoryTab } from '../UserDetailPage/HistoryTab/HistoryTab.js';
 import { tabsForType, PRIMARY_TAB } from './detailTabs.js';
 import styles from './TreeView.module.css';
 
@@ -182,6 +183,8 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
             user={{ name: object.name, groupMembershipIds: object.details.groupMembershipIds }}
             onMembershipChange={(groupMembershipIds) => updateObjectDetails(object.id, { groupMembershipIds })}
           />
+        ) : tab === 'history' ? (
+          <HistoryTab />
         ) : (
           <Card title={tabs.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>
