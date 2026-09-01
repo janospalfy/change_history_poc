@@ -127,6 +127,24 @@ function uniqueOptions(operations: ChangeHistoryOperation[], fieldId: string): {
   return options;
 }
 
+/** Distinct property names across every operation's `changes` list (e.g.
+ *  "E-Mail Address", "User Password") — an operation can touch several, so
+ *  this can't be derived via `getFieldValue`/`uniqueOptions` like the
+ *  single-valued fields above. */
+function uniqueChangedPropertyOptions(operations: ChangeHistoryOperation[]): { value: string; label: string }[] {
+  const seen = new Set<string>();
+  const options: { value: string; label: string }[] = [];
+  for (const op of operations) {
+    for (const change of op.changes) {
+      if (!seen.has(change.property)) {
+        seen.add(change.property);
+        options.push({ value: change.property, label: change.property });
+      }
+    }
+  }
+  return options;
+}
+
 /** The generic "Add filter" field list, matching the Figma Add-filter menu
  *  exactly (node 1492:22341). Options are derived from real mock data. */
 /** "Is in the last" value options, matching the Figma date filter tag's
@@ -180,6 +198,7 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
     },
     { id: 'targetObject', label: 'Target object', options: uniqueOptions(allOperations, 'targetObject') },
     { id: 'lastUpdatedOn', label: 'Last updated on', options: uniqueOptions(allOperations, 'lastUpdatedOn') },
+    { id: 'propertyChanged', label: 'Property changed', options: uniqueChangedPropertyOptions(allOperations) },
   ];
   return { allOperations, latestDate, latestDateInput: toDatetimeLocal(latestDate), filterFields };
 }
@@ -244,9 +263,13 @@ export function HistoryTab() {
           op.label.toLowerCase().includes(trimmedQuery) ||
           op.id.toLowerCase().includes(trimmedQuery);
         const matchesType = activeTypes.length === 0 || activeTypes.includes(BUCKET_BY_TYPE[op.type]);
-        const matchesFilters = activeFilters.every(
-          (filter) => !filter.value || getFieldValue(op, filter.fieldId) === filter.value,
-        );
+        const matchesFilters = activeFilters.every((filter) => {
+          if (!filter.value) return true;
+          if (filter.fieldId === 'propertyChanged') {
+            return op.changes.some((change) => change.property === filter.value);
+          }
+          return getFieldValue(op, filter.fieldId) === filter.value;
+        });
         const opTime = new Date(op.date).getTime();
         let matchesDate = true;
         if (dateRule === 'relative') matchesDate = opTime >= relativeCutoff;
