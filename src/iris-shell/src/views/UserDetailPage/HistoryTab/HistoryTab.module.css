@@ -146,6 +146,23 @@
   flex-shrink: 0;
 }
 
+.dateFilterClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--oi-size-s);
+  border: none;
+  background: none;
+  color: var(--oi-content-color-tertiary);
+  cursor: pointer;
+}
+
+.dateFilterClear:hover {
+  color: var(--oi-content-color-primary);
+  background-color: var(--oi-background-color-secondary);
+}
+
 .dateFilterValueSegment {
   color: var(--oi-content-color-primary);
   border-right: none;

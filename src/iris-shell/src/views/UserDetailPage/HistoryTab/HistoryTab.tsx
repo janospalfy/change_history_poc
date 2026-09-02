@@ -494,6 +494,16 @@ export function HistoryTab() {
                   <DateValueInput value={dateTo} onChange={setDateTo} ariaLabel="To date" />
                 </>
               )}
+              {dateRule !== null && (
+                <button
+                  type="button"
+                  className={styles.dateFilterClear}
+                  onClick={() => setDateRule(null)}
+                  aria-label="Clear date filter"
+                >
+                  <Icon name="X" size="12px" />
+                </button>
+              )}
             </div>        </div>
 
         {activeFilters.length > 0 && (
