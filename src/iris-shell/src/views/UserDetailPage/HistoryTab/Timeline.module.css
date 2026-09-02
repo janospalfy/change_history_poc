@@ -226,6 +226,12 @@
   flex-shrink: 0;
 }
 
+.eventChevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--oi-content-color-tertiary);
+}
+
 .dotCreate {
   background-color: var(--oi-color-green-500);
 }

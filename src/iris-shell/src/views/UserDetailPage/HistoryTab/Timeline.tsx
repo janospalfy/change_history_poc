@@ -142,6 +142,9 @@ function TimelineEventItem({
         <span className={styles.eventActor}>{operation.actor}</span>
         <Badge className={styles.eventBadge}>{operation.status}</Badge>
       </div>
+      <span className={styles.eventChevron} aria-hidden="true">
+        <Icon name="CaretRight" size="16px" />
+      </span>
     </button>
   );
 }
