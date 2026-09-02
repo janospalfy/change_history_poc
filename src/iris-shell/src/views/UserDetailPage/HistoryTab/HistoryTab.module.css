@@ -71,17 +71,6 @@
   flex-wrap: wrap;
 }
 
-/* Inline counterpart to .customFiltersLabel, disambiguating this row from
-   the custom filters row below it. */
-.quickFiltersLabel {
-  font-size: var(--oi-text-body-xs-font-size, 11px);
-  font-weight: var(--oi-text-heading-05-font-weight);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--oi-content-color-tertiary);
-  flex-shrink: 0;
-}
-
 .allChip {
   padding-inline: var(--oi-spacing-m);
 }

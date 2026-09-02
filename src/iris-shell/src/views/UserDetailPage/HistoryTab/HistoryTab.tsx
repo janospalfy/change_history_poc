@@ -2,7 +2,6 @@ import { useMemo, useRef, useState, type Ref } from 'react';
 import { cx } from '../../../lib/cx.js';
 import { SegmentedToggle } from '../../../components/SegmentedToggle/SegmentedToggle.js';
 import { TextInput } from '../../../components/TextInput/TextInput.js';
-import { Button } from '../../../components/Button/Button.js';
 import { IconButton } from '../../../components/IconButton/IconButton.js';
 import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
 import { Menu } from '../../../components/Menu/Menu.js';
@@ -391,23 +390,23 @@ export function HistoryTab() {
           align="end"
           items={exportMenuItems}
           trigger={({ ref, onClick, expanded }) => (
-            <Button
-              ref={ref as Ref<HTMLButtonElement>}
-              iconLead="Export"
-              variant="secondary"
-              aria-haspopup="menu"
-              aria-expanded={expanded}
-              onClick={onClick}
-            >
-              Export
-            </Button>
+            <Tooltip label="Export">
+              <IconButton
+                ref={ref as Ref<HTMLButtonElement>}
+                icon="Export"
+                ariaLabel="Export"
+                variant="secondary"
+                aria-haspopup="menu"
+                aria-expanded={expanded}
+                onClick={onClick}
+              />
+            </Tooltip>
           )}
         />
       </div>
 
       <>
         <div className={styles.filterStrip} role="group" aria-label="Filter by operation type">
-            <span className={styles.quickFiltersLabel}>Quick filters</span>
             <button
               type="button"
               className={cx(
