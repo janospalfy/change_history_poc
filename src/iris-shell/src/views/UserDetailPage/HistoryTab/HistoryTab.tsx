@@ -456,6 +456,7 @@ export function HistoryTab() {
                   >
                     Date
                     <span className={styles.dateFilterRule}>{dateRule !== null ? DATE_RULE_LABELS[dateRule] : 'All time'}</span>
+                    <Icon name="CaretDown" size="12px" className={styles.dateFilterCaret} />
                   </button>
                 )}
               />

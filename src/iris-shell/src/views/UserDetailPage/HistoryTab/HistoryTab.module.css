@@ -138,6 +138,11 @@
   font-weight: var(--oi-text-body-s-font-weight);
 }
 
+.dateFilterCaret {
+  color: var(--oi-content-color-tertiary);
+  flex-shrink: 0;
+}
+
 .dateFilterValueSegment {
   color: var(--oi-content-color-primary);
   border-right: none;
