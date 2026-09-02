@@ -54,15 +54,18 @@
 }
 
 /* Grid-rows collapse trick: animates from 0fr to 1fr so the events block's
-   real (auto) height can transition smoothly without measuring it in JS. */
+   real (auto) height can transition smoothly without measuring it in JS.
+   overflow:hidden must live on this grid container itself (not just the
+   .eventsBlock child) or collapsed groups leak their first row's content. */
 .collapsible {
   display: grid;
-  grid-template-rows: 0fr;
+  grid-template-rows: minmax(0, 0fr);
+  overflow: hidden;
   transition: grid-template-rows var(--oi-motion-duration-short) var(--oi-motion-ease-default);
 }
 
 .collapsibleExpanded {
-  grid-template-rows: 1fr;
+  grid-template-rows: minmax(0, 1fr);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -72,15 +75,16 @@
 }
 
 /* Event rows sit indented under their header, matching the Figma spec
-   (header spans the full width; its events block starts 32px in). The
-   grid item itself must clip overflow for the row-collapse transition to
-   hide its content instead of just squashing it. */
+   (header spans the full width; its events block starts 32px in). Overflow
+   clipping for the row-collapse transition now lives on .collapsible (the
+   outer grid container, spanning the full width) rather than here — this
+   box is intentionally NOT clipped so .eventLineHighlight can render in the
+   32px gutter to its left, over the shared connector line. */
 .eventsBlock {
   display: flex;
   flex-direction: column;
   margin-left: 32px;
   padding-top: var(--oi-spacing-s);
-  overflow: hidden;
   min-height: 0;
 }
 
@@ -156,6 +160,7 @@
 /* ---------- event item (expanded operation row) ---------- */
 
 .eventItem {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--oi-spacing-m);
@@ -172,6 +177,27 @@
 
 .eventItem:hover {
   background-color: var(--oi-background-color-secondary);
+}
+
+/* Active state while this row's operation is open in the detail sidesheet
+   (Figma node 1454:26963) — a light blue tint across the full row. */
+.eventItemSelected,
+.eventItemSelected:hover {
+  background-color: var(--oi-background-color-info);
+}
+
+/* Overlays the shared connector line (.line, at wrap-relative left: 11px)
+   with a brand-color bar spanning the row whose operation is open in the
+   sidesheet, matching Figma node 1532:26841 exactly (2px wide, 45px tall). */
+.eventLineHighlight {
+  position: absolute;
+  top: 50%;
+  left: -21px;
+  width: 2px;
+  height: 45px;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background-color: var(--oi-border-color-focus);
 }
 
 .eventTime {

@@ -22,6 +22,9 @@ const PAGE_SIZE = 8;
 export interface TimelineProps {
   groups: ChangeHistoryGroup[];
   onSelectOperation: (operation: ChangeHistoryOperation) => void;
+  /** The operation currently open in the detail sidesheet, if any — its row
+   *  gets a highlighted segment on the connector line. */
+  selectedOperationId?: string | null;
   /** Expand every group regardless of user interaction (e.g. while a search
    *  filter is active, so matches are visible without an extra click). */
   forceExpandAll?: boolean;
@@ -35,7 +38,7 @@ export interface TimelineProps {
  * border). A single connector line runs behind every row, most of it
  * hidden behind each row's own opaque background.
  */
-export function Timeline({ groups, onSelectOperation, forceExpandAll = false }: TimelineProps) {
+export function Timeline({ groups, onSelectOperation, selectedOperationId = null, forceExpandAll = false }: TimelineProps) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [visibleCount, setVisibleCount] = useState(Math.min(PAGE_SIZE, groups.length));
   const [loadingMore, setLoadingMore] = useState(false);
@@ -105,7 +108,7 @@ export function Timeline({ groups, onSelectOperation, forceExpandAll = false }: 
               <div className={cx(styles.collapsible, isExpanded && styles.collapsibleExpanded)}>
                 <div className={styles.eventsBlock}>
                   {group.operations.map((op) => (
-                    <TimelineEventItem key={op.id} operation={op} onSelect={onSelectOperation} />
+                    <TimelineEventItem key={op.id} operation={op} selected={op.id === selectedOperationId} onSelect={onSelectOperation} />
                   ))}
                 </div>
               </div>
@@ -124,13 +127,16 @@ export function Timeline({ groups, onSelectOperation, forceExpandAll = false }: 
 
 function TimelineEventItem({
   operation,
+  selected,
   onSelect,
 }: {
   operation: ChangeHistoryOperation;
+  selected: boolean;
   onSelect: (operation: ChangeHistoryOperation) => void;
 }) {
   return (
-    <button type="button" className={styles.eventItem} onClick={() => onSelect(operation)}>
+    <button type="button" className={cx(styles.eventItem, selected && styles.eventItemSelected)} onClick={() => onSelect(operation)}>
+      {selected && <span className={styles.eventLineHighlight} aria-hidden="true" />}
       <span className={styles.eventTime}>{operation.time}</span>
       <span
         className={cx(styles.eventMarker, styles[DOT_CLASS_BY_TYPE[operation.type]])}

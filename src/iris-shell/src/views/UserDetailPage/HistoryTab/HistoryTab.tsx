@@ -513,6 +513,7 @@ export function HistoryTab() {
           <Timeline
             groups={filteredGroups}
             onSelectOperation={(op) => setSelectedOpId(op.id)}
+            selectedOperationId={selectedOpId}
             forceExpandAll={hasActiveFilters}
           />
         ) : (
