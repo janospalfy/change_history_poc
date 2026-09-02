@@ -33,9 +33,19 @@
 
 .divider {
   width: 1px;
-  height: var(--oi-spacing-l);
+  height: 22px;
   background-color: var(--oi-border-color-muted);
   flex-shrink: 0;
+}
+
+/* Groups the Add-filter/Export buttons apart from the search box (Figma's
+   toolbar gives this pairing 32px of separation vs. the toolbar's usual
+   12px gap between other items — the extra 20px here tops up that gap). */
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-m);
+  margin-left: calc(var(--oi-spacing-xxl) - var(--oi-spacing-m));
 }
 
 .filterButtonActive {
@@ -73,6 +83,17 @@
 
 .allChip {
   padding-inline: var(--oi-spacing-m);
+}
+
+/* Separates the quick-filter chips from the Date filter tag (Figma node
+   1532:26846) — 1px, 22px tall, with 12px clear space on each side (the
+   filter strip's own 8px gap plus 4px extra margin to top that up). */
+.chipDivider {
+  width: 1px;
+  height: 22px;
+  margin-inline: calc(var(--oi-spacing-m) - var(--oi-spacing-s));
+  background-color: var(--oi-border-color-muted);
+  flex-shrink: 0;
 }
 
 /* ---------- merged date filter tag (Figma node 1487:26333) ---------- */

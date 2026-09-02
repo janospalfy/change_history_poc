@@ -366,43 +366,45 @@ export function HistoryTab() {
           aria-label="Search history"
           className={styles.search}
         />
-        <Menu
-          ariaLabel="Add filter"
-          align="start"
-          items={addFilterMenuItems}
-          trigger={({ ref, onClick, expanded }) => (
-            <Tooltip label="Add filter">
-              <IconButton
-                ref={ref as Ref<HTMLButtonElement>}
-                icon="FunnelSimple"
-                ariaLabel="Add filter"
-                variant="secondary"
-                aria-haspopup="menu"
-                aria-expanded={expanded}
-                className={activeFilters.length > 0 ? styles.filterButtonActive : undefined}
-                onClick={onClick}
-              />
-            </Tooltip>
-          )}
-        />
-        <Menu
-          ariaLabel="Export"
-          align="end"
-          items={exportMenuItems}
-          trigger={({ ref, onClick, expanded }) => (
-            <Tooltip label="Export">
-              <IconButton
-                ref={ref as Ref<HTMLButtonElement>}
-                icon="Export"
-                ariaLabel="Export"
-                variant="secondary"
-                aria-haspopup="menu"
-                aria-expanded={expanded}
-                onClick={onClick}
-              />
-            </Tooltip>
-          )}
-        />
+        <div className={styles.toolbarActions}>
+          <Menu
+            ariaLabel="Add filter"
+            align="start"
+            items={addFilterMenuItems}
+            trigger={({ ref, onClick, expanded }) => (
+              <Tooltip label="Add filter">
+                <IconButton
+                  ref={ref as Ref<HTMLButtonElement>}
+                  icon="FunnelSimple"
+                  ariaLabel="Add filter"
+                  variant="secondary"
+                  aria-haspopup="menu"
+                  aria-expanded={expanded}
+                  className={activeFilters.length > 0 ? styles.filterButtonActive : undefined}
+                  onClick={onClick}
+                />
+              </Tooltip>
+            )}
+          />
+          <Menu
+            ariaLabel="Export"
+            align="end"
+            items={exportMenuItems}
+            trigger={({ ref, onClick, expanded }) => (
+              <Tooltip label="Export">
+                <IconButton
+                  ref={ref as Ref<HTMLButtonElement>}
+                  icon="Export"
+                  ariaLabel="Export"
+                  variant="secondary"
+                  aria-haspopup="menu"
+                  aria-expanded={expanded}
+                  onClick={onClick}
+                />
+              </Tooltip>
+            )}
+          />
+        </div>
       </div>
 
       <>
@@ -437,6 +439,7 @@ export function HistoryTab() {
                 </button>
               );
             })}
+            <span className={styles.chipDivider} aria-hidden="true" />
             <div className={cx(styles.dateFilterTag, dateRule !== null && styles.dateFilterTagActive)}>
               <Menu
                 ariaLabel="Filter by date"

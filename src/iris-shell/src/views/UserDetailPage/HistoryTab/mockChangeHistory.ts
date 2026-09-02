@@ -116,15 +116,19 @@ const GENERATED_ACTORS = [
   'isabella.clark (O1D.local)',
 ];
 
+// 'created' is deliberately absent here — Change History should show exactly
+// one Create event (the object's own creation), not one scattered through
+// every generated filler group. The sole Create lives in the hand-authored
+// groups below.
 const GENERATED_TYPES: { type: OperationType; label: string }[] = [
-  { type: 'created', label: 'Created' },
+  { type: 'changeUser', label: 'Update user' },
   { type: 'changeUser', label: 'Update user' },
   { type: 'changeUser', label: 'Update user' },
   { type: 'moved', label: 'Move user' },
   { type: 'groupMembershipChange', label: 'Group membership change' },
   { type: 'deprovision', label: 'Deprovision user' },
   { type: 'undoDeprovision', label: 'Undo deprovisioning' },
-  { type: 'created', label: 'Created' },
+  { type: 'groupMembershipChange', label: 'Group membership change' },
 ];
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
@@ -199,24 +203,6 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
   {
     date: 'November 13, 2026',
     operations: [
-      {
-        id: 'ID: 1-4102',
-        time: '09:12:03',
-        type: 'created',
-        label: 'Created',
-        actor: 'administrator (O1D.local)',
-        status: 'Completed',
-        date: 'November 13, 2026',
-        name: 'Peter Kim (O1D.local/Test OU)',
-        reason: '<none>',
-        requestedAt: 'November 13, 2026 09:12:03 UTC',
-        logonComputer: 'ActiveRolesVm.O1D.local',
-        logonSite: 'Default-First-Site-Name',
-        activeRolesAdmin: 'Yes',
-        targetObject: 'Peter Kim (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 13, 2026 09:12:03 UTC',
-        changes: [],
-      },
       {
         id: 'ID: 1-4098',
         time: '08:47:51',
@@ -333,8 +319,8 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
       {
         id: 'ID: 1-4022',
         time: '11:15:37',
-        type: 'created',
-        label: 'Created',
+        type: 'changeUser',
+        label: 'Update user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'November 4, 2026',
@@ -346,7 +332,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'Yes',
         targetObject: 'Sara Ito (O1D.local/Test OU)',
         lastUpdatedOn: 'November 4, 2026 11:15:37 UTC',
-        changes: [],
+        changes: [
+          {
+            property: 'Job Title',
+            attribute: '(title)',
+            changeNote: 'Replace value · Operation initiator',
+            oldValue: '<not set>',
+            newValue: 'Support Specialist',
+          },
+        ],
       },
       {
         id: 'ID: 1-4018',
@@ -373,6 +367,31 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
             newValue: '<not a member>',
           },
         ],
+      },
+    ],
+  },
+  {
+    // The object's own creation — the oldest, first-ever event, so it sits
+    // right before the generated filler groups take over further back.
+    date: 'October 30, 2026',
+    operations: [
+      {
+        id: 'ID: 1-4102',
+        time: '09:12:03',
+        type: 'created',
+        label: 'Create user',
+        actor: 'administrator (O1D.local)',
+        status: 'Completed',
+        date: 'October 30, 2026',
+        name: 'Peter Kim (O1D.local/Test OU)',
+        reason: '<none>',
+        requestedAt: 'October 30, 2026 09:12:03 UTC',
+        logonComputer: 'ActiveRolesVm.O1D.local',
+        logonSite: 'Default-First-Site-Name',
+        activeRolesAdmin: 'Yes',
+        targetObject: 'Peter Kim (O1D.local/Test OU)',
+        lastUpdatedOn: 'October 30, 2026 09:12:03 UTC',
+        changes: [],
       },
     ],
   },
@@ -430,6 +449,47 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
         lastUpdatedOn: 'November 13, 2026 08:40:03 UTC',
+        changes: [],
+      },
+    ],
+  },
+  {
+    date: 'November 10, 2026',
+    operations: [
+      {
+        id: 'ID: 1-5080',
+        time: '10:22:15',
+        type: 'created',
+        label: 'Create user',
+        actor: 'isabella.clark (O1D.local)',
+        status: 'Completed',
+        date: 'November 10, 2026',
+        name: 'Marketing Interns 2026 (O1D.local/Test OU)',
+        reason: 'New seasonal access group for marketing interns',
+        requestedAt: 'November 10, 2026 10:22:15 UTC',
+        logonComputer: 'WKS-ICLARK.O1D.local',
+        logonSite: 'Default-First-Site-Name',
+        activeRolesAdmin: 'No',
+        targetObject: 'Marketing Interns 2026 (O1D.local/Test OU)',
+        lastUpdatedOn: 'November 10, 2026 10:22:15 UTC',
+        changes: [],
+      },
+      {
+        id: 'ID: 1-5077',
+        time: '09:48:02',
+        type: 'created',
+        label: 'Create user',
+        actor: 'administrator (O1D.local)',
+        status: 'Completed',
+        date: 'November 10, 2026',
+        name: 'svc-reporting-automation (O1D.local/Test OU)',
+        reason: 'Created on behalf of the user for the reporting automation project',
+        requestedAt: 'November 10, 2026 09:48:02 UTC',
+        logonComputer: 'ActiveRolesVm.O1D.local',
+        logonSite: 'Default-First-Site-Name',
+        activeRolesAdmin: 'Yes',
+        targetObject: 'svc-reporting-automation (O1D.local/Test OU)',
+        lastUpdatedOn: 'November 10, 2026 09:48:02 UTC',
         changes: [],
       },
     ],
