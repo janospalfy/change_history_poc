@@ -116,13 +116,16 @@
   align-items: center;
   gap: var(--oi-spacing-xs);
   border: none;
-  border-right: var(--oi-border-width-default) solid var(--oi-border-color-default);
   background: none;
   padding-inline: var(--oi-spacing-m);
   font-size: var(--oi-text-body-s-font-size);
   line-height: var(--oi-text-body-s-line-height);
   font-family: inherit;
   color: var(--oi-content-color-tertiary);
+}
+
+.dateFilterSegment:not(:last-child) {
+  border-right: var(--oi-border-width-default) solid var(--oi-border-color-default);
 }
 
 .dateFilterSegment:first-child {
