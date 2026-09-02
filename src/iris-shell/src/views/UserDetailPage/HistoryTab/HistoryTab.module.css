@@ -1,7 +1,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--oi-spacing-m);
+  gap: var(--oi-spacing-l);
   height: 100%;
   min-height: 0;
 }
