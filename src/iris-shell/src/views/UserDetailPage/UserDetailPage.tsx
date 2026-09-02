@@ -35,7 +35,7 @@ const TABS = [
   { value: 'roles', label: 'Roles' },
   { value: 'authorization', label: 'Authorization' },
   { value: 'object', label: 'Object' },
-  { value: 'history', label: 'History' },
+  { value: 'history', label: 'History (12)' },
 ];
 
 export interface UserDetailPageProps {
