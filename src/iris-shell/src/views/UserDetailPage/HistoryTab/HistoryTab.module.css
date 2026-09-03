@@ -9,7 +9,7 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: var(--oi-spacing-m);
+  gap: var(--oi-spacing-l);
   flex-shrink: 0;
 }
 
@@ -36,19 +36,16 @@
   height: 22px;
   background-color: var(--oi-border-color-muted);
   flex-shrink: 0;
-  /* Bumps the toolbar's uniform 12px gap up to 16px on both sides of this
-     divider, between the segmented control and the search box. */
-  margin-inline: calc(var(--oi-spacing-l) - var(--oi-spacing-m));
 }
 
 /* Groups the Add-filter/Export buttons apart from the search box (Figma's
    toolbar gives this pairing 32px of separation vs. the toolbar's usual
-   12px gap between other items — the extra 20px here tops up that gap). */
+   16px gap between other items — the extra 16px here tops up that gap). */
 .toolbarActions {
   display: flex;
   align-items: center;
   gap: var(--oi-spacing-m);
-  margin-left: calc(var(--oi-spacing-xxl) - var(--oi-spacing-m));
+  margin-left: calc(var(--oi-spacing-xxl) - var(--oi-spacing-l));
 }
 
 .filterButtonActive {
