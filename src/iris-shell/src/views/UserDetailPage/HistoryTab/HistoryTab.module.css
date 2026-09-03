@@ -180,7 +180,7 @@
 .dateInput {
   border-radius: 0;
   cursor: pointer;
-  width: 146px;
+  width: 116px;
   padding-right: 18px;
   font-size: 12px;
 }
@@ -196,6 +196,13 @@
   margin: 0;
   opacity: 0;
   cursor: pointer;
+}
+
+/* The native clear ("x") button duplicates the pill's own visible Clear
+   button and renders as a stray, badly-aligned icon — drop it entirely. */
+.dateInput::-webkit-clear-button,
+.dateInput::-webkit-inner-spin-button {
+  display: none;
 }
 
 .dateInputWrapper {
@@ -240,6 +247,11 @@
   background-color: var(--oi-background-color-info);
 }
 
+.typeChipMembershipSelected {
+  border-color: var(--oi-border-color-badge-warning);
+  background-color: var(--oi-background-color-warning);
+}
+
 .typeChipRemoveSelected {
   border-color: var(--oi-border-color-badge-error);
   background-color: var(--oi-background-color-error);
@@ -277,6 +289,10 @@ body:global(.theme-dark) .typeChipDeprovisionSelected {
 
 .dotEdit {
   background-color: var(--oi-color-blue-600);
+}
+
+.dotMembership {
+  background-color: var(--oi-color-yellow-600);
 }
 
 .dotRemove {

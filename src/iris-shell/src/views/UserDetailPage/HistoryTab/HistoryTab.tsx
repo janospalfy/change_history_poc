@@ -44,7 +44,7 @@ function DateValueInput({
   return (
     <span className={styles.dateInputWrapper}>
       <input
-        type="datetime-local"
+        type="date"
         className={cx(styles.dateFilterSegment, styles.dateFilterValueSegment, styles.dateInput)}
         aria-label={ariaLabel}
         value={value}
@@ -59,12 +59,18 @@ function DateValueInput({
  *  fixed per type, matching the Figma design (not user-configurable). Each
  *  chip is a broad bucket covering one or more granular operation types. */
 const OPERATION_TYPES = [
-  { value: 'create', label: 'Create', dotClassName: 'dotCreate', selectedClassName: 'typeChipCreateSelected' },
   { value: 'edit', label: 'Update', dotClassName: 'dotEdit', selectedClassName: 'typeChipEditSelected' },
+  {
+    value: 'membership',
+    label: 'Membership',
+    dotClassName: 'dotMembership',
+    selectedClassName: 'typeChipMembershipSelected',
+  },
+  { value: 'create', label: 'Create', dotClassName: 'dotCreate', selectedClassName: 'typeChipCreateSelected' },
   { value: 'remove', label: 'Delete', dotClassName: 'dotRemove', selectedClassName: 'typeChipRemoveSelected' },
   {
     value: 'deprovision',
-    label: 'Deprovision',
+    label: 'Deprovisioning',
     dotClassName: 'dotDeprovision',
     selectedClassName: 'typeChipDeprovisionSelected',
   },
@@ -76,7 +82,7 @@ const BUCKET_BY_TYPE: Record<OperationType, (typeof OPERATION_TYPES)[number]['va
   changeUser: 'edit',
   renamed: 'edit',
   moved: 'edit',
-  groupMembershipChange: 'edit',
+  groupMembershipChange: 'membership',
   deprovision: 'deprovision',
   undoDeprovision: 'deprovision',
   deleted: 'remove',
@@ -169,12 +175,13 @@ const DATE_RULE_LABELS: Record<DateRule, string> = {
   exactly: 'is',
 };
 
-/** yyyy-MM-DDTHH:mm (local time), used as the default value for the
- *  before/after/exactly/between date-time inputs. */
+/** yyyy-MM-DD (local time), used as the default value for the
+ *  before/after/exactly/between date inputs — filtering only ever compares
+ *  whole days, so there's no meaningful time-of-day to pick. */
 function toDatetimeLocal(timestamp: number): string {
   const d = new Date(timestamp);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 /** Everything derived from a single operations list (dataset-dependent, so
