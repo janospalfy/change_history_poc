@@ -409,37 +409,41 @@ export function HistoryTab() {
 
       <>
         <div className={styles.filterStrip} role="group" aria-label="Filter by operation type">
-            <button
-              type="button"
-              className={cx(
-                styles.typeChip,
-                styles.allChip,
-                activeTypes.length === 0 && cx(styles.typeChipSelected, styles.allChipSelected),
-              )}
-              aria-pressed={activeTypes.length === 0}
-              onClick={() => setActiveTypes([])}
-            >
-              All
-            </button>
-            {OPERATION_TYPES.map((type) => {
-              const selected = activeTypes.includes(type.value);
-              return (
+            {view === 'changeHistory' && (
+              <>
                 <button
-                  key={type.value}
                   type="button"
                   className={cx(
                     styles.typeChip,
-                    selected && cx(styles.typeChipSelected, styles[type.selectedClassName]),
+                    styles.allChip,
+                    activeTypes.length === 0 && cx(styles.typeChipSelected, styles.allChipSelected),
                   )}
-                  aria-pressed={selected}
-                  onClick={() => toggleType(type.value)}
+                  aria-pressed={activeTypes.length === 0}
+                  onClick={() => setActiveTypes([])}
                 >
-                  <span className={cx(styles.dot, styles[type.dotClassName])} aria-hidden="true" />
-                  {type.label}
+                  All
                 </button>
-              );
-            })}
-            <span className={styles.chipDivider} aria-hidden="true" />
+                {OPERATION_TYPES.map((type) => {
+                  const selected = activeTypes.includes(type.value);
+                  return (
+                    <button
+                      key={type.value}
+                      type="button"
+                      className={cx(
+                        styles.typeChip,
+                        selected && cx(styles.typeChipSelected, styles[type.selectedClassName]),
+                      )}
+                      aria-pressed={selected}
+                      onClick={() => toggleType(type.value)}
+                    >
+                      <span className={cx(styles.dot, styles[type.dotClassName])} aria-hidden="true" />
+                      {type.label}
+                    </button>
+                  );
+                })}
+                <span className={styles.chipDivider} aria-hidden="true" />
+              </>
+            )}
             <div className={cx(styles.dateFilterTag, dateRule !== null && styles.dateFilterTagActive)}>
               <Menu
                 ariaLabel="Filter by date"
