@@ -121,14 +121,15 @@ const GENERATED_ACTORS = [
 // every generated filler group. The sole Create lives in the hand-authored
 // groups below.
 const GENERATED_TYPES: { type: OperationType; label: string }[] = [
-  { type: 'changeUser', label: 'Update user' },
-  { type: 'changeUser', label: 'Update user' },
-  { type: 'changeUser', label: 'Update user' },
+  { type: 'changeUser', label: 'Modify user' },
+  { type: 'changeUser', label: 'Modify user' },
+  { type: 'changeUser', label: 'Modify user' },
   { type: 'moved', label: 'Move user' },
-  { type: 'groupMembershipChange', label: 'Group membership change' },
+  { type: 'renamed', label: 'Rename user' },
+  { type: 'groupMembershipChange', label: 'Add group member' },
   { type: 'deprovision', label: 'Deprovision user' },
   { type: 'undoDeprovision', label: 'Undo deprovisioning' },
-  { type: 'groupMembershipChange', label: 'Group membership change' },
+  { type: 'groupMembershipChange', label: 'Remove group member' },
 ];
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
@@ -164,15 +165,38 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
     // Create/Delete/Undo deprovision operations don't show a Properties
     // changed section in the sidesheet — they act on the whole object, not
     // individual properties.
-    changes: type === 'created' || type === 'undoDeprovision' || type === 'deleted' ? [] : [
-      {
-        property: 'Description',
-        attribute: '(description)',
-        changeNote: 'Replace value · Operation initiator',
-        oldValue: `Value ${opId - 1}`,
-        newValue: `Value ${opId}`,
-      },
-    ],
+    changes:
+      type === 'created' || type === 'undoDeprovision' || type === 'deleted'
+        ? []
+        : type === 'groupMembershipChange'
+          ? [
+              {
+                property: 'Member Of',
+                attribute: '(memberOf)',
+                changeNote: `${label === 'Remove group member' ? 'Remove' : 'Add'} value · Operation initiator`,
+                oldValue: label === 'Remove group member' ? `Group-${opId}` : '<not a member>',
+                newValue: label === 'Remove group member' ? '<not a member>' : `Group-${opId}`,
+              },
+            ]
+          : type === 'renamed'
+            ? [
+                {
+                  property: 'Full Name',
+                  attribute: '(cn)',
+                  changeNote: 'Replace value · Operation initiator',
+                  oldValue: `user-${opId - 1}`,
+                  newValue: `user-${opId}`,
+                },
+              ]
+            : [
+              {
+                property: 'Description',
+                attribute: '(description)',
+                changeNote: 'Replace value · Operation initiator',
+                oldValue: `Value ${opId - 1}`,
+                newValue: `Value ${opId}`,
+              },
+            ],
   };
 }
 
@@ -207,7 +231,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4098',
         time: '08:47:51',
         type: 'changeUser',
-        label: 'Update user',
+        label: 'Modify user',
         actor: 'sara.ito (O1D.local)',
         status: 'Pending',
         date: 'September 2, 2026',
@@ -238,7 +262,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4061',
         time: '15:02:44',
         type: 'changeUser',
-        label: 'Update user',
+        label: 'Modify user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'August 29, 2026',
@@ -320,7 +344,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4022',
         time: '11:15:37',
         type: 'changeUser',
-        label: 'Update user',
+        label: 'Modify user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'August 20, 2026',
@@ -346,7 +370,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4018',
         time: '09:30:21',
         type: 'groupMembershipChange',
-        label: 'Group membership change',
+        label: 'Remove group member',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'August 20, 2026',
@@ -411,7 +435,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         id: 'ID: 1-5104',
         time: '08:55:12',
         type: 'changeUser',
-        label: 'Update user',
+        label: 'Modify user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
         date: 'September 1, 2026',
@@ -553,7 +577,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         id: 'ID: 1-5055',
         time: '09:05:30',
         type: 'changeUser',
-        label: 'Update user',
+        label: 'Modify user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
         date: 'August 25, 2026',

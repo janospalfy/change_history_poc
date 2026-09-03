@@ -18,7 +18,7 @@ const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
   changeUser: 'dotEdit',
   renamed: 'dotEdit',
   moved: 'dotEdit',
-  groupMembershipChange: 'dotEdit',
+  groupMembershipChange: 'dotMembership',
   deprovision: 'dotDeprovision',
   undoDeprovision: 'dotDeprovision',
   deleted: 'dotRemove',
