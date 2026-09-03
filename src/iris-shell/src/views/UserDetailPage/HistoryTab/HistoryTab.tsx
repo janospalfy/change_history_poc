@@ -369,7 +369,7 @@ export function HistoryTab() {
         <div className={styles.toolbarActions}>
           <Menu
             ariaLabel="Add filter"
-            align="start"
+            align="end"
             items={addFilterMenuItems}
             trigger={({ ref, onClick, expanded }) => (
               <Tooltip label="Add filter">
