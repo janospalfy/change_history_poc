@@ -255,8 +255,8 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
             property: 'E-Mail Address',
             attribute: '(mail)',
             changeNote: 'Replace value · Operation initiator',
-            oldValue: '<not set>',
-            newValue: 'peter@saasii.io',
+            oldValue: 'noah.kim@saasii.io',
+            newValue: 'noa.kim@saasii.io',
           },
           {
             property: 'User Password',

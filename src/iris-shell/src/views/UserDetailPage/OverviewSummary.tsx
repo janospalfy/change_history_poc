@@ -22,7 +22,7 @@ export function OverviewSummary({ user }: OverviewSummaryProps) {
         <div className={styles.identityPanel}>
           <Avatar src={user.avatarUrl} name={user.name} size="l" className={styles.overviewAvatar} />
           <h2 className={styles.identityName}>{user.name}</h2>
-          <p className={styles.identityEmail}>{user.email}</p>
+          <p className={styles.identityEmail}>{details.email}</p>
           <div className={styles.badges}>
             <span className={styles.badge}>{details.type}</span>
             <span className={`${styles.badge} ${styles.badgeActive}`}>Active</span>
