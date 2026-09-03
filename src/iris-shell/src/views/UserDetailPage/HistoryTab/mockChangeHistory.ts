@@ -177,10 +177,10 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
 }
 
 /** Deterministically generates `count` older date groups, each with 1-3
- *  operations, going backward from October 2026. */
+ *  operations, going backward from August 2026. */
 function generateOlderGroups(count: number): ChangeHistoryGroup[] {
   const groups: ChangeHistoryGroup[] = [];
-  const cursor = new Date(2026, 9, 30); // October 30, 2026 — just before the hand-authored groups
+  const cursor = new Date(2026, 7, 1); // August 1, 2026 — just before the hand-authored groups
   let seed = 0;
 
   for (let i = 0; i < count; i++) {
@@ -201,7 +201,7 @@ function generateOlderGroups(count: number): ChangeHistoryGroup[] {
 /** Mock change-history data for the History tab timeline (POC only). */
 export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
   {
-    date: 'November 13, 2026',
+    date: 'September 2, 2026',
     operations: [
       {
         id: 'ID: 1-4098',
@@ -210,15 +210,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Update user',
         actor: 'sara.ito (O1D.local)',
         status: 'Pending',
-        date: 'November 13, 2026',
+        date: 'September 2, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'November 13, 2026 08:47:51 UTC',
+        requestedAt: 'September 2, 2026 08:47:51 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 13, 2026 08:47:51 UTC',
+        lastUpdatedOn: 'September 2, 2026 08:47:51 UTC',
         changes: [
           {
             property: 'Job Title',
@@ -232,7 +232,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
     ],
   },
   {
-    date: 'November 5, 2026',
+    date: 'August 29, 2026',
     operations: [
       {
         id: 'ID: 1-4061',
@@ -241,15 +241,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Update user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
-        date: 'November 5, 2026',
+        date: 'August 29, 2026',
         name: 'My OU (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'November 5, 2026 15:02:44 UTC',
+        requestedAt: 'August 29, 2026 15:02:44 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'Peter Kim (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 5, 2026 15:02:44 UTC',
+        lastUpdatedOn: 'August 29, 2026 15:02:44 UTC',
         changes: [
           {
             property: 'E-Mail Address',
@@ -274,15 +274,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Deprovision user',
         actor: 'peter.kim (O1D.local)',
         status: 'Canceled',
-        date: 'November 5, 2026',
+        date: 'August 29, 2026',
         name: 'Contractor Temp (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'November 5, 2026 14:50:19 UTC',
+        requestedAt: 'August 29, 2026 14:50:19 UTC',
         logonComputer: 'ActiveRolesVm2.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Contractor Temp (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 5, 2026 14:50:19 UTC',
+        lastUpdatedOn: 'August 29, 2026 14:50:19 UTC',
         changes: [
           {
             property: 'Account Status',
@@ -300,21 +300,21 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Delete user',
         actor: 'administrator (O1D.local)',
         status: 'Denied',
-        date: 'November 5, 2026',
+        date: 'August 29, 2026',
         name: 'svc-backup (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'November 5, 2026 14:42:12 UTC',
+        requestedAt: 'August 29, 2026 14:42:12 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'svc-backup (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 5, 2026 14:42:12 UTC',
+        lastUpdatedOn: 'August 29, 2026 14:42:12 UTC',
         changes: [],
       },
     ],
   },
   {
-    date: 'November 4, 2026',
+    date: 'August 20, 2026',
     operations: [
       {
         id: 'ID: 1-4022',
@@ -323,15 +323,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Update user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
-        date: 'November 4, 2026',
+        date: 'August 20, 2026',
         name: 'Sara Ito (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'November 4, 2026 11:15:37 UTC',
+        requestedAt: 'August 20, 2026 11:15:37 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'Sara Ito (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 4, 2026 11:15:37 UTC',
+        lastUpdatedOn: 'August 20, 2026 11:15:37 UTC',
         changes: [
           {
             property: 'Job Title',
@@ -349,15 +349,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Group membership change',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
-        date: 'November 4, 2026',
+        date: 'August 20, 2026',
         name: 'Peter Kim (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'November 4, 2026 09:30:21 UTC',
+        requestedAt: 'August 20, 2026 09:30:21 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'IT Support (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 4, 2026 09:30:21 UTC',
+        lastUpdatedOn: 'August 20, 2026 09:30:21 UTC',
         changes: [
           {
             property: 'Member Of',
@@ -373,7 +373,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
   {
     // The object's own creation — the oldest, first-ever event, so it sits
     // right before the generated filler groups take over further back.
-    date: 'October 30, 2026',
+    date: 'August 1, 2026',
     operations: [
       {
         id: 'ID: 1-4102',
@@ -382,15 +382,15 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         label: 'Create user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
-        date: 'October 30, 2026',
+        date: 'August 1, 2026',
         name: 'Peter Kim (O1D.local/Test OU)',
         reason: '<none>',
-        requestedAt: 'October 30, 2026 09:12:03 UTC',
+        requestedAt: 'August 1, 2026 09:12:03 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'Peter Kim (O1D.local/Test OU)',
-        lastUpdatedOn: 'October 30, 2026 09:12:03 UTC',
+        lastUpdatedOn: 'August 1, 2026 09:12:03 UTC',
         changes: [],
       },
     ],
@@ -405,7 +405,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
  *  changes made to their account. */
 export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
   {
-    date: 'November 13, 2026',
+    date: 'September 1, 2026',
     operations: [
       {
         id: 'ID: 1-5104',
@@ -414,15 +414,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Update user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
-        date: 'November 13, 2026',
+        date: 'September 1, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Self-service password reset',
-        requestedAt: 'November 13, 2026 08:55:12 UTC',
+        requestedAt: 'September 1, 2026 08:55:12 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 13, 2026 08:55:12 UTC',
+        lastUpdatedOn: 'September 1, 2026 08:55:12 UTC',
         changes: [
           {
             property: 'User Password',
@@ -440,21 +440,21 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Undo deprovisioning',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
-        date: 'November 13, 2026',
+        date: 'September 1, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Self-service account unlock',
-        requestedAt: 'November 13, 2026 08:40:03 UTC',
+        requestedAt: 'September 1, 2026 08:40:03 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 13, 2026 08:40:03 UTC',
+        lastUpdatedOn: 'September 1, 2026 08:40:03 UTC',
         changes: [],
       },
     ],
   },
   {
-    date: 'November 10, 2026',
+    date: 'August 29, 2026',
     operations: [
       {
         id: 'ID: 1-5080',
@@ -463,15 +463,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Create user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
-        date: 'November 10, 2026',
+        date: 'August 29, 2026',
         name: 'Marketing Interns 2026 (O1D.local/Test OU)',
         reason: 'New seasonal access group for marketing interns',
-        requestedAt: 'November 10, 2026 10:22:15 UTC',
+        requestedAt: 'August 29, 2026 10:22:15 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Marketing Interns 2026 (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 10, 2026 10:22:15 UTC',
+        lastUpdatedOn: 'August 29, 2026 10:22:15 UTC',
         changes: [],
       },
       {
@@ -481,21 +481,21 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Create user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
-        date: 'November 10, 2026',
+        date: 'August 29, 2026',
         name: 'svc-reporting-automation (O1D.local/Test OU)',
         reason: 'Created on behalf of the user for the reporting automation project',
-        requestedAt: 'November 10, 2026 09:48:02 UTC',
+        requestedAt: 'August 29, 2026 09:48:02 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'svc-reporting-automation (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 10, 2026 09:48:02 UTC',
+        lastUpdatedOn: 'August 29, 2026 09:48:02 UTC',
         changes: [],
       },
     ],
   },
   {
-    date: 'November 6, 2026',
+    date: 'August 25, 2026',
     operations: [
       {
         id: 'ID: 1-5061',
@@ -504,15 +504,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Add user to VPN Users group',
         actor: 'isabella.clark (O1D.local)',
         status: 'Pending',
-        date: 'November 6, 2026',
+        date: 'August 25, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Access request approval',
-        requestedAt: 'November 6, 2026 17:20:47 UTC',
+        requestedAt: 'August 25, 2026 17:20:47 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'VPN Users (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 6, 2026 17:20:47 UTC',
+        lastUpdatedOn: 'August 25, 2026 17:20:47 UTC',
         changes: [
           {
             property: 'Member Of',
@@ -530,15 +530,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Remove user from Legacy Contractors group',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
-        date: 'November 6, 2026',
+        date: 'August 25, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Access review cleanup',
-        requestedAt: 'November 6, 2026 17:45:02 UTC',
+        requestedAt: 'August 25, 2026 17:45:02 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Legacy Contractors (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 6, 2026 17:45:02 UTC',
+        lastUpdatedOn: 'August 25, 2026 17:45:02 UTC',
         changes: [
           {
             property: 'Member Of',
@@ -556,15 +556,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Update user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
-        date: 'November 6, 2026',
+        date: 'August 25, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Self-service profile update',
-        requestedAt: 'November 6, 2026 09:05:30 UTC',
+        requestedAt: 'August 25, 2026 09:05:30 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
-        lastUpdatedOn: 'November 6, 2026 09:05:30 UTC',
+        lastUpdatedOn: 'August 25, 2026 09:05:30 UTC',
         changes: [
           {
             property: 'Mobile Phone',
@@ -578,7 +578,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
     ],
   },
   {
-    date: 'October 30, 2026',
+    date: 'August 17, 2026',
     operations: [
       {
         id: 'ID: 1-5030',
@@ -587,15 +587,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Deprovision user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Denied',
-        date: 'October 30, 2026',
+        date: 'August 17, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Self-service account deactivation request',
-        requestedAt: 'October 30, 2026 13:12:09 UTC',
+        requestedAt: 'August 17, 2026 13:12:09 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Isabella Clark (O1D.local/Test OU)',
-        lastUpdatedOn: 'October 30, 2026 13:12:09 UTC',
+        lastUpdatedOn: 'August 17, 2026 13:12:09 UTC',
         changes: [
           {
             property: 'Account Status',
@@ -613,21 +613,21 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Delete user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
-        date: 'October 30, 2026',
+        date: 'August 17, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Self-service revoke expired access request',
-        requestedAt: 'October 30, 2026 10:04:47 UTC',
+        requestedAt: 'August 17, 2026 10:04:47 UTC',
         logonComputer: 'WKS-ICLARK.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Access Request #4821 (O1D.local/Test OU)',
-        lastUpdatedOn: 'October 30, 2026 10:04:47 UTC',
+        lastUpdatedOn: 'August 17, 2026 10:04:47 UTC',
         changes: [],
       },
     ],
   },
   {
-    date: 'October 22, 2026',
+    date: 'August 9, 2026',
     operations: [
       {
         id: 'ID: 1-5017',
@@ -636,21 +636,21 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Delete user',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
-        date: 'October 22, 2026',
+        date: 'August 9, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Admin removed unused MFA device',
-        requestedAt: 'October 22, 2026 16:38:29 UTC',
+        requestedAt: 'August 9, 2026 16:38:29 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
         targetObject: 'MFA Device - iPhone 14 (O1D.local/Test OU)',
-        lastUpdatedOn: 'October 22, 2026 16:38:29 UTC',
+        lastUpdatedOn: 'August 9, 2026 16:38:29 UTC',
         changes: [],
       },
     ],
   },
   {
-    date: 'October 14, 2026',
+    date: 'August 1, 2026',
     operations: [
       {
         id: 'ID: 1-5009',
@@ -659,15 +659,15 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         label: 'Delete user',
         actor: 'peter.kim (O1D.local)',
         status: 'Denied',
-        date: 'October 14, 2026',
+        date: 'August 1, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
         reason: 'Helpdesk removed stale access token on request',
-        requestedAt: 'October 14, 2026 11:52:03 UTC',
+        requestedAt: 'August 1, 2026 11:52:03 UTC',
         logonComputer: 'ActiveRolesVm2.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'No',
         targetObject: 'Access Token - CI Pipeline (O1D.local/Test OU)',
-        lastUpdatedOn: 'October 14, 2026 11:52:03 UTC',
+        lastUpdatedOn: 'August 1, 2026 11:52:03 UTC',
         changes: [],
       },
     ],

@@ -266,6 +266,10 @@
   background-color: var(--oi-color-blue-600);
 }
 
+.dotMembership {
+  background-color: var(--oi-color-yellow-600);
+}
+
 .dotRemove {
   background-color: var(--oi-color-red-600);
 }
