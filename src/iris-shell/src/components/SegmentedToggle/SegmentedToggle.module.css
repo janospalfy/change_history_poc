@@ -13,7 +13,7 @@
   left: 0;
   width: 0;
   height: 100%;
-  border-radius: var(--oi-border-radius-l);
+  border-radius: var(--oi-border-radius-default);
   background-color: var(--oi-background-color-secondary);
   transform: translateX(0);
   transition:
@@ -37,7 +37,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--oi-border-radius-l);
+  border-radius: var(--oi-border-radius-default);
   background-color: transparent;
   color: var(--oi-content-color-tertiary);
   padding-inline: var(--oi-spacing-m);
