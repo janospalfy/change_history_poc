@@ -126,10 +126,10 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
   { type: 'changeUser', label: 'Modify user' },
   { type: 'moved', label: 'Move user' },
   { type: 'renamed', label: 'Rename user' },
-  { type: 'groupMembershipChange', label: 'Add group member' },
+  { type: 'groupMembershipChange', label: 'Add group membership' },
   { type: 'deprovision', label: 'Deprovision user' },
   { type: 'undoDeprovision', label: 'Undo deprovisioning' },
-  { type: 'groupMembershipChange', label: 'Remove group member' },
+  { type: 'groupMembershipChange', label: 'Remove group membership' },
 ];
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
@@ -173,9 +173,9 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
               {
                 property: 'Member Of',
                 attribute: '(memberOf)',
-                changeNote: `${label === 'Remove group member' ? 'Remove' : 'Add'} value · Operation initiator`,
-                oldValue: label === 'Remove group member' ? `Group-${opId}` : '<not a member>',
-                newValue: label === 'Remove group member' ? '<not a member>' : `Group-${opId}`,
+                changeNote: `${label === 'Remove group membership' ? 'Remove' : 'Add'} value · Operation initiator`,
+                oldValue: label === 'Remove group membership' ? `Group-${opId}` : '<not a member>',
+                newValue: label === 'Remove group membership' ? '<not a member>' : `Group-${opId}`,
               },
             ]
           : type === 'renamed'
@@ -370,7 +370,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4018',
         time: '09:30:21',
         type: 'groupMembershipChange',
-        label: 'Remove group member',
+        label: 'Remove group membership',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'August 20, 2026',
