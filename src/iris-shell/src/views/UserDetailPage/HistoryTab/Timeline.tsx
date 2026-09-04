@@ -28,6 +28,10 @@ export interface TimelineProps {
   /** Expand every group regardless of user interaction (e.g. while a search
    *  filter is active, so matches are visible without an extra click). */
   forceExpandAll?: boolean;
+  /** Change History rows show who made the change (actor). User Activity's
+   *  actor is always the current user, so its rows show the target object
+   *  instead — the varied, actually-informative part of that story. */
+  showTargetObject?: boolean;
 }
 
 /**
@@ -38,7 +42,13 @@ export interface TimelineProps {
  * border). A single connector line runs behind every row, most of it
  * hidden behind each row's own opaque background.
  */
-export function Timeline({ groups, onSelectOperation, selectedOperationId = null, forceExpandAll = false }: TimelineProps) {
+export function Timeline({
+  groups,
+  onSelectOperation,
+  selectedOperationId = null,
+  forceExpandAll = false,
+  showTargetObject = false,
+}: TimelineProps) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [visibleCount, setVisibleCount] = useState(Math.min(PAGE_SIZE, groups.length));
   const [loadingMore, setLoadingMore] = useState(false);
@@ -108,7 +118,13 @@ export function Timeline({ groups, onSelectOperation, selectedOperationId = null
               <div className={cx(styles.collapsible, isExpanded && styles.collapsibleExpanded)}>
                 <div className={styles.eventsBlock}>
                   {group.operations.map((op) => (
-                    <TimelineEventItem key={op.id} operation={op} selected={op.id === selectedOperationId} onSelect={onSelectOperation} />
+                    <TimelineEventItem
+                      key={op.id}
+                      operation={op}
+                      selected={op.id === selectedOperationId}
+                      onSelect={onSelectOperation}
+                      showTargetObject={showTargetObject}
+                    />
                   ))}
                 </div>
               </div>
@@ -129,10 +145,12 @@ function TimelineEventItem({
   operation,
   selected,
   onSelect,
+  showTargetObject,
 }: {
   operation: ChangeHistoryOperation;
   selected: boolean;
   onSelect: (operation: ChangeHistoryOperation) => void;
+  showTargetObject: boolean;
 }) {
   return (
     <button type="button" className={cx(styles.eventItem, selected && styles.eventItemSelected)} onClick={() => onSelect(operation)}>
@@ -145,7 +163,10 @@ function TimelineEventItem({
       <span className={styles.eventLabel}>{operation.label}</span>
       <div className={styles.eventDetails}>
         <span className={styles.eventId}>{operation.id}</span>
-        <span className={styles.eventActor}>{operation.actor}</span>
+        <span className={styles.eventActor} title={showTargetObject ? 'Target object' : 'Requested by'}>
+          {showTargetObject && <span className={styles.eventActorLabel}>Target:</span>}
+          <span className={styles.eventActorValue}>{showTargetObject ? operation.targetObject : operation.actor}</span>
+        </span>
         <Badge className={styles.eventBadge}>{operation.status}</Badge>
       </div>
       <span className={styles.eventChevron} aria-hidden="true">

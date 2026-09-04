@@ -191,7 +191,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
           </div>
         )}
         {tab === 'memberships' && <UserMemberships user={user} onMembershipChange={(groupMembershipIds) => updateUser(user.id, { groupMembershipIds })} />}
-        {tab === 'history' && <HistoryTab />}
+        {tab === 'history' && <HistoryTab subjectName={user.name} />}
         {tab !== 'overview' && tab !== 'general' && tab !== 'user-details' && tab !== 'memberships' && tab !== 'history' && (
           <Card title={TABS.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>

@@ -184,7 +184,7 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
             onMembershipChange={(groupMembershipIds) => updateObjectDetails(object.id, { groupMembershipIds })}
           />
         ) : tab === 'history' ? (
-          <HistoryTab />
+          <HistoryTab subjectName={object.name} />
         ) : (
           <Card title={tabs.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>

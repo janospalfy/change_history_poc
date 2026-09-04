@@ -298,13 +298,6 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
             oldValue: 'noah.kim@saasii.io',
             newValue: 'noa.kim@saasii.io',
           },
-          {
-            property: 'User Password',
-            attribute: '(edsaPassword)',
-            changeNote: 'Replace value · Operation initiator',
-            oldValue: '********',
-            newValue: '********',
-          },
         ],
       },
       {

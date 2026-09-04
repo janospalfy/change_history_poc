@@ -214,7 +214,7 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
  * History / User Activity toggle, search + export + filter toolbar, and
  * (further down the audit) the grouped timeline and operation sidesheet.
  */
-export function HistoryTab() {
+export function HistoryTab({ subjectName }: { subjectName: string }) {
   const [view, setView] = useState('changeHistory');
   const [query, setQuery] = useState('');
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
@@ -227,9 +227,29 @@ export function HistoryTab() {
   const filterIdRef = useRef(0);
 
   const activeDataset = view === 'changeHistory' ? MOCK_CHANGE_HISTORY : MOCK_USER_ACTIVITY;
+  // Change History is about things done TO the current object, so its Name
+  // and Target object fields always reflect the subject being viewed. User
+  // Activity is about things the current user DID to other (varied) objects,
+  // so there the subject instead always appears as the actor ("Requested
+  // by") — Name is set to match Target object (whichever varied object the
+  // activity was on), not the actor's own identity.
+  const subjectLabel = `${subjectName} (O1D.local/Test OU)`;
+  const subjectActor = `${subjectName.toLowerCase().replace(/\s+/g, '.')} (O1D.local)`;
+  const displayDataset = useMemo(
+    () =>
+      activeDataset.map((group) => ({
+        ...group,
+        operations: group.operations.map((op) =>
+          view === 'changeHistory'
+            ? { ...op, name: subjectLabel, targetObject: subjectLabel }
+            : { ...op, actor: subjectActor, name: op.targetObject },
+        ),
+      })),
+    [activeDataset, view, subjectLabel, subjectActor],
+  );
   const { allOperations, latestDate, latestDateInput, filterFields } = useMemo(
-    () => buildDatasetContext(activeDataset),
-    [activeDataset],
+    () => buildDatasetContext(displayDataset),
+    [displayDataset],
   );
 
   // Switching views swaps the whole dataset out from under any active
@@ -261,7 +281,7 @@ export function HistoryTab() {
   const relativeCutoff =
     latestDate - (DATE_RELATIVE_OPTIONS.find((f) => f.id === dateRelativeId)?.days ?? 0) * 86_400_000;
   const filteredGroups = useMemo(() => {
-    return activeDataset.map((group) => ({
+    return displayDataset.map((group) => ({
       ...group,
       operations: group.operations.filter((op) => {
         const matchesQuery =
@@ -287,7 +307,7 @@ export function HistoryTab() {
         return matchesQuery && matchesType && matchesFilters && matchesDate;
       }),
     })).filter((group) => group.operations.length > 0);
-  }, [activeDataset, trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromTime, toTime]);
+  }, [displayDataset, trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromTime, toTime]);
 
   const toggleType = (value: string) => {
     setActiveTypes((prev) =>
@@ -540,6 +560,7 @@ export function HistoryTab() {
             onSelectOperation={(op) => setSelectedOpId(op.id)}
             selectedOperationId={selectedOpId}
             forceExpandAll={hasActiveFilters}
+            showTargetObject={view === 'userActivity'}
           />
         ) : (
           <p className={styles.placeholder}>No operations match the current search and filters.</p>
