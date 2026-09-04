@@ -134,11 +134,24 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
 
+// Named overrides for specific generated group-membership operations, so a
+// handful of filler rows read as real stories instead of generic placeholders.
+const GENERATED_GROUP_NAME_OVERRIDES: Record<number, string> = {
+  3026: 'IT Security', // July 5, 2026 — Remove group membership
+};
+
+// Actor overrides for specific generated operations, e.g. to avoid a
+// misleading actor for a particular story.
+const GENERATED_ACTOR_OVERRIDES: Record<number, string> = {
+  3062: 'administrator (O1D.local)', // May 30, 2026 — Remove group membership
+};
+
 function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistoryOperation {
   const { type, label } = GENERATED_TYPES[seed % GENERATED_TYPES.length];
-  const actor = GENERATED_ACTORS[seed % GENERATED_ACTORS.length];
-  const status = GENERATED_STATUSES[seed % GENERATED_STATUSES.length];
   const opId = 3000 + seed;
+  const actor = GENERATED_ACTOR_OVERRIDES[opId] ?? GENERATED_ACTORS[seed % GENERATED_ACTORS.length];
+  const status = GENERATED_STATUSES[seed % GENERATED_STATUSES.length];
+  const groupName = GENERATED_GROUP_NAME_OVERRIDES[opId] ?? `Group-${opId}`;
   const hour = 8 + (seed % 10);
   const minute = (seed * 7) % 60;
   const second = (seed * 13) % 60;
@@ -160,7 +173,10 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
     logonComputer: seed % 2 === 0 ? 'ActiveRolesVm.O1D.local' : 'ActiveRolesVm2.O1D.local',
     logonSite: 'Default-First-Site-Name',
     activeRolesAdmin: seed % 3 === 0 ? 'Yes' : 'No',
-    targetObject: `user-${opId} (O1D.local/Test OU)`,
+    targetObject:
+      type === 'groupMembershipChange'
+        ? `${groupName} (O1D.local/Test OU)`
+        : `user-${opId} (O1D.local/Test OU)`,
     lastUpdatedOn: requestedAt,
     // Create/Delete/Undo deprovision operations don't show a Properties
     // changed section in the sidesheet — they act on the whole object, not
@@ -174,8 +190,8 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
                 property: 'Member Of',
                 attribute: '(memberOf)',
                 changeNote: `${label === 'Remove group membership' ? 'Remove' : 'Add'} value · Operation initiator`,
-                oldValue: label === 'Remove group membership' ? `Group-${opId}` : '<not a member>',
-                newValue: label === 'Remove group membership' ? '<not a member>' : `Group-${opId}`,
+                oldValue: label === 'Remove group membership' ? groupName : '<not a member>',
+                newValue: label === 'Remove group membership' ? '<not a member>' : groupName,
               },
             ]
           : type === 'renamed'
