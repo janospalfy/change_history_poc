@@ -162,6 +162,13 @@
   white-space: nowrap;
 }
 
+/* Decorative checkbox shown in a filter value menu row \u2014 the row's own
+   click handler toggles the value, so the checkbox itself must not
+   intercept pointer/focus events. */
+.menuCheckbox {
+  pointer-events: none;
+}
+
 /* Native date picker embedded in a date-filter chip. Borderless/transparent
    so it blends into the chip body; the empty state shows the browser's own
    muted placeholder (e.g. mm/dd/yyyy). */

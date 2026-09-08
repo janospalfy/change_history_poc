@@ -297,11 +297,12 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
           op.id.toLowerCase().includes(trimmedQuery);
         const matchesType = activeTypes.length === 0 || activeTypes.includes(BUCKET_BY_TYPE[op.type]);
         const matchesFilters = activeFilters.every((filter) => {
-          if (!filter.value) return true;
+          const values = filter.values ?? [];
+          if (values.length === 0) return true;
           if (filter.fieldId === 'propertyChanged') {
-            return op.changes.some((change) => change.property === filter.value);
+            return op.changes.some((change) => values.includes(change.property));
           }
-          return getFieldValue(op, filter.fieldId) === filter.value;
+          return values.includes(getFieldValue(op, filter.fieldId));
         });
         const opTime = getOperationTimestamp(op);
         let matchesDate = true;
@@ -332,6 +333,14 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
   };
   const setFilterValue = (id: string, value: string) =>
     setActiveFilters((prev) => prev.map((f) => (f.id === id ? { ...f, value } : f)));
+  const toggleFilterValue = (id: string, value: string) =>
+    setActiveFilters((prev) =>
+      prev.map((f) => {
+        if (f.id !== id) return f;
+        const values = f.values ?? [];
+        return { ...f, values: values.includes(value) ? values.filter((v) => v !== value) : [...values, value] };
+      }),
+    );
   const removeFilter = (id: string) => setActiveFilters((prev) => prev.filter((f) => f.id !== id));
   const clearFilters = () => setActiveFilters([]);
 
@@ -558,6 +567,7 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
               fields={filterFields}
               onAddFilter={addFilter}
               onValueChange={setFilterValue}
+              onToggleValue={toggleFilterValue}
               onRemove={removeFilter}
               onClear={clearFilters}
               className={styles.propertyFilters}

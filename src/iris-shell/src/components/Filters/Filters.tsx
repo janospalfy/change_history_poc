@@ -1,6 +1,7 @@
 import { useEffect, useRef, type Ref } from 'react';
 import { cx } from '../../lib/cx.js';
 import { Icon } from '../Icon/Icon.js';
+import { Checkbox } from '../Checkbox/Checkbox.js';
 import { Menu, type MenuEntry } from '../Menu/Menu.js';
 import styles from './Filters.module.css';
 
@@ -33,7 +34,10 @@ export interface FilterFieldConfig {
 export interface ActiveFilter {
   id: string;
   fieldId: string;
+  /** Used when the field's type is `'date'`. */
   value?: string;
+  /** Selected values for a `'select'` field — more than one may be chosen. */
+  values?: string[];
 }
 
 /**
@@ -49,8 +53,10 @@ export interface FiltersProps {
   fields: FilterFieldConfig[];
   /** Add a new filter chip for the given field id. */
   onAddFilter: (fieldId: string) => void;
-  /** Set the chosen value on an existing filter chip. */
+  /** Set the chosen value on an existing `'date'`-type filter chip. */
   onValueChange: (filterId: string, value: string) => void;
+  /** Toggle a value on/off an existing `'select'`-type filter chip. */
+  onToggleValue: (filterId: string, value: string) => void;
   /** Remove a single filter chip. */
   onRemove: (filterId: string) => void;
   /** Remove all filter chips. */
@@ -69,6 +75,7 @@ export function Filters({
   fields,
   onAddFilter,
   onValueChange,
+  onToggleValue,
   onRemove,
   onClear,
   className,
@@ -120,16 +127,31 @@ export function Filters({
           const rule = field.rule ?? 'is';
           const placeholder = field.placeholder ?? 'Select value';
           const isDate = field.type === 'date';
-          const selected = field.options?.find((o) => o.value === filter.value);
+          const selectedValues = filter.values ?? [];
+          const selectedOptions = (field.options ?? []).filter((o) => selectedValues.includes(o.value));
           const hasMenu = !isDate && (field.options?.length ?? 0) > 0;
 
-          const valueItems: MenuEntry[] = (field.options ?? []).map((o) => ({
-            kind: 'item',
-            label: o.label,
-            icon: o.icon,
-            selected: o.value === filter.value,
-            onSelect: () => onValueChange(filter.id, o.value),
-          }));
+          const valueItems: MenuEntry[] = (field.options ?? []).map((o) => {
+            const isSelected = selectedValues.includes(o.value);
+            return {
+              kind: 'item',
+              label: o.label,
+              // Decorative only — the menu row itself owns the click/toggle,
+              // so the checkbox can't fight its own native click handling.
+              visual: (
+                <Checkbox
+                  checked={isSelected}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  readOnly
+                  className={styles.menuCheckbox}
+                />
+              ),
+              checkbox: true,
+              selected: isSelected,
+              onSelect: () => onToggleValue(filter.id, o.value),
+            };
+          });
 
           const chipHeader = (
             <>
@@ -150,10 +172,13 @@ export function Filters({
               aria-expanded={args?.expanded}
             >
               {chipHeader}
-              {selected ? (
+              {selectedOptions.length > 0 ? (
                 <span className={styles.value}>
-                  {selected.icon && <Icon name={selected.icon} size="16px" />}
-                  <span className={styles.valueLabel}>{selected.label}</span>
+                  <span className={styles.valueLabel}>
+                    {selectedOptions.length === 1
+                      ? selectedOptions[0].label
+                      : `${selectedOptions[0].label} +${selectedOptions.length - 1}`}
+                  </span>
                 </span>
               ) : (
                 <span className={styles.valuePlaceholder}>{placeholder}</span>

@@ -41,6 +41,12 @@ export interface MenuItemEntry {
   inactive?: boolean;
   /** Render the label + icon in the danger colour (e.g. "Delete"). */
   danger?: boolean;
+  /**
+   * Multi-select item: uses `menuitemcheckbox` semantics instead of
+   * `menuitemradio`, and selecting it does not close the menu (so several
+   * options can be toggled in one open).
+   */
+  checkbox?: boolean;
 }
 
 export interface MenuSectionEntry {
@@ -455,14 +461,15 @@ function renderItem(item: MenuEntry, i: number, close: () => void): ReactNode {
     );
   }
   if (item.kind === ITEM_KIND) {
-    const isRadio = typeof item.selected === 'boolean';
+    const isCheckbox = !!item.checkbox;
+    const isRadio = !isCheckbox && typeof item.selected === 'boolean';
     const inactive = !!item.inactive && !item.disabled;
     return (
       <button
         key={`i-${i}-${item.label}`}
         type="button"
-        role={isRadio ? 'menuitemradio' : 'menuitem'}
-        aria-checked={isRadio ? item.selected : undefined}
+        role={isCheckbox ? 'menuitemcheckbox' : isRadio ? 'menuitemradio' : 'menuitem'}
+        aria-checked={isCheckbox || isRadio ? item.selected : undefined}
         aria-disabled={inactive || undefined}
         disabled={item.disabled}
         className={cx(
@@ -474,7 +481,7 @@ function renderItem(item: MenuEntry, i: number, close: () => void): ReactNode {
         onClick={() => {
           if (item.disabled || inactive) return;
           item.onSelect?.();
-          close();
+          if (!isCheckbox) close();
         }}
       >
         {(item.visual !== undefined || item.icon) && (
@@ -485,7 +492,7 @@ function renderItem(item: MenuEntry, i: number, close: () => void): ReactNode {
           </span>
         )}
         <span className={styles.itemLabel}>{item.label}</span>
-        {item.selected && (
+        {item.selected && !isCheckbox && (
           <span className={styles.itemCheck} aria-hidden="true">
             <Icon name="Check" size="16px" />
           </span>
