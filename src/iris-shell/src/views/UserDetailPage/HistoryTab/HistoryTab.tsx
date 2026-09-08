@@ -31,7 +31,9 @@ const VIEW_ITEMS = [
 
 /** A native date input with the browser's calendar icon replaced by the
  *  Iris `CalendarBlank` glyph (the native icon is kept, just made
- *  invisible, so its click target still opens the native picker). */
+ *  invisible, so its click target still opens the native picker). Uses
+ *  `datetime-local` rather than `date` so a time can be picked too — every
+ *  operation has a precise time-of-day available, not just a day. */
 function DateValueInput({
   value,
   onChange,
@@ -44,7 +46,7 @@ function DateValueInput({
   return (
     <span className={styles.dateInputWrapper}>
       <input
-        type="date"
+        type="datetime-local"
         className={cx(styles.dateFilterSegment, styles.dateFilterValueSegment, styles.dateInput)}
         aria-label={ariaLabel}
         value={value}
@@ -175,20 +177,25 @@ const DATE_RULE_LABELS: Record<DateRule, string> = {
   exactly: 'is',
 };
 
-/** yyyy-MM-DD (local time), used as the default value for the
- *  before/after/exactly/between date inputs — filtering only ever compares
- *  whole days, so there's no meaningful time-of-day to pick. */
+/** yyyy-MM-DDThh:mm (local time), used as the default value for the
+ *  before/after/exactly/between date+time inputs. */
 function toDatetimeLocal(timestamp: number): string {
   const d = new Date(timestamp);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** An operation's full date + time as a single timestamp, so date filtering
+ *  can compare down to the minute rather than just the whole day. */
+function getOperationTimestamp(op: ChangeHistoryOperation): number {
+  return new Date(`${op.date} ${op.time}`).getTime();
 }
 
 /** Everything derived from a single operations list (dataset-dependent, so
  *  Change History and User Activity each get their own). */
 function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
   const allOperations = dataset.flatMap((group) => group.operations);
-  const latestDate = allOperations.reduce((latest, op) => Math.max(latest, new Date(op.date).getTime()), 0);
+  const latestDate = allOperations.reduce((latest, op) => Math.max(latest, getOperationTimestamp(op)), 0);
   const filterFields: FilterFieldConfig[] = [
     { id: 'name', label: 'Name', options: uniqueOptions(allOperations, 'name') },
     { id: 'reason', label: 'Reason', options: uniqueOptions(allOperations, 'reason') },
@@ -296,12 +303,16 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
           }
           return getFieldValue(op, filter.fieldId) === filter.value;
         });
-        const opTime = new Date(op.date).getTime();
+        const opTime = getOperationTimestamp(op);
         let matchesDate = true;
         if (dateRule === 'relative') matchesDate = opTime >= relativeCutoff;
         else if (dateRule === 'before') matchesDate = fromTime !== null && opTime < fromTime;
         else if (dateRule === 'after') matchesDate = fromTime !== null && opTime > fromTime;
-        else if (dateRule === 'exactly') matchesDate = fromTime !== null && opTime === fromTime;
+        // Inputs are minute-precision (datetime-local), but operation
+        // timestamps carry seconds — compare at minute granularity so "Is"
+        // can actually match.
+        else if (dateRule === 'exactly')
+          matchesDate = fromTime !== null && Math.floor(opTime / 60_000) === Math.floor(fromTime / 60_000);
         else if (dateRule === 'between')
           matchesDate = fromTime !== null && toTime !== null && opTime >= fromTime && opTime <= toTime;
         return matchesQuery && matchesType && matchesFilters && matchesDate;
