@@ -147,11 +147,20 @@ const GENERATED_ACTOR_OVERRIDES: Record<number, string> = {
 };
 
 function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistoryOperation {
-  const { type, label } = GENERATED_TYPES[seed % GENERATED_TYPES.length];
+  const { type, label: rawLabel } = GENERATED_TYPES[seed % GENERATED_TYPES.length];
   const opId = 3000 + seed;
   const actor = GENERATED_ACTOR_OVERRIDES[opId] ?? GENERATED_ACTORS[seed % GENERATED_ACTORS.length];
   const status = GENERATED_STATUSES[seed % GENERATED_STATUSES.length];
   const groupName = GENERATED_GROUP_NAME_OVERRIDES[opId] ?? `Group-${opId}`;
+  const isRemove = rawLabel === 'Remove group membership';
+  // Named after the group being joined/left, matching the console's
+  // "Add <object> to <group>" convention (e.g. "Add user to VPN Users group").
+  const label =
+    type === 'groupMembershipChange'
+      ? isRemove
+        ? `Remove user from ${groupName} group`
+        : `Add user to ${groupName} group`
+      : rawLabel;
   const hour = 8 + (seed % 10);
   const minute = (seed * 7) % 60;
   const second = (seed * 13) % 60;
@@ -189,9 +198,9 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
               {
                 property: 'Member Of',
                 attribute: '(memberOf)',
-                changeNote: `${label === 'Remove group membership' ? 'Remove' : 'Add'} value · Operation initiator`,
-                oldValue: label === 'Remove group membership' ? groupName : '<not a member>',
-                newValue: label === 'Remove group membership' ? '<not a member>' : groupName,
+                changeNote: `${isRemove ? 'Remove' : 'Add'} value · Operation initiator`,
+                oldValue: isRemove ? groupName : '<not a member>',
+                newValue: isRemove ? '<not a member>' : groupName,
               },
             ]
           : type === 'renamed'
@@ -379,7 +388,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4018',
         time: '09:30:21',
         type: 'groupMembershipChange',
-        label: 'Remove group membership',
+        label: 'Remove user from IT Support group',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'August 20, 2026',
