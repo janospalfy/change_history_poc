@@ -436,8 +436,6 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
 
       <>
         <div className={styles.filterStrip} role="group" aria-label="Filter by operation type">
-            {view === 'changeHistory' && (
-              <>
                 <button
                   type="button"
                   className={cx(
@@ -469,8 +467,6 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
                   );
                 })}
                 <span className={styles.chipDivider} aria-hidden="true" />
-              </>
-            )}
             <div className={cx(styles.dateFilterTag, dateRule !== null && styles.dateFilterTagActive)}>
               <Menu
                 ariaLabel="Filter by date"
