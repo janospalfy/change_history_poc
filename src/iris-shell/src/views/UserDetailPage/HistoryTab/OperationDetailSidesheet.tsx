@@ -64,6 +64,7 @@ export function OperationDetailSidesheet({
       ),
     },
     { label: 'Requested', value: operation.requestedAt },
+    { label: 'Completed', value: operation.requestedAt },
     { label: 'Status', value: <Badge>{operation.status}</Badge> },
   ];
 
