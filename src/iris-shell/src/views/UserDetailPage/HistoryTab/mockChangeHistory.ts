@@ -128,7 +128,7 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
   { type: 'renamed', label: 'Rename user' },
   { type: 'groupMembershipChange', label: 'Add group membership' },
   { type: 'deprovision', label: 'Deprovision user' },
-  { type: 'undoDeprovision', label: 'Undo deprovisioning' },
+  { type: 'undoDeprovision', label: 'Un-deprovision user' },
   { type: 'groupMembershipChange', label: 'Remove group membership' },
 ];
 
@@ -470,7 +470,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         id: 'ID: 1-5098',
         time: '08:40:03',
         type: 'undoDeprovision',
-        label: 'Undo deprovisioning',
+        label: 'Un-deprovision user',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
         date: 'September 1, 2026',
