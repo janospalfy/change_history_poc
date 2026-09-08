@@ -93,6 +93,12 @@ export function OperationDetailSidesheet({
     },
     {
       kind: 'item' as const,
+      label: 'Export as XML',
+      icon: 'FileCode',
+      onSelect: () => showToast('Export successful', undefined, 'This operation has been exported as XML.'),
+    },
+    {
+      kind: 'item' as const,
       label: 'Export as CSV',
       icon: 'FileCsv',
       onSelect: () => showToast('Export successful', undefined, 'This operation has been exported as CSV.'),
