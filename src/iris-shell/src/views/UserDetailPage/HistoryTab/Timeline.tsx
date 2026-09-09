@@ -176,7 +176,7 @@ function TimelineEventItem({
         aria-hidden="true"
       />
       <span className={styles.eventLabel}>{operation.label}</span>
-      <Tooltip label={operation.reason} placement="top">
+      <Tooltip label={`Reason: ${operation.reason}`} placement="top">
         <span className={styles.eventReason}>{truncateReason(operation.reason)}</span>
       </Tooltip>
       <div className={styles.eventDetails}>
