@@ -207,6 +207,8 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
     {
       id: 'activeRolesAdmin',
       label: 'Active Roles Admin',
+      // A yes/no field \u2014 only one answer can apply at a time.
+      selectionMode: 'single',
       options: uniqueOptions(allOperations, 'activeRolesAdmin'),
     },
     { id: 'targetObject', label: 'Target object', options: uniqueOptions(allOperations, 'targetObject') },
@@ -341,6 +343,8 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
         return { ...f, values: values.includes(value) ? values.filter((v) => v !== value) : [...values, value] };
       }),
     );
+  const selectFilterValue = (id: string, value: string) =>
+    setActiveFilters((prev) => prev.map((f) => (f.id === id ? { ...f, values: [value] } : f)));
   const removeFilter = (id: string) => setActiveFilters((prev) => prev.filter((f) => f.id !== id));
   const clearFilters = () => setActiveFilters([]);
 
@@ -568,6 +572,7 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
               onAddFilter={addFilter}
               onValueChange={setFilterValue}
               onToggleValue={toggleFilterValue}
+              onSelectValue={selectFilterValue}
               onRemove={removeFilter}
               onClear={clearFilters}
               className={styles.propertyFilters}

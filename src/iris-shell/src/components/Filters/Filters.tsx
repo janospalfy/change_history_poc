@@ -28,6 +28,13 @@ export interface FilterFieldConfig {
   placeholder?: string;
   /** Values the user can pick from. Used when `type` is `'select'`. */
   options?: FilterOption[];
+  /**
+   * How many values can be chosen at once for a `'select'` field. `'multi'`
+   * (default) shows a checkbox per option; `'single'` shows a radio per
+   * option and picking one replaces any previous choice (e.g. a yes/no
+   * field where only one answer applies).
+   */
+  selectionMode?: 'single' | 'multi';
 }
 
 /** An active filter instance rendered as a chip. */
@@ -55,8 +62,10 @@ export interface FiltersProps {
   onAddFilter: (fieldId: string) => void;
   /** Set the chosen value on an existing `'date'`-type filter chip. */
   onValueChange: (filterId: string, value: string) => void;
-  /** Toggle a value on/off an existing `'select'`-type filter chip. */
+  /** Toggle a value on/off an existing `'select'`, `selectionMode: 'multi'` filter chip. */
   onToggleValue: (filterId: string, value: string) => void;
+  /** Replace the value on an existing `'select'`, `selectionMode: 'single'` filter chip. */
+  onSelectValue: (filterId: string, value: string) => void;
   /** Remove a single filter chip. */
   onRemove: (filterId: string) => void;
   /** Remove all filter chips. */
@@ -76,6 +85,7 @@ export function Filters({
   onAddFilter,
   onValueChange,
   onToggleValue,
+  onSelectValue,
   onRemove,
   onClear,
   className,
@@ -127,12 +137,21 @@ export function Filters({
           const rule = field.rule ?? 'is';
           const placeholder = field.placeholder ?? 'Select value';
           const isDate = field.type === 'date';
+          const isSingle = field.selectionMode === 'single';
           const selectedValues = filter.values ?? [];
           const selectedOptions = (field.options ?? []).filter((o) => selectedValues.includes(o.value));
           const hasMenu = !isDate && (field.options?.length ?? 0) > 0;
 
           const valueItems: MenuEntry[] = (field.options ?? []).map((o) => {
             const isSelected = selectedValues.includes(o.value);
+            if (isSingle) {
+              return {
+                kind: 'item',
+                label: o.label,
+                selected: isSelected,
+                onSelect: () => onSelectValue(filter.id, o.value),
+              };
+            }
             return {
               kind: 'item',
               label: o.label,
