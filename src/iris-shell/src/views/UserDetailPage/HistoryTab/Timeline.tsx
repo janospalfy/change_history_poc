@@ -54,7 +54,8 @@ export interface TimelineProps {
  * collapsed header row (marker + chevron + date + count) until expanded,
  * revealing its individual `TimelineEventItem` rows, indented under the
  * header and flush against each other (separated only by their own bottom
- * border). A single connector line runs behind every row, most of it
+ * border). The most recent group starts expanded; older groups start
+ * collapsed. A single connector line runs behind every row, most of it
  * hidden behind each row's own opaque background.
  */
 export function Timeline({
@@ -64,7 +65,9 @@ export function Timeline({
   forceExpandAll = false,
   showTargetObject = false,
 }: TimelineProps) {
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  // Most recent group starts expanded so the latest activity is visible
+  // without an extra click; older groups stay collapsed until requested.
+  const [expanded, setExpanded] = useState<Set<number>>(() => (groups.length > 0 ? new Set([0]) : new Set()));
   const [visibleCount, setVisibleCount] = useState(Math.min(PAGE_SIZE, groups.length));
   const [loadingMore, setLoadingMore] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
