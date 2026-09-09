@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cx } from '../../../lib/cx.js';
 import { Icon } from '../../../components/Icon/Icon.js';
 import { Badge } from '../../../components/Badge/Badge.js';
+import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
 import type { ChangeHistoryGroup, ChangeHistoryOperation, OperationType } from './mockChangeHistory.js';
 import styles from './Timeline.module.css';
 
@@ -18,6 +19,20 @@ const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
 
 /** Groups revealed per page as the sentinel scrolls into view. */
 const PAGE_SIZE = 8;
+
+/** Character budget the reason column is truncated to before its own '…' is
+ *  appended. Deliberately conservative for the 240px column so the CSS
+ *  overflow/ellipsis on `.eventReason` is a rarely-triggered safety net,
+ *  not the primary truncation mechanism — that lets us trim trailing
+ *  punctuation/whitespace ourselves instead of the browser cutting a
+ *  reason off mid-word or right after a stray hyphen. */
+const REASON_TRUNCATE_LENGTH = 34;
+
+function truncateReason(reason: string): string {
+  if (reason.length <= REASON_TRUNCATE_LENGTH) return reason;
+  const clipped = reason.slice(0, REASON_TRUNCATE_LENGTH).trimEnd().replace(/[-,.;:]+$/, '');
+  return `${clipped}\u2026`;
+}
 
 export interface TimelineProps {
   groups: ChangeHistoryGroup[];
@@ -161,8 +176,10 @@ function TimelineEventItem({
         aria-hidden="true"
       />
       <span className={styles.eventLabel}>{operation.label}</span>
+      <Tooltip label={operation.reason} placement="top">
+        <span className={styles.eventReason}>{truncateReason(operation.reason)}</span>
+      </Tooltip>
       <div className={styles.eventDetails}>
-        <span className={styles.eventId}>{operation.id}</span>
         <span className={styles.eventActor} title={showTargetObject ? 'Target object' : 'Requested by'}>
           {showTargetObject && <span className={styles.eventActorLabel}>Target:</span>}
           <span className={styles.eventActorValue}>{showTargetObject ? operation.targetObject : operation.actor}</span>

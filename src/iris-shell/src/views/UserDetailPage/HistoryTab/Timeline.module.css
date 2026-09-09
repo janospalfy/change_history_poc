@@ -162,14 +162,17 @@
 .eventItem {
   position: relative;
   display: flex;
+  /* center (not flex-start): keeps top/bottom whitespace symmetric whether
+     the row stays at min-height or grows taller for a wrapped label. */
   align-items: center;
   gap: var(--oi-spacing-m);
-  height: 44px;
+  min-height: 44px;
   width: 100%;
   border: none;
   text-align: left;
   color: inherit;
   font: inherit;
+  padding-block: var(--oi-spacing-xs);
   padding-inline: var(--oi-spacing-s);
   border-bottom: var(--oi-border-width-default) solid var(--oi-border-color-default);
   background-color: var(--oi-background-color-primary);
@@ -188,14 +191,15 @@
 
 /* Overlays the shared connector line (.line, at wrap-relative left: 11px)
    with a brand-color bar spanning the row whose operation is open in the
-   sidesheet, matching Figma node 1532:26841 exactly (2px wide, 45px tall). */
+   sidesheet, matching Figma node 1532:26841 (2px wide) — stretched to the
+   row's full (possibly wrapped, multi-line) height rather than a fixed
+   45px, so it still covers the whole row once rows can grow with content. */
 .eventLineHighlight {
   position: absolute;
-  top: 50%;
+  top: 0;
+  bottom: 0;
   left: -21px;
   width: 2px;
-  height: 45px;
-  transform: translateY(-50%);
   border-radius: 1px;
   background-color: var(--oi-border-color-focus);
 }
@@ -224,48 +228,63 @@
   color: var(--oi-content-color-primary);
 }
 
+/* Reason is free text entered by the requester. Truncation is mostly done
+   in JS (see `truncateReason`) so trailing punctuation/whitespace can be
+   trimmed before the '…' is appended; the overflow/ellipsis here is only a
+   safety net for text longer than that estimate. Shrinks down to 120px
+   before .eventLabel gives up any more space, rather than staying a rigid
+   240px on narrow viewports. */
+.eventReason {
+  flex-shrink: 1;
+  min-width: 120px;
+  max-width: 240px;
+  width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+}
+
 .eventDetails {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--oi-spacing-m);
-  min-width: 350px;
-  width: 350px;
-  flex-shrink: 0;
-}
-
-.eventId {
-  flex-shrink: 0;
-  font-size: var(--oi-text-caption-font-size);
-  line-height: var(--oi-text-caption-line-height);
-  color: var(--oi-content-color-tertiary);
-  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 160px;
+  max-width: 260px;
+  width: 260px;
 }
 
 .eventActor {
-  margin-left: var(--oi-spacing-m);
   display: inline-flex;
   align-items: center;
   gap: var(--oi-spacing-xs);
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--oi-text-body-s-font-size);
-  line-height: var(--oi-text-body-s-line-height);
-  color: var(--oi-content-color-secondary);
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
 }
 
+/* Darker than the surrounding .eventActor (tertiary) so the actual person/
+   object name reads as more prominent, and stays visually distinct from
+   the (also tertiary) reason text next to it. */
 .eventActorValue {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--oi-content-color-secondary);
 }
 
 .eventActorLabel {
   flex-shrink: 0;
   color: var(--oi-content-color-tertiary);
-  font-size: var(--oi-text-body-s-font-size);
-  line-height: var(--oi-text-body-s-line-height);
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
 }
 
 .eventBadge {

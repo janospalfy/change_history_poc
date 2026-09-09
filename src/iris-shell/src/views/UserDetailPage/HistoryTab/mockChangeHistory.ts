@@ -146,6 +146,19 @@ const GENERATED_ACTOR_OVERRIDES: Record<number, string> = {
   3062: 'administrator (O1D.local)', // May 30, 2026 — Remove group membership
 };
 
+// Cycled independently of type/actor/status (different length, so it
+// doesn't line up with them) to give filler rows a realistic mix of blank
+// and free-text reasons instead of every row reading '<none>'.
+const GENERATED_REASONS: string[] = [
+  '<none>',
+  'Manager-approved role change',
+  'Quarterly access recertification',
+  'Employee transferred to a new team',
+  'Routine access review',
+  'Contractor engagement ended',
+  'Self-service profile update',
+];
+
 function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistoryOperation {
   const { type, label: rawLabel } = GENERATED_TYPES[seed % GENERATED_TYPES.length];
   const opId = 3000 + seed;
@@ -177,7 +190,7 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
     status,
     date: dateLabel,
     name: `user-${opId} (O1D.local/Test OU)`,
-    reason: '<none>',
+    reason: GENERATED_REASONS[seed % GENERATED_REASONS.length],
     requestedAt,
     logonComputer: seed % 2 === 0 ? 'ActiveRolesVm.O1D.local' : 'ActiveRolesVm2.O1D.local',
     logonSite: 'Default-First-Site-Name',
@@ -261,7 +274,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Pending',
         date: 'September 2, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'Promotion to Senior Analyst approved by manager',
         requestedAt: 'September 2, 2026 08:47:51 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -292,7 +305,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Completed',
         date: 'August 29, 2026',
         name: 'My OU (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'Email address correction requested by employee',
         requestedAt: 'August 29, 2026 15:02:44 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -318,7 +331,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Canceled',
         date: 'August 29, 2026',
         name: 'Contractor Temp (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'Contract extended - deprovisioning canceled by hiring manager',
         requestedAt: 'August 29, 2026 14:50:19 UTC',
         logonComputer: 'ActiveRolesVm2.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -344,7 +357,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Denied',
         date: 'August 29, 2026',
         name: 'svc-backup (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'Account still in use by backup pipeline - request denied',
         requestedAt: 'August 29, 2026 14:42:12 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -367,7 +380,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Completed',
         date: 'August 20, 2026',
         name: 'Sara Ito (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'New hire role assignment',
         requestedAt: 'August 20, 2026 11:15:37 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -393,7 +406,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Completed',
         date: 'August 20, 2026',
         name: 'Peter Kim (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'Team change - no longer requires IT Support access',
         requestedAt: 'August 20, 2026 09:30:21 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -426,7 +439,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Completed',
         date: 'August 1, 2026',
         name: 'Peter Kim (O1D.local/Test OU)',
-        reason: '<none>',
+        reason: 'New hire onboarding',
         requestedAt: 'August 1, 2026 09:12:03 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
