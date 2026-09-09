@@ -46,7 +46,7 @@
 /* Collapsed groups sit closer together; an expanded group keeps the full
    gap so its revealed events read as clearly separate from what follows. */
 .groupSpacingTight {
-  margin-bottom: var(--oi-spacing-xs);
+  margin-bottom: 14px;
 }
 
 .groupSpacingNormal {
