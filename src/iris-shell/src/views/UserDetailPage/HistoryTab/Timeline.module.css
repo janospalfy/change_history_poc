@@ -318,3 +318,54 @@
 .dotDeprovision {
   background-color: var(--oi-color-purple-600);
 }
+
+/* ---------- compact (narrow viewport) event row ---------- */
+/* Below this width the single-line row (time, label, reason, actor, badge,
+   chevron all inline) starts crowding/truncating too much of its own data.
+   Switch to a 3-row grid instead: marker/time/label/chevron on top, then
+   reason and actor+badge each on their own full-width line underneath. */
+@media (max-width: 720px) {
+  .eventItem {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas:
+      'marker time label chevron'
+      '. reason reason reason'
+      '. details details details';
+    align-items: center;
+    row-gap: var(--oi-spacing-xs);
+    min-height: 0;
+  }
+
+  .eventMarker {
+    grid-area: marker;
+  }
+
+  .eventTime {
+    grid-area: time;
+  }
+
+  .eventLabel {
+    grid-area: label;
+    white-space: normal;
+  }
+
+  .eventChevron {
+    grid-area: chevron;
+  }
+
+  .eventReason {
+    grid-area: reason;
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
+
+  .eventDetails {
+    grid-area: details;
+    max-width: none;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}
