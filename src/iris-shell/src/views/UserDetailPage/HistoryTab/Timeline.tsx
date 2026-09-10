@@ -21,12 +21,12 @@ const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
 const PAGE_SIZE = 8;
 
 /** Character budget the reason column is truncated to before its own '…' is
- *  appended. Deliberately conservative for the 240px column so the CSS
- *  overflow/ellipsis on `.eventReason` is a rarely-triggered safety net,
+ *  appended. Deliberately conservative for the 420px max-width column so the
+ *  CSS overflow/ellipsis on `.eventReason` is a rarely-triggered safety net,
  *  not the primary truncation mechanism — that lets us trim trailing
  *  punctuation/whitespace ourselves instead of the browser cutting a
  *  reason off mid-word or right after a stray hyphen. */
-const REASON_TRUNCATE_LENGTH = 34;
+const REASON_TRUNCATE_LENGTH = 60;
 
 function truncateReason(reason: string): string {
   if (reason.length <= REASON_TRUNCATE_LENGTH) return reason;
@@ -183,10 +183,15 @@ function TimelineEventItem({
         <span className={styles.eventReason}>{truncateReason(operation.reason)}</span>
       </Tooltip>
       <div className={styles.eventDetails}>
-        <span className={styles.eventActor} title={showTargetObject ? 'Target object' : 'Requested by'}>
-          {showTargetObject && <span className={styles.eventActorLabel}>Target:</span>}
-          <span className={styles.eventActorValue}>{showTargetObject ? operation.targetObject : operation.actor}</span>
-        </span>
+        <Tooltip
+          label={`${showTargetObject ? 'Target' : 'Requested by'}: ${showTargetObject ? operation.targetObject : operation.actor}`}
+          placement="top"
+        >
+          <span className={styles.eventActor}>
+            {showTargetObject && <span className={styles.eventActorLabel}>Target:</span>}
+            <span className={styles.eventActorValue}>{showTargetObject ? operation.targetObject : operation.actor}</span>
+          </span>
+        </Tooltip>
         <Badge className={styles.eventBadge}>{operation.status}</Badge>
       </div>
       <span className={styles.eventChevron} aria-hidden="true">

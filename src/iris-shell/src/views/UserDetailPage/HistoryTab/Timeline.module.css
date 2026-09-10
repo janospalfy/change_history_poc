@@ -228,17 +228,17 @@
   color: var(--oi-content-color-primary);
 }
 
-/* Reason is free text entered by the requester. Truncation is mostly done
-   in JS (see `truncateReason`) so trailing punctuation/whitespace can be
-   trimmed before the '…' is appended; the overflow/ellipsis here is only a
-   safety net for text longer than that estimate. Shrinks down to 120px
-   before .eventLabel gives up any more space, rather than staying a rigid
-   240px on narrow viewports. */
+/* Reason is free text entered by the requester. No fixed width — it sizes
+   to its own content (up to max-width) so a short reason shows in full
+   instead of always reserving/truncating to a rigid column. Only reasons
+   that would exceed max-width get truncated, mostly done in JS (see
+   `truncateReason`) so trailing punctuation/whitespace can be trimmed
+   before the '…' is appended; the overflow/ellipsis here is only a safety
+   net for text longer than that estimate. */
 .eventReason {
-  flex-shrink: 1;
-  min-width: 120px;
-  max-width: 240px;
-  width: 240px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 420px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
