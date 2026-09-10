@@ -151,9 +151,6 @@
 }
 
 .count {
-  /* Pushes count to the row's right edge, so it lines up across groups
-     instead of trailing right after the variable-width date text. */
-  margin-left: auto;
   font-size: var(--oi-text-caption-font-size);
   line-height: var(--oi-text-caption-line-height);
   color: var(--oi-content-color-tertiary);
