@@ -247,15 +247,16 @@
   color: var(--oi-content-color-tertiary);
 }
 
+/* No fixed width — sizes to its own content (up to max-width) so a short
+   actor/target name shows in full instead of always truncating inside a
+   rigid 260px box, even when the row has spare room to its right. */
 .eventDetails {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--oi-spacing-m);
-  flex-shrink: 1;
-  min-width: 160px;
-  max-width: 260px;
-  width: 260px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 380px;
   margin-left: var(--oi-spacing-l);
 }
 
@@ -263,7 +264,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--oi-spacing-xs);
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   font-size: var(--oi-text-caption-font-size);
   line-height: var(--oi-text-caption-line-height);
