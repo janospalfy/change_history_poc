@@ -31,29 +31,59 @@ const VIEW_ITEMS = [
 
 /** A native date input with the browser's calendar icon replaced by the
  *  Iris `CalendarBlank` glyph (the native icon is kept, just made
- *  invisible, so its click target still opens the native picker). Uses
- *  `datetime-local` rather than `date` so a time can be picked too — every
- *  operation has a precise time-of-day available, not just a day. */
+ *  invisible, so its click target still opens the native picker), plus a
+ *  separate, optional time input next to it. Time is intentionally not
+ *  required — a bare date filters the whole day; adding a time narrows
+ *  the match down to that precise instant (see the filtering logic below). */
 function DateValueInput({
-  value,
-  onChange,
-  ariaLabel,
+  date,
+  time,
+  onDateChange,
+  onTimeChange,
+  dateAriaLabel,
+  timeAriaLabel,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  ariaLabel: string;
+  date: string;
+  time: string;
+  onDateChange: (value: string) => void;
+  onTimeChange: (value: string) => void;
+  dateAriaLabel: string;
+  timeAriaLabel: string;
 }) {
   return (
-    <span className={styles.dateInputWrapper}>
-      <input
-        type="datetime-local"
-        className={cx(styles.dateFilterSegment, styles.dateFilterValueSegment, styles.dateInput)}
-        aria-label={ariaLabel}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <Icon name="CalendarBlank" size="12px" className={styles.dateInputIcon} />
-    </span>
+    <>
+      <span className={styles.dateInputWrapper}>
+        <input
+          type="date"
+          className={cx(styles.dateFilterSegment, styles.dateFilterValueSegment, styles.dateInput)}
+          aria-label={dateAriaLabel}
+          value={date}
+          onChange={(e) => onDateChange(e.target.value)}
+        />
+        <Icon name="CalendarBlank" size="12px" className={styles.dateInputIcon} />
+      </span>
+      <span className={styles.timeInputWrapper}>
+        <input
+          type="time"
+          className={cx(styles.dateFilterSegment, styles.dateFilterValueSegment, styles.timeInput)}
+          aria-label={timeAriaLabel}
+          placeholder="Any time"
+          value={time}
+          onChange={(e) => onTimeChange(e.target.value)}
+        />
+        <Icon name="Clock" size="12px" className={styles.timeInputIcon} />
+        {time !== '' && (
+          <button
+            type="button"
+            className={styles.timeInputClear}
+            onClick={() => onTimeChange('')}
+            aria-label={`Clear ${timeAriaLabel.toLowerCase()}`}
+          >
+            <Icon name="X" size="10px" />
+          </button>
+        )}
+      </span>
+    </>
   );
 }
 
@@ -177,12 +207,22 @@ const DATE_RULE_LABELS: Record<DateRule, string> = {
   exactly: 'is',
 };
 
-/** yyyy-MM-DDThh:mm (local time), used as the default value for the
- *  before/after/exactly/between date+time inputs. */
-function toDatetimeLocal(timestamp: number): string {
+/** yyyy-MM-DD (local time), used as the default value for the
+ *  before/after/exactly/between date inputs. Time starts blank — optional. */
+function toDateOnly(timestamp: number): string {
   const d = new Date(timestamp);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Combines a date input with an optional time input into a timestamp. When
+ *  time is blank, falls back to the start or end of that day — this is what
+ *  makes the time input optional: a bare date still filters meaningfully,
+ *  as "the whole day" rather than requiring an exact instant. */
+function combineDateTime(date: string, time: string, boundary: 'start' | 'end'): number | null {
+  if (!date) return null;
+  if (time) return new Date(`${date}T${time}`).getTime();
+  return new Date(`${date}T${boundary === 'start' ? '00:00:00' : '23:59:59.999'}`).getTime();
 }
 
 /** An operation's full date + time as a single timestamp, so date filtering
@@ -215,7 +255,7 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
     { id: 'lastUpdatedOn', label: 'Last updated on', options: uniqueOptions(allOperations, 'lastUpdatedOn') },
     { id: 'propertyChanged', label: 'Property changed', options: uniqueChangedPropertyOptions(allOperations) },
   ];
-  return { allOperations, latestDate, latestDateInput: toDatetimeLocal(latestDate), filterFields };
+  return { allOperations, latestDate, latestDateOnly: toDateOnly(latestDate), filterFields };
 }
 
 /**
@@ -231,7 +271,9 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
   const [dateRule, setDateRule] = useState<DateRule | null>(null);
   const [dateRelativeId, setDateRelativeId] = useState<(typeof DATE_RELATIVE_OPTIONS)[number]['id']>('last30');
   const [dateFrom, setDateFrom] = useState('');
+  const [timeFrom, setTimeFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [timeTo, setTimeTo] = useState('');
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const filterIdRef = useRef(0);
 
@@ -256,7 +298,7 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
       })),
     [activeDataset, view, subjectLabel, subjectActor],
   );
-  const { allOperations, latestDate, latestDateInput, filterFields } = useMemo(
+  const { allOperations, latestDate, latestDateOnly, filterFields } = useMemo(
     () => buildDatasetContext(displayDataset),
     [displayDataset],
   );
@@ -269,13 +311,15 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
     setActiveTypes([]);
     setActiveFilters([]);
     setDateRule(null);
-    setDateFrom(latestDateInput);
-    setDateTo(latestDateInput);
+    setDateFrom(latestDateOnly);
+    setTimeFrom('');
+    setDateTo(latestDateOnly);
+    setTimeTo('');
     setSelectedOpId(null);
   }
   if (dateFrom === '' && dateTo === '') {
-    setDateFrom(latestDateInput);
-    setDateTo(latestDateInput);
+    setDateFrom(latestDateOnly);
+    setDateTo(latestDateOnly);
   }
 
   const selectedIndex = allOperations.findIndex((op) => op.id === selectedOpId);
@@ -285,8 +329,12 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
   const trimmedQuery = query.trim().toLowerCase();
   const hasActiveFilters =
     trimmedQuery.length > 0 || activeTypes.length > 0 || activeFilters.length > 0 || dateRule !== null;
-  const fromTime = dateFrom ? new Date(dateFrom).getTime() : null;
-  const toTime = dateTo ? new Date(dateTo).getTime() : null;
+  // "start"/"end" boundaries fall back to the whole day when no time is
+  // given (see `combineDateTime`) — that's what makes the time input
+  // optional rather than required alongside the date.
+  const fromStart = combineDateTime(dateFrom, timeFrom, 'start');
+  const fromEnd = combineDateTime(dateFrom, timeFrom, 'end');
+  const toEnd = combineDateTime(dateTo, timeTo, 'end');
   const relativeCutoff =
     latestDate - (DATE_RELATIVE_OPTIONS.find((f) => f.id === dateRelativeId)?.days ?? 0) * 86_400_000;
   const filteredGroups = useMemo(() => {
@@ -309,19 +357,24 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
         const opTime = getOperationTimestamp(op);
         let matchesDate = true;
         if (dateRule === 'relative') matchesDate = opTime >= relativeCutoff;
-        else if (dateRule === 'before') matchesDate = fromTime !== null && opTime < fromTime;
-        else if (dateRule === 'after') matchesDate = fromTime !== null && opTime > fromTime;
-        // Inputs are minute-precision (datetime-local), but operation
-        // timestamps carry seconds — compare at minute granularity so "Is"
-        // can actually match.
+        // Before/after compare against the start/end of the day when no
+        // time was entered, so "before Aug 20" excludes Aug 20 itself and
+        // "after Aug 20" only starts matching on Aug 21.
+        else if (dateRule === 'before') matchesDate = fromStart !== null && opTime < fromStart;
+        else if (dateRule === 'after') matchesDate = fromEnd !== null && opTime > fromEnd;
+        // With a time entered, "Is" matches that specific minute (inputs
+        // are minute-precision, operation timestamps carry seconds). With
+        // no time, "Is" matches anywhere within that whole day instead.
         else if (dateRule === 'exactly')
-          matchesDate = fromTime !== null && Math.floor(opTime / 60_000) === Math.floor(fromTime / 60_000);
+          matchesDate = timeFrom
+            ? fromStart !== null && Math.floor(opTime / 60_000) === Math.floor(fromStart / 60_000)
+            : fromStart !== null && fromEnd !== null && opTime >= fromStart && opTime <= fromEnd;
         else if (dateRule === 'between')
-          matchesDate = fromTime !== null && toTime !== null && opTime >= fromTime && opTime <= toTime;
+          matchesDate = fromStart !== null && toEnd !== null && opTime >= fromStart && opTime <= toEnd;
         return matchesQuery && matchesType && matchesFilters && matchesDate;
       }),
     })).filter((group) => group.operations.length > 0);
-  }, [displayDataset, trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromTime, toTime]);
+  }, [displayDataset, trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromStart, fromEnd, toEnd, timeFrom]);
 
   const toggleType = (value: string) => {
     setActiveTypes((prev) =>
@@ -542,13 +595,34 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
                 />
               )}
               {(dateRule === 'before' || dateRule === 'after' || dateRule === 'exactly') && (
-                <DateValueInput value={dateFrom} onChange={setDateFrom} ariaLabel="Date value" />
+                <DateValueInput
+                  date={dateFrom}
+                  time={timeFrom}
+                  onDateChange={setDateFrom}
+                  onTimeChange={setTimeFrom}
+                  dateAriaLabel="Date value"
+                  timeAriaLabel="Time value"
+                />
               )}
               {dateRule === 'between' && (
                 <>
-                  <DateValueInput value={dateFrom} onChange={setDateFrom} ariaLabel="From date" />
+                  <DateValueInput
+                    date={dateFrom}
+                    time={timeFrom}
+                    onDateChange={setDateFrom}
+                    onTimeChange={setTimeFrom}
+                    dateAriaLabel="From date"
+                    timeAriaLabel="From time"
+                  />
                   <span className={styles.dateFilterAnd} aria-hidden="true">and</span>
-                  <DateValueInput value={dateTo} onChange={setDateTo} ariaLabel="To date" />
+                  <DateValueInput
+                    date={dateTo}
+                    time={timeTo}
+                    onDateChange={setDateTo}
+                    onTimeChange={setTimeTo}
+                    dateAriaLabel="To date"
+                    timeAriaLabel="To time"
+                  />
                 </>
               )}
               {dateRule !== null && (

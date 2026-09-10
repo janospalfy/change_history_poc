@@ -177,11 +177,15 @@
   font-size: var(--oi-text-body-s-font-size);
 }
 
+/* Auto width (not a hardcoded px value) so the box always sizes exactly to
+   its own rendered value regardless of locale date format — avoids both
+   clipping the text and leaving a gap before the icon. padding-right
+   reserves just enough room for the icon at a fixed 4px after the text. */
 .dateInput {
   border-radius: 0;
   cursor: pointer;
-  width: 152px;
-  padding-right: 20px;
+  width: auto;
+  padding-right: 18px;
   font-size: 12px;
 }
 
@@ -209,6 +213,11 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  /* margin (not padding): keeps this outside the positioning box so the
+     icon's `right: 2px` stays relative to the input's own edge, not a
+     padded-out wrapper edge — otherwise the icon floats in this gap
+     instead of sitting right after the date text. */
+  margin-right: var(--oi-spacing-s);
 }
 
 .dateInputIcon {
@@ -216,6 +225,68 @@
   right: 2px;
   color: var(--oi-content-color-tertiary);
   pointer-events: none;
+}
+
+/* Time is optional, unlike the date next to it, but uses the same
+   icon-overlay treatment (native picker hidden, Iris glyph drawn instead)
+   so the two fields' spacing is equally reliable across browsers instead
+   of depending on the native clock indicator's own inconsistent padding. */
+.timeInputWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--oi-spacing-s);
+}
+
+.timeInput {
+  cursor: pointer;
+  width: auto;
+  padding-right: 18px;
+  font-size: 12px;
+}
+
+.timeInput::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.timeInput::-webkit-clear-button,
+.timeInput::-webkit-inner-spin-button {
+  display: none;
+}
+
+.timeInputIcon {
+  position: absolute;
+  right: 2px;
+  color: var(--oi-content-color-tertiary);
+  pointer-events: none;
+}
+
+.timeInputClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-left: var(--oi-spacing-xs);
+  margin-right: var(--oi-spacing-xs);
+  border: none;
+  border-radius: var(--oi-border-radius-default);
+  background: none;
+  color: var(--oi-content-color-tertiary);
+  cursor: pointer;
+}
+
+.timeInputClear:hover {
+  color: var(--oi-content-color-primary);
+  background-color: var(--oi-background-color-secondary);
 }
 
 .typeChip {
