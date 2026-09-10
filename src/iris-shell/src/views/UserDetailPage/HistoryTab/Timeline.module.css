@@ -256,6 +256,7 @@
   min-width: 160px;
   max-width: 260px;
   width: 260px;
+  margin-left: var(--oi-spacing-l);
 }
 
 .eventActor {
