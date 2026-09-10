@@ -165,11 +165,12 @@
      columns across every row, instead of each column packing to its own
      content width and drifting depending on neighboring text length. */
   display: grid;
-  /* Every track here is a fixed size (not "auto"/content-based) so the grid
-     resolves to the exact same column widths on every row regardless of
-     that row's own text/badge length — true table-column alignment instead
-     of each row's badge width nudging everything after it. */
-  grid-template-columns: 50px 8px minmax(120px, 200px) minmax(0, 1fr) minmax(150px, 240px) 96px 16px;
+  /* Label is the only flexible track — it absorbs/gives up space as the row
+     resizes. Reason, actor and status are all fixed widths (not "auto" or
+     an "fr" of their own), so together they always move as a single block
+     flush against the chevron on the right, instead of reason resizing
+     independently of the actor/status next to it. */
+  grid-template-columns: 50px 8px minmax(0, 1fr) 200px 190px 96px 16px;
   /* center (not flex-start): keeps top/bottom whitespace symmetric whether
      the row stays at min-height or grows taller for a wrapped label. */
   align-items: center;
@@ -227,9 +228,8 @@
 
 .eventLabel {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
   font-size: var(--oi-text-body-s-font-size);
   line-height: var(--oi-text-body-s-line-height);
   color: var(--oi-content-color-primary);
@@ -282,10 +282,14 @@
 }
 
 .eventBadge {
-  justify-self: start;
-  /* Pulls the badge in closer to the actor/target column, undoing part of
-     the row's shared column-gap. */
-  margin-left: calc(-1 * var(--oi-spacing-s));
+  /* end (not start): the badge column reserves a fixed width so every row
+     aligns, but left-aligning left a gap of unused reserved space between
+     the badge and the chevron. End-aligning puts the badge flush against
+     that gap instead, closing the distance to the chevron. */
+  justify-self: end;
+  /* Cancels out the row's shared column-gap so actor/target and badge sit
+     right next to each other. */
+  margin-left: calc(-1 * var(--oi-spacing-m));
 }
 
 .eventChevron {
@@ -318,7 +322,7 @@
    chevron all inline) starts crowding/truncating too much of its own data.
    Switch to a 3-row grid instead: marker/time/label/chevron on top, then
    reason and actor+badge each on their own full-width line underneath. */
-@media (max-width: 992px) {
+@media (max-width: 1200px) {
   .eventItem {
     grid-template-columns: auto auto 1fr auto;
     grid-template-areas:
