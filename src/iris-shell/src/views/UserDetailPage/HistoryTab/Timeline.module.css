@@ -161,11 +161,19 @@
 
 .eventItem {
   position: relative;
-  display: flex;
+  /* Grid (not flex) so reason/actor/status line up as fixed-width table
+     columns across every row, instead of each column packing to its own
+     content width and drifting depending on neighboring text length. */
+  display: grid;
+  /* Every track here is a fixed size (not "auto"/content-based) so the grid
+     resolves to the exact same column widths on every row regardless of
+     that row's own text/badge length — true table-column alignment instead
+     of each row's badge width nudging everything after it. */
+  grid-template-columns: 50px 8px minmax(120px, 200px) minmax(0, 1fr) minmax(150px, 240px) 96px 16px;
   /* center (not flex-start): keeps top/bottom whitespace symmetric whether
      the row stays at min-height or grows taller for a wrapped label. */
   align-items: center;
-  gap: var(--oi-spacing-m);
+  column-gap: var(--oi-spacing-m);
   min-height: 44px;
   width: 100%;
   border: none;
@@ -205,8 +213,6 @@
 }
 
 .eventTime {
-  min-width: 50px;
-  flex-shrink: 0;
   font-size: var(--oi-text-caption-font-size);
   line-height: var(--oi-text-caption-line-height);
   color: var(--oi-content-color-tertiary);
@@ -216,29 +222,26 @@
 .eventMarker {
   width: 8px;
   height: 8px;
-  flex-shrink: 0;
   border-radius: var(--oi-border-radius-max);
 }
 
 .eventLabel {
-  flex: 1 1 auto;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--oi-text-body-s-font-size);
   line-height: var(--oi-text-body-s-line-height);
   color: var(--oi-content-color-primary);
 }
 
-/* Reason is free text entered by the requester. No fixed width — it sizes
-   to its own content (up to max-width) so a short reason shows in full
-   instead of always reserving/truncating to a rigid column. Only reasons
-   that would exceed max-width get truncated, mostly done in JS (see
-   `truncateReason`) so trailing punctuation/whitespace can be trimmed
-   before the '…' is appended; the overflow/ellipsis here is only a safety
-   net for text longer than that estimate. */
+/* Reason is free text entered by the requester. Fixed grid column (not
+   content-sized) so it lines up under every other row's reason instead of
+   drifting with the label's length; long reasons ellipsis, mostly already
+   trimmed in JS (see `truncateReason`) so trailing punctuation/whitespace
+   is cut before the '…' rather than the browser cutting mid-word. */
 .eventReason {
-  flex: 0 1 auto;
   min-width: 0;
-  max-width: 420px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -247,25 +250,14 @@
   color: var(--oi-content-color-tertiary);
 }
 
-/* No fixed width — sizes to its own content (up to max-width) so a short
-   actor/target name shows in full instead of always truncating inside a
-   rigid 260px box, even when the row has spare room to its right. */
-.eventDetails {
-  display: flex;
-  align-items: center;
-  gap: var(--oi-spacing-m);
-  flex: 0 1 auto;
-  min-width: 0;
-  max-width: 380px;
-  margin-left: var(--oi-spacing-l);
-}
-
 .eventActor {
   display: inline-flex;
   align-items: center;
   gap: var(--oi-spacing-xs);
-  flex: 0 1 auto;
   min-width: 0;
+  /* Extra room on top of the row's shared column-gap, so reason and
+     requested-by/target read as clearly separate columns. */
+  margin-left: var(--oi-spacing-l);
   font-size: var(--oi-text-caption-font-size);
   line-height: var(--oi-text-caption-line-height);
   color: var(--oi-content-color-tertiary);
@@ -290,12 +282,14 @@
 }
 
 .eventBadge {
-  flex-shrink: 0;
+  justify-self: start;
+  /* Pulls the badge in closer to the actor/target column, undoing part of
+     the row's shared column-gap. */
+  margin-left: calc(-1 * var(--oi-spacing-s));
 }
 
 .eventChevron {
   display: inline-flex;
-  flex-shrink: 0;
   color: var(--oi-content-color-tertiary);
 }
 
@@ -324,17 +318,17 @@
    chevron all inline) starts crowding/truncating too much of its own data.
    Switch to a 3-row grid instead: marker/time/label/chevron on top, then
    reason and actor+badge each on their own full-width line underneath. */
-@media (max-width: 720px) {
+@media (max-width: 992px) {
   .eventItem {
-    display: grid;
     grid-template-columns: auto auto 1fr auto;
     grid-template-areas:
       'marker time label chevron'
       '. reason reason reason'
-      '. details details details';
+      '. actor actor badge';
     align-items: center;
     row-gap: var(--oi-spacing-xs);
     min-height: 0;
+    padding-block: var(--oi-spacing-m);
   }
 
   .eventMarker {
@@ -352,6 +346,7 @@
 
   .eventChevron {
     grid-area: chevron;
+    justify-self: end;
   }
 
   .eventReason {
@@ -362,10 +357,15 @@
     text-overflow: clip;
   }
 
-  .eventDetails {
-    grid-area: details;
+  .eventActor {
+    grid-area: actor;
     max-width: none;
     margin-left: 0;
-    flex-wrap: wrap;
+  }
+
+  .eventBadge {
+    grid-area: badge;
+    justify-self: end;
+    margin-left: 0;
   }
 }

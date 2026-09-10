@@ -182,18 +182,16 @@ function TimelineEventItem({
       <Tooltip label={`Reason: ${operation.reason}`} placement="top">
         <span className={styles.eventReason}>{truncateReason(operation.reason)}</span>
       </Tooltip>
-      <div className={styles.eventDetails}>
-        <Tooltip
-          label={`${showTargetObject ? 'Target' : 'Requested by'}: ${showTargetObject ? operation.targetObject : operation.actor}`}
-          placement="top"
-        >
-          <span className={styles.eventActor}>
-            {showTargetObject && <span className={styles.eventActorLabel}>Target:</span>}
-            <span className={styles.eventActorValue}>{showTargetObject ? operation.targetObject : operation.actor}</span>
-          </span>
-        </Tooltip>
-        <Badge className={styles.eventBadge}>{operation.status}</Badge>
-      </div>
+      <Tooltip
+        label={`${showTargetObject ? 'Target' : 'Requested by'}: ${showTargetObject ? operation.targetObject : operation.actor}`}
+        placement="top"
+      >
+        <span className={styles.eventActor}>
+          {showTargetObject && <span className={styles.eventActorLabel}>Target:</span>}
+          <span className={styles.eventActorValue}>{showTargetObject ? operation.targetObject : operation.actor}</span>
+        </span>
+      </Tooltip>
+      <Badge className={styles.eventBadge}>{operation.status}</Badge>
       <span className={styles.eventChevron} aria-hidden="true">
         <Icon name="CaretRight" size="16px" />
       </span>
