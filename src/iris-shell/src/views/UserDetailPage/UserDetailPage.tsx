@@ -31,7 +31,6 @@ const TABS = [
   { value: 'account', label: 'Account' },
   { value: 'connections', label: 'Connections' },
   { value: 'memberships', label: 'Memberships (8)' },
-  { value: 'managed-units', label: 'Managed units' },
   { value: 'roles', label: 'Roles' },
   { value: 'authorization', label: 'Authorization' },
   { value: 'object', label: 'Object' },

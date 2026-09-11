@@ -14,7 +14,6 @@ const USER_TABS: TabItem[] = [
   { value: 'account', label: 'Account' },
   { value: 'connections', label: 'Connections' },
   { value: 'memberships', label: 'Memberships' },
-  { value: 'managed-units', label: 'Managed units' },
   { value: 'roles', label: 'Roles' },
   { value: 'authorization', label: 'Authorization' },
   { value: 'object', label: 'Object' },
