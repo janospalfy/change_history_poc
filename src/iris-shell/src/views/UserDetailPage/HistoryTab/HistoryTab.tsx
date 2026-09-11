@@ -663,6 +663,7 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
             selectedOperationId={selectedOpId}
             forceExpandAll={hasActiveFilters}
             showTargetObject={view === 'userActivity'}
+            totalOperationCount={allOperations.length}
           />
         ) : (
           <p className={styles.placeholder}>No operations match the current search and filters.</p>

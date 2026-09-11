@@ -20,6 +20,15 @@
   background-color: var(--oi-border-color-default);
 }
 
+/* Bounds the connector line to just the groups/rows — kept as a wrapper
+   (not merged into `.list`) so the line's stacking order vs. every row's
+   marker dot is unchanged, and so its bottom:18px offset lands above the
+   trailing "N/N operations shown" row instead of running behind it. */
+.body {
+  position: relative;
+  width: 100%;
+}
+
 .list {
   position: relative;
   z-index: 1;
@@ -39,6 +48,22 @@
 }
 
 .loadingText {
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+}
+
+/* Closing row once every group is loaded (no more pages left to reveal) —
+   the connector line lives inside `.list` now, so it stops above this row
+   instead of running down past the last group into the total count. */
+.end {
+  position: relative;
+  z-index: 1;
+  padding-top: var(--oi-spacing-m);
+  padding-left: var(--oi-spacing-xs);
+}
+
+.endLabel {
   font-size: var(--oi-text-caption-font-size);
   line-height: var(--oi-text-caption-line-height);
   color: var(--oi-content-color-tertiary);
