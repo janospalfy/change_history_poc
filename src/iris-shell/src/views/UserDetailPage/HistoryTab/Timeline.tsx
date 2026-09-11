@@ -21,12 +21,12 @@ const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
 const PAGE_SIZE = 8;
 
 /** Character budget the reason column is truncated to before its own '…' is
- *  appended. Deliberately conservative for the 420px max-width column so the
+ *  appended. Deliberately conservative for the 228px-wide column so the
  *  CSS overflow/ellipsis on `.eventReason` is a rarely-triggered safety net,
  *  not the primary truncation mechanism — that lets us trim trailing
  *  punctuation/whitespace ourselves instead of the browser cutting a
  *  reason off mid-word or right after a stray hyphen. */
-const REASON_TRUNCATE_LENGTH = 60;
+const REASON_TRUNCATE_LENGTH = 68;
 
 function truncateReason(reason: string): string {
   if (reason.length <= REASON_TRUNCATE_LENGTH) return reason;
@@ -173,12 +173,14 @@ function TimelineEventItem({
   return (
     <button type="button" className={cx(styles.eventItem, selected && styles.eventItemSelected)} onClick={() => onSelect(operation)}>
       {selected && <span className={styles.eventLineHighlight} aria-hidden="true" />}
-      <span className={styles.eventTime}>{operation.time}</span>
       <span
         className={cx(styles.eventMarker, styles[DOT_CLASS_BY_TYPE[operation.type]])}
         aria-hidden="true"
       />
-      <span className={styles.eventLabel}>{operation.label}</span>
+      <span className={styles.eventTime}>{operation.time}</span>
+      <Tooltip label={operation.label} placement="top">
+        <span className={styles.eventLabel}>{operation.label}</span>
+      </Tooltip>
       <Tooltip label={`Reason: ${operation.reason}`} placement="top">
         <span className={styles.eventReason}>{truncateReason(operation.reason)}</span>
       </Tooltip>
@@ -192,9 +194,6 @@ function TimelineEventItem({
         </span>
       </Tooltip>
       <Badge className={styles.eventBadge}>{operation.status}</Badge>
-      <span className={styles.eventChevron} aria-hidden="true">
-        <Icon name="CaretRight" size="16px" />
-      </span>
     </button>
   );
 }

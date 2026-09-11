@@ -1,6 +1,13 @@
 .wrap {
   position: relative;
   width: 100%;
+  /* Row layout below reacts to the space Timeline actually has (e.g. the
+     narrower panel in TreeDetailPage's split layout), not the viewport —
+     a viewport-based @media query stayed in the wide single-row layout
+     even when this component itself was squeezed, forcing the label
+     column to near-zero width and breaking words mid-letter. */
+  container-type: inline-size;
+  container-name: timeline;
 }
 
 .line {
@@ -168,9 +175,9 @@
   /* Label is the only flexible track — it absorbs/gives up space as the row
      resizes. Reason, actor and status are all fixed widths (not "auto" or
      an "fr" of their own), so together they always move as a single block
-     flush against the chevron on the right, instead of reason resizing
+     flush against the row's right edge, instead of reason resizing
      independently of the actor/status next to it. */
-  grid-template-columns: 50px 8px minmax(0, 1fr) 200px 190px 96px 16px;
+  grid-template-columns: 8px 50px minmax(0, 1fr) 228px 190px 96px;
   /* center (not flex-start): keeps top/bottom whitespace symmetric whether
      the row stays at min-height or grows taller for a wrapped label. */
   align-items: center;
@@ -228,8 +235,9 @@
 
 .eventLabel {
   min-width: 0;
-  white-space: normal;
-  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--oi-text-body-s-font-size);
   line-height: var(--oi-text-body-s-line-height);
   color: var(--oi-content-color-primary);
@@ -283,18 +291,13 @@
 
 .eventBadge {
   /* end (not start): the badge column reserves a fixed width so every row
-     aligns, but left-aligning left a gap of unused reserved space between
-     the badge and the chevron. End-aligning puts the badge flush against
-     that gap instead, closing the distance to the chevron. */
+     aligns, but left-aligning left a gap of unused reserved space before
+     the row's right edge. End-aligning puts the badge flush against the
+     edge instead. */
   justify-self: end;
   /* Cancels out the row's shared column-gap so actor/target and badge sit
      right next to each other. */
   margin-left: calc(-1 * var(--oi-spacing-m));
-}
-
-.eventChevron {
-  display: inline-flex;
-  color: var(--oi-content-color-tertiary);
 }
 
 .dotCreate {
@@ -317,16 +320,28 @@
   background-color: var(--oi-color-purple-600);
 }
 
-/* ---------- compact (narrow viewport) event row ---------- */
-/* Below this width the single-line row (time, label, reason, actor, badge,
-   chevron all inline) starts crowding/truncating too much of its own data.
-   Switch to a 3-row grid instead: marker/time/label/chevron on top, then
-   reason and actor+badge each on their own full-width line underneath. */
-@media (max-width: 1200px) {
+/* ---------- compact (narrow container) event row ---------- */
+/* Below this width the single-line row (time, label, reason, actor, badge
+   all inline) starts crowding/truncating too much of its own data. Switch
+   to a 3-row grid instead: marker/time/label on top, then reason and
+   actor+badge each on their own full-width line underneath.
+   840px (not the old 1200px) because this now measures Timeline's own
+   container, not the viewport — a plain content column's container is
+   ~330–340px narrower than the viewport (global sidebar + page padding),
+   so 840px still keeps the roomy single-row layout for a ~1200px+ window;
+   only a genuinely squeezed container (e.g. TreeDetailPage's split panel
+   layout) drops below it. */
+@container timeline (max-width: 840px) {
   .eventItem {
+    /* Actor spans the same two columns as reason (not just one) so its
+       own text length can't inflate the shared "time" column's auto width
+       and shove the label away from the time next to it — each `.eventItem`
+       is its own independent grid, so an "auto" column sizes to the widest
+       thing placed in it *for that row*, including cells below the label
+       row. Badge keeps its own dedicated last column instead. */
     grid-template-columns: auto auto 1fr auto;
     grid-template-areas:
-      'marker time label chevron'
+      'marker time label .'
       '. reason reason reason'
       '. actor actor badge';
     align-items: center;
@@ -345,12 +360,10 @@
 
   .eventLabel {
     grid-area: label;
+    overflow: visible;
+    text-overflow: clip;
     white-space: normal;
-  }
-
-  .eventChevron {
-    grid-area: chevron;
-    justify-self: end;
+    overflow-wrap: break-word;
   }
 
   .eventReason {
