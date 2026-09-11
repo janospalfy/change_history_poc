@@ -50,6 +50,7 @@ function DateValueInput({
   dateAriaLabel: string;
   timeAriaLabel: string;
 }) {
+  const timeInputRef = useRef<HTMLInputElement>(null);
   return (
     <>
       <span className={styles.dateInputWrapper}>
@@ -62,8 +63,9 @@ function DateValueInput({
         />
         <Icon name="CalendarBlank" size="12px" className={styles.dateInputIcon} />
       </span>
-      <span className={styles.timeInputWrapper}>
+      <span className={cx(styles.timeInputWrapper, time !== '' && styles.timeInputWrapperWithClear)}>
         <input
+          ref={timeInputRef}
           type="time"
           className={cx(styles.dateFilterSegment, styles.dateFilterValueSegment, styles.timeInput)}
           aria-label={timeAriaLabel}
@@ -71,7 +73,6 @@ function DateValueInput({
           value={time}
           onChange={(e) => onTimeChange(e.target.value)}
         />
-        <Icon name="Clock" size="12px" className={styles.timeInputIcon} />
         {time !== '' && (
           <button
             type="button"
@@ -82,6 +83,15 @@ function DateValueInput({
             <Icon name="X" size="10px" />
           </button>
         )}
+        <button
+          type="button"
+          className={styles.timeInputIconButton}
+          onClick={() => timeInputRef.current?.showPicker?.()}
+          aria-label={`Open ${timeAriaLabel.toLowerCase()} picker`}
+          tabIndex={-1}
+        >
+          <Icon name="Clock" size="12px" />
+        </button>
       </span>
     </>
   );

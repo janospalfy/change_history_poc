@@ -227,10 +227,12 @@
   pointer-events: none;
 }
 
-/* Time is optional, unlike the date next to it, but uses the same
-   icon-overlay treatment (native picker hidden, Iris glyph drawn instead)
-   so the two fields' spacing is equally reliable across browsers instead
-   of depending on the native clock indicator's own inconsistent padding. */
+/* Time is optional, unlike the date next to it. Its "clear" and clock
+   buttons are embedded inside the input's own box (like a search field's
+   icon), overlaid via absolute positioning against `.timeInputWrapper`
+   rather than placed after it — clock always sits at the box's right
+   edge; the clear button, when present, sits just to its left so the two
+   never occupy the same spot. */
 .timeInputWrapper {
   position: relative;
   display: inline-flex;
@@ -241,19 +243,17 @@
 .timeInput {
   cursor: pointer;
   width: auto;
-  padding-right: 18px;
+  text-align: left;
+  padding-right: 20px;
   font-size: 12px;
 }
 
+.timeInputWrapperWithClear .timeInput {
+  padding-right: 38px;
+}
+
 .timeInput::-webkit-calendar-picker-indicator {
-  position: absolute;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
+  display: none;
 }
 
 .timeInput::-webkit-clear-button,
@@ -261,22 +261,15 @@
   display: none;
 }
 
-.timeInputIcon {
+.timeInputClear,
+.timeInputIconButton {
   position: absolute;
-  right: 2px;
-  color: var(--oi-content-color-tertiary);
-  pointer-events: none;
-}
-
-.timeInputClear {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  margin-left: var(--oi-spacing-xs);
-  margin-right: var(--oi-spacing-xs);
   border: none;
   border-radius: var(--oi-border-radius-default);
   background: none;
@@ -284,7 +277,16 @@
   cursor: pointer;
 }
 
-.timeInputClear:hover {
+.timeInputIconButton {
+  right: 2px;
+}
+
+.timeInputClear {
+  right: 20px;
+}
+
+.timeInputClear:hover,
+.timeInputIconButton:hover {
   color: var(--oi-content-color-primary);
   background-color: var(--oi-background-color-secondary);
 }
