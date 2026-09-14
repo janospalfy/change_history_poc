@@ -38,7 +38,7 @@ export interface TimelineProps {
   groups: ChangeHistoryGroup[];
   onSelectOperation: (operation: ChangeHistoryOperation) => void;
   /** The operation currently open in the detail sidesheet, if any — its row
-   *  gets a highlighted background. */
+   *  gets a highlighted segment on the connector line. */
   selectedOperationId?: string | null;
   /** Expand every group regardless of user interaction (e.g. while a search
    *  filter is active, so matches are visible without an extra click). */
@@ -55,12 +55,14 @@ export interface TimelineProps {
 }
 
 /**
- * Timeline — grouped, expandable operation history rendered as accordions.
- * Each date group is a collapsed header row (marker + chevron + date +
- * count) until expanded, revealing its individual `TimelineEventItem` rows,
- * indented under the header and flush against each other (separated only
- * by their own bottom border). The most recent group starts expanded;
- * older groups start collapsed.
+ * Timeline — grouped, expandable operation history. Each date group is a
+ * collapsed header row (chevron + date + count) until expanded, revealing
+ * its individual `TimelineEventItem` rows, indented under the header and
+ * flush against each other (separated only by their own bottom border).
+ * The most recent group starts expanded; older groups start collapsed.
+ * A single connector line runs behind every row, threaded through each
+ * group's chevron and each event's colored dot, most of it hidden behind
+ * each row's own opaque background.
  */
 export function Timeline({
   groups,
@@ -116,44 +118,47 @@ export function Timeline({
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.list}>
-        {visibleGroups.map((group, index) => {
-          const isExpanded = forceExpandAll || expanded.has(index);
-          return (
-            <div
-              key={group.date}
-              className={cx(styles.group, isExpanded ? styles.groupSpacingNormal : styles.groupSpacingTight)}
-            >
-              <button
-                type="button"
-                className={styles.headerRow}
-                aria-expanded={isExpanded}
-                onClick={() => toggle(index)}
+      <div className={styles.body}>
+        <div className={styles.line} aria-hidden="true" />
+        <div className={styles.list}>
+          {visibleGroups.map((group, index) => {
+            const isExpanded = forceExpandAll || expanded.has(index);
+            return (
+              <div
+                key={group.date}
+                className={cx(styles.group, isExpanded ? styles.groupSpacingNormal : styles.groupSpacingTight)}
               >
-                <span className={cx(styles.chevron, isExpanded && styles.chevronExpanded)}>
-                  <Icon name="CaretRight" size="16px" />
-                </span>
-                <span className={styles.date}>{group.date}</span>
-                <span className={styles.count}>
-                  {group.operations.length} operation{group.operations.length === 1 ? '' : 's'}
-                </span>
-              </button>
-              <div className={cx(styles.collapsible, isExpanded && styles.collapsibleExpanded)}>
-                <div className={styles.eventsBlock}>
-                  {group.operations.map((op) => (
-                    <TimelineEventItem
-                      key={op.id}
-                      operation={op}
-                      selected={op.id === selectedOperationId}
-                      onSelect={onSelectOperation}
-                      showTargetObject={showTargetObject}
-                    />
-                  ))}
+                <button
+                  type="button"
+                  className={styles.headerRow}
+                  aria-expanded={isExpanded}
+                  onClick={() => toggle(index)}
+                >
+                  <span className={cx(styles.chevron, isExpanded && styles.chevronExpanded)}>
+                    <Icon name="CaretRight" size="16px" />
+                  </span>
+                  <span className={styles.date}>{group.date}</span>
+                  <span className={styles.count}>
+                    {group.operations.length} operation{group.operations.length === 1 ? '' : 's'}
+                  </span>
+                </button>
+                <div className={cx(styles.collapsible, isExpanded && styles.collapsibleExpanded)}>
+                  <div className={styles.eventsBlock}>
+                    {group.operations.map((op) => (
+                      <TimelineEventItem
+                        key={op.id}
+                        operation={op}
+                        selected={op.id === selectedOperationId}
+                        onSelect={onSelectOperation}
+                        showTargetObject={showTargetObject}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
       {hasMore ? (
         <div ref={sentinelRef} className={styles.sentinel}>
@@ -185,6 +190,7 @@ function TimelineEventItem({
 }) {
   return (
     <button type="button" className={cx(styles.eventItem, selected && styles.eventItemSelected)} onClick={() => onSelect(operation)}>
+      {selected && <span className={styles.eventLineHighlight} aria-hidden="true" />}
       <span
         className={cx(styles.eventMarker, styles[DOT_CLASS_BY_TYPE[operation.type]])}
         aria-hidden="true"

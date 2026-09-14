@@ -10,6 +10,27 @@
   container-name: timeline;
 }
 
+.line {
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  /* Aligns with the chevron column below (headerRow's 4px left padding +
+     half its 16px icon), now that the grey header marker is gone. */
+  left: 12px;
+  width: 1px;
+  border-radius: 1px;
+  background-color: var(--oi-border-color-default);
+}
+
+/* Bounds the connector line to just the groups/rows — kept as a wrapper
+   (not merged into `.list`) so the line's stacking order vs. every row's
+   marker dot is unchanged, and so its bottom:18px offset lands above the
+   trailing "N/N operations shown" row instead of running behind it. */
+.body {
+  position: relative;
+  width: 100%;
+}
+
 .list {
   position: relative;
   z-index: 1;
@@ -35,7 +56,8 @@
 }
 
 /* Closing row once every group is loaded (no more pages left to reveal) —
-   just the dataset's total count below the last group. */
+   the connector line lives inside `.list` now, so it stops above this row
+   instead of running down past the last group into the total count. */
 .end {
   position: relative;
   z-index: 1;
@@ -86,15 +108,16 @@
   }
 }
 
-/* No indent (unlike before the grey header marker was removed) — flush
-   with the header's own left edge lines up each row's colored dot with
-   the chevron above it (both now start at the same x, so the 8px dot
-   centers under the 16px chevron). Overflow clipping for the row-collapse
-   transition lives on .collapsible (the outer grid container, spanning
-   the full width) rather than here. */
+/* Event rows sit indented under their header, matching the Figma spec
+   (header spans the full width; its events block starts 32px in).
+   Overflow clipping for the row-collapse transition lives on .collapsible
+   (the outer grid container, spanning the full width) rather than here —
+   this box is intentionally NOT clipped so .eventLineHighlight can render
+   in the 32px gutter to its left, over the connector line. */
 .eventsBlock {
   display: flex;
   flex-direction: column;
+  margin-left: 32px;
   padding-top: var(--oi-spacing-s);
   min-height: 0;
 }
@@ -190,6 +213,21 @@
 .eventItemSelected,
 .eventItemSelected:hover {
   background-color: var(--oi-background-color-info);
+}
+
+/* Overlays the shared connector line (.line, at wrap-relative left: 12px)
+   with a brand-color bar spanning the row whose operation is open in the
+   sidesheet, matching Figma node 1532:26841 (2px wide) — stretched to the
+   row's full (possibly wrapped, multi-line) height rather than a fixed
+   45px, so it still covers the whole row once rows can grow with content. */
+.eventLineHighlight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -20px;
+  width: 2px;
+  border-radius: 1px;
+  background-color: var(--oi-border-color-focus);
 }
 
 .eventTime {
