@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   border-radius: var(--oi-border-radius-default);
   border: var(--oi-border-width-default) var(--oi-border-style-solid) transparent;
   color: var(--oi-content-color-secondary);

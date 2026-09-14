@@ -53,6 +53,26 @@
   color: var(--oi-content-color-primary);
 }
 
+/* Count of active property filters, pinned to the Add-filter button's
+   corner as a small rounded-square chip (not a circular badge). */
+.filterCountBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 3px;
+  border-radius: 4px;
+  background-color: var(--oi-button-background-primary);
+  color: var(--oi-content-color-constant);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: var(--oi-text-caption-font-weight);
+}
+
 /* Filters is built for the full-width Users page; drop its outer padding
    and border so it sits flush within the History tab's own content area.
    padding-top is zeroed too, so the gap above/below .filterRowDivider (set

@@ -492,11 +492,24 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
             align="end"
             items={addFilterMenuItems}
             trigger={({ ref, onClick, expanded }) => (
-              <Tooltip label="Add filter">
+              <Tooltip
+                label={activeFilters.length > 0 ? `Add filter (${activeFilters.length} active)` : 'Add filter'}
+              >
                 <IconButton
                   ref={ref as Ref<HTMLButtonElement>}
-                  icon="FunnelSimple"
-                  ariaLabel="Add filter"
+                  icon={
+                    <>
+                      <Icon name="FunnelSimple" size="20px" />
+                      {activeFilters.length > 0 && (
+                        <span className={styles.filterCountBadge} aria-hidden="true">
+                          {activeFilters.length}
+                        </span>
+                      )}
+                    </>
+                  }
+                  ariaLabel={
+                    activeFilters.length > 0 ? `Add filter, ${activeFilters.length} active` : 'Add filter'
+                  }
                   variant="secondary"
                   aria-haspopup="menu"
                   aria-expanded={expanded}
