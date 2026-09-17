@@ -15,14 +15,11 @@
 
 /* Scrolls internally so the toolbar above it never loses width to a
    reserved scrollbar gutter (it would otherwise sit inside the same
-   scroll container as the toolbar, shifting its width vs. other tabs).
-   The right padding keeps the scrollbar off the edge of the content
-   (e.g. the Timeline's "Expand all" toggle, which is itself right-aligned). */
+   scroll container as the toolbar, shifting its width vs. other tabs). */
 .body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-right: var(--oi-spacing-s);
 }
 
 .toolbar > * {
@@ -54,6 +51,13 @@
 .filterButtonActive {
   background-color: var(--oi-background-color-tertiary);
   color: var(--oi-content-color-primary);
+}
+
+/* Positions the active-filter-count badge against the labeled Filter
+   button's corner (Button itself has no position: relative). */
+.filterButtonWrap {
+  position: relative;
+  display: inline-flex;
 }
 
 /* Count of active property filters, pinned to the Add-filter button's

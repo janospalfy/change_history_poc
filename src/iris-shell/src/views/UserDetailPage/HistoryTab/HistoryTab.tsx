@@ -3,6 +3,7 @@ import { cx } from '../../../lib/cx.js';
 import { SegmentedToggle } from '../../../components/SegmentedToggle/SegmentedToggle.js';
 import { TextInput } from '../../../components/TextInput/TextInput.js';
 import { IconButton } from '../../../components/IconButton/IconButton.js';
+import { Button } from '../../../components/Button/Button.js';
 import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
 import { Menu } from '../../../components/Menu/Menu.js';
 import { Icon } from '../../../components/Icon/Icon.js';
@@ -495,27 +496,27 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
               <Tooltip
                 label={activeFilters.length > 0 ? `Add filter (${activeFilters.length} active)` : 'Add filter'}
               >
-                <IconButton
-                  ref={ref as Ref<HTMLButtonElement>}
-                  icon={
-                    <>
-                      <Icon name="FunnelSimple" size="20px" />
-                      {activeFilters.length > 0 && (
-                        <span className={styles.filterCountBadge} aria-hidden="true">
-                          {activeFilters.length}
-                        </span>
-                      )}
-                    </>
-                  }
-                  ariaLabel={
-                    activeFilters.length > 0 ? `Add filter, ${activeFilters.length} active` : 'Add filter'
-                  }
-                  variant="secondary"
-                  aria-haspopup="menu"
-                  aria-expanded={expanded}
-                  className={activeFilters.length > 0 ? styles.filterButtonActive : undefined}
-                  onClick={onClick}
-                />
+                <span className={styles.filterButtonWrap}>
+                  <Button
+                    ref={ref as Ref<HTMLButtonElement>}
+                    iconLead="FunnelSimple"
+                    variant="secondary"
+                    aria-haspopup="menu"
+                    aria-expanded={expanded}
+                    aria-label={
+                      activeFilters.length > 0 ? `Add filter, ${activeFilters.length} active` : 'Add filter'
+                    }
+                    className={activeFilters.length > 0 ? styles.filterButtonActive : undefined}
+                    onClick={onClick}
+                  >
+                    Filter
+                  </Button>
+                  {activeFilters.length > 0 && (
+                    <span className={styles.filterCountBadge} aria-hidden="true">
+                      {activeFilters.length}
+                    </span>
+                  )}
+                </span>
               </Tooltip>
             )}
           />
