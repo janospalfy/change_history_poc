@@ -37,6 +37,7 @@ const DEFAULT_FAVORITES: FavoriteEntry[] = [
     href: '#/users/isabella-clark?tab=overview',
   },
   { id: 'page-users', name: 'Users', type: 'Page', icon: 'Users', href: '#/users' },
+  { id: 'o1d-program-data', name: 'Program Data', type: 'Folder', icon: 'Folder', href: '#/tree/o1d-program-data' },
 ];
 
 function read(): FavoriteEntry[] {
