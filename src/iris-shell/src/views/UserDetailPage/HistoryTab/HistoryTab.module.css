@@ -15,11 +15,14 @@
 
 /* Scrolls internally so the toolbar above it never loses width to a
    reserved scrollbar gutter (it would otherwise sit inside the same
-   scroll container as the toolbar, shifting its width vs. other tabs). */
+   scroll container as the toolbar, shifting its width vs. other tabs).
+   The right padding keeps the scrollbar off the edge of the content
+   (e.g. the Timeline's "Expand all" toggle, which is itself right-aligned). */
 .body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  padding-right: var(--oi-spacing-s);
 }
 
 .toolbar > * {

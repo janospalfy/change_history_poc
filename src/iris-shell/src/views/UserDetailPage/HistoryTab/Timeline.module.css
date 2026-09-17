@@ -24,11 +24,51 @@
 
 /* Bounds the connector line to just the groups/rows — kept as a wrapper
    (not merged into `.list`) so the line's stacking order vs. every row's
-   marker dot is unchanged, and so its bottom:18px offset lands above the
-   trailing "N/N operations shown" row instead of running behind it. */
+   marker dot is unchanged. */
 .body {
   position: relative;
   width: 100%;
+}
+
+/* "N/N operations shown" summary — sits above the list so it's visible
+   without scrolling to the end, regardless of how many pages have loaded.
+   The expand/collapse-all toggle shares this row, right-aligned. */
+.summary {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--oi-spacing-m);
+  padding-left: var(--oi-spacing-xs);
+}
+
+.summaryLabel {
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-tertiary);
+}
+
+.summaryToggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-link);
+  cursor: pointer;
+}
+
+.summaryToggle:hover {
+  color: var(--oi-content-color-link-hover);
+  text-decoration: underline;
+}
+
+.summaryToggle:focus-visible {
+  box-shadow: var(--oi-focus-ring);
+  border-radius: var(--oi-border-radius-s);
+  outline: none;
 }
 
 .list {
@@ -50,22 +90,6 @@
 }
 
 .loadingText {
-  font-size: var(--oi-text-caption-font-size);
-  line-height: var(--oi-text-caption-line-height);
-  color: var(--oi-content-color-tertiary);
-}
-
-/* Closing row once every group is loaded (no more pages left to reveal) —
-   the connector line lives inside `.list` now, so it stops above this row
-   instead of running down past the last group into the total count. */
-.end {
-  position: relative;
-  z-index: 1;
-  padding-top: var(--oi-spacing-m);
-  padding-left: var(--oi-spacing-xs);
-}
-
-.endLabel {
   font-size: var(--oi-text-caption-font-size);
   line-height: var(--oi-text-caption-line-height);
   color: var(--oi-content-color-tertiary);

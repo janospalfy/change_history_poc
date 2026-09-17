@@ -48,8 +48,8 @@ export interface TimelineProps {
    *  instead — the varied, actually-informative part of that story. */
   showTargetObject?: boolean;
   /** True count of operations in the dataset before search/filters are
-   *  applied — lets the end-of-list label read "12/45 operations shown"
-   *  instead of comparing the filtered count to itself. Defaults to the
+   *  applied — lets the summary label read "12/45 operations shown" instead
+   *  of comparing the filtered count to itself. Defaults to the
    *  (already-filtered) `groups` total when the caller has no filters. */
   totalOperationCount?: number;
 }
@@ -116,8 +116,26 @@ export function Timeline({
   const shownOperations = groups.reduce((sum, group) => sum + group.operations.length, 0);
   const totalOperations = totalOperationCount ?? shownOperations;
 
+  // Reflects reality once every group happens to be individually expanded,
+  // not just after the button itself was clicked — so the label stays
+  // accurate if the user expands the last remaining group by hand.
+  const isAllExpanded = groups.length > 0 && groups.every((_, index) => expanded.has(index));
+  const toggleAll = () => {
+    setExpanded(isAllExpanded ? new Set() : new Set(groups.map((_, index) => index)));
+  };
+
   return (
     <div className={styles.wrap}>
+      <div className={styles.summary}>
+        <span className={styles.summaryLabel}>
+          {totalOperations === 0 ? 'No operations shown' : `${shownOperations}/${totalOperations} operations shown`}
+        </span>
+        {!forceExpandAll && groups.length > 0 && (
+          <button type="button" className={styles.summaryToggle} onClick={toggleAll}>
+            {isAllExpanded ? 'Collapse all' : 'Expand all'}
+          </button>
+        )}
+      </div>
       <div className={styles.body}>
         <div className={styles.line} aria-hidden="true" />
         <div className={styles.list}>
@@ -160,17 +178,9 @@ export function Timeline({
           })}
         </div>
       </div>
-      {hasMore ? (
+      {hasMore && (
         <div ref={sentinelRef} className={styles.sentinel}>
           {loadingMore && <span className={styles.loadingText}>Loading more…</span>}
-        </div>
-      ) : (
-        <div className={styles.end}>
-          <span className={styles.endLabel}>
-            {totalOperations === 0
-              ? 'No operations shown'
-              : `${shownOperations}/${totalOperations} operations shown`}
-          </span>
         </div>
       )}
     </div>
