@@ -376,7 +376,15 @@ function FavouritesBody() {
           )}
           {filteredEntries.length > 0 && (
             <>
-              <p className={styles.favSectionLabel}>Objects & folders</p>
+              <p
+                className={
+                  filteredViews.length > 0
+                    ? `${styles.favSectionLabel} ${styles.favSectionLabelSpaced}`
+                    : styles.favSectionLabel
+                }
+              >
+                Objects & folders
+              </p>
               {filteredEntries.map((f) => {
                 const index = entries.indexOf(f);
                 return (

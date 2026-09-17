@@ -53,6 +53,13 @@
   color: var(--oi-content-color-tertiary);
 }
 
+/* Extra breathing room above a section label that follows another section
+   (e.g. "Objects & folders" after "Views"), since the shared row gap alone
+   is too tight to read as a section boundary. */
+.favSectionLabelSpaced {
+  margin-top: var(--oi-spacing-m);
+}
+
 /* Custom row for the Favourites Views/Objects lists (not NavItem — needs a
    trailing filter-count badge, a right-click context menu (Open/Rename/
    Remove), and doubles as the drag-and-drop reorder handle). */
