@@ -175,7 +175,6 @@ export function OperationDetailSidesheet({
 
       {operation.type === 'deprovision' && (
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Workflow Activities and Policy Actions</h3>
           <WorkflowAccordion activities={operation.workflowActivities ?? DEFAULT_DEPROVISION_WORKFLOW} />
         </section>
       )}
@@ -228,56 +227,72 @@ function WorkflowAccordion({ activities }: { activities: WorkflowActivity[] }) {
     });
   };
 
+  const isAllExpanded = activities.length > 0 && activities.every((_, index) => expanded.has(index));
+  const toggleAll = () => {
+    setExpanded(isAllExpanded ? new Set() : new Set(activities.map((_, index) => index)));
+  };
+
   return (
-    <div className={styles.workflowList}>
-      {activities.map((activity, index) => {
-        const isExpanded = expanded.has(index);
-        return (
-          <div key={activity.name} className={styles.workflowRow}>
-            <button
-              type="button"
-              className={styles.workflowHeader}
-              aria-expanded={isExpanded}
-              onClick={() => toggle(index)}
-            >
-              <span className={cx(styles.workflowChevron, isExpanded && styles.workflowChevronExpanded)}>
-                <Icon name="CaretRight" size="16px" />
-              </span>
-              <span className={styles.workflowName}>{activity.name}</span>
-              <span className={styles.workflowTimestamp}>{activity.timestamp}</span>
-            </button>
-            <div className={cx(styles.workflowCollapsible, isExpanded && styles.workflowCollapsibleExpanded)}>
-              <div className={styles.workflowBody}>
-                {activity.policy && (
-                  <p className={styles.workflowNote}>
-                    Policy:{' '}
-                    <Link href="#" onClick={(e) => e.preventDefault()}>
-                      {activity.policy}
-                    </Link>
-                  </p>
-                )}
-                {activity.notes.map((note) => (
-                  <p key={note} className={styles.workflowNote}>
-                    {note}
-                  </p>
-                ))}
-                {activity.change && (
-                  <div className={styles.workflowChange}>
-                    <div className={styles.workflowChangeRow}>
-                      <span className={styles.workflowChangeLabel}>Old value</span>
-                      <span>{activity.change.oldValue}</span>
+    <>
+      <div className={styles.sectionHeaderRow}>
+        <h3 className={styles.sectionTitle}>Workflow Activities and Policy Actions</h3>
+        {activities.length > 0 && (
+          <button type="button" className={styles.summaryToggle} onClick={toggleAll}>
+            <Icon name={isAllExpanded ? 'ArrowsInSimple' : 'ArrowsOutSimple'} size="16px" />
+            <span>{isAllExpanded ? 'Collapse all' : 'Expand all'}</span>
+          </button>
+        )}
+      </div>
+      <div className={styles.workflowList}>
+        {activities.map((activity, index) => {
+          const isExpanded = expanded.has(index);
+          return (
+            <div key={activity.name} className={styles.workflowRow}>
+              <button
+                type="button"
+                className={styles.workflowHeader}
+                aria-expanded={isExpanded}
+                onClick={() => toggle(index)}
+              >
+                <span className={cx(styles.workflowChevron, isExpanded && styles.workflowChevronExpanded)}>
+                  <Icon name="CaretRight" size="16px" />
+                </span>
+                <span className={styles.workflowName}>{activity.name}</span>
+                <span className={styles.workflowTimestamp}>{activity.timestamp}</span>
+              </button>
+              <div className={cx(styles.workflowCollapsible, isExpanded && styles.workflowCollapsibleExpanded)}>
+                <div className={styles.workflowBody}>
+                  {activity.policy && (
+                    <p className={styles.workflowNote}>
+                      Policy:{' '}
+                      <Link href="#" onClick={(e) => e.preventDefault()}>
+                        {activity.policy}
+                      </Link>
+                    </p>
+                  )}
+                  {activity.notes.map((note) => (
+                    <p key={note} className={styles.workflowNote}>
+                      {note}
+                    </p>
+                  ))}
+                  {activity.change && (
+                    <div className={styles.workflowChange}>
+                      <div className={styles.workflowChangeRow}>
+                        <span className={styles.workflowChangeLabel}>Old value</span>
+                        <span>{activity.change.oldValue}</span>
+                      </div>
+                      <div className={styles.workflowChangeRow}>
+                        <span className={styles.workflowChangeLabel}>New value</span>
+                        <span>{activity.change.newValue}</span>
+                      </div>
                     </div>
-                    <div className={styles.workflowChangeRow}>
-                      <span className={styles.workflowChangeLabel}>New value</span>
-                      <span>{activity.change.newValue}</span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }

@@ -57,6 +57,44 @@
   color: var(--oi-content-color-primary);
 }
 
+/* Section title row for sections with a trailing action (e.g. the workflow
+   accordion's expand/collapse-all button). */
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--oi-spacing-m);
+}
+
+/* Matches Filters' ghostBtn treatment (transparent, hover fill, secondary
+   text) so expand/collapse-all reads as the same control everywhere. */
+.summaryToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oi-button-gap-s);
+  flex-shrink: 0;
+  padding-block: var(--oi-spacing-xs);
+  padding-inline: var(--oi-spacing-s);
+  border: none;
+  border-radius: var(--oi-border-radius-default);
+  background-color: transparent;
+  color: var(--oi-content-color-secondary);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  font-weight: var(--oi-text-body-s-font-weight);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.summaryToggle:hover {
+  background-color: var(--oi-background-color-primary);
+}
+
+.summaryToggle:focus-visible {
+  outline: var(--oi-border-width-l) var(--oi-border-style-solid) var(--oi-border-color-focus);
+  outline-offset: var(--oi-border-width-l);
+}
+
 /* ---------- workflow activities accordion ---------- */
 
 .workflowList {

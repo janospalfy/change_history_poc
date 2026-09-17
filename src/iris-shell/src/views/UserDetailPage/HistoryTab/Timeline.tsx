@@ -132,7 +132,8 @@ export function Timeline({
         </span>
         {!forceExpandAll && groups.length > 0 && (
           <button type="button" className={styles.summaryToggle} onClick={toggleAll}>
-            {isAllExpanded ? 'Collapse all' : 'Expand all'}
+            <Icon name={isAllExpanded ? 'ArrowsInSimple' : 'ArrowsOutSimple'} size="16px" />
+            <span>{isAllExpanded ? 'Collapse all' : 'Expand all'}</span>
           </button>
         )}
       </div>
