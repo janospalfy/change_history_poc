@@ -27,11 +27,17 @@
 
 .favEmpty {
   margin: 0;
-  padding: var(--oi-spacing-s) var(--oi-spacing-m);
-  font-size: var(--oi-text-body-s-font-size);
-  line-height: var(--oi-text-body-s-line-height);
+  padding: var(--oi-spacing-xs) var(--oi-spacing-s);
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
   color: var(--oi-content-color-tertiary);
-  text-align: center;
+  text-align: left;
+}
+
+.favEmpty strong {
+  display: block;
+  font-weight: var(--oi-text-caption-strong-font-weight);
+  color: var(--oi-content-color-secondary);
 }
 
 .favSearch {

@@ -25,10 +25,26 @@ export interface FavoriteEntry {
   href: string;
 }
 
+/** Shown the first time the app runs (before the user has favorited
+ *  anything), so the sidebar's Favourites panel isn't empty out of the box. */
+const DEFAULT_FAVORITES: FavoriteEntry[] = [
+  {
+    id: 'isabella-clark',
+    name: 'Isabella Clark',
+    type: 'User',
+    icon: 'User',
+    description: 'Oversees enterprise-wide platform security strategy and operations.',
+    href: '#/users/isabella-clark?tab=overview',
+  },
+  { id: 'page-users', name: 'Users', type: 'Page', icon: 'Users', href: '#/users' },
+];
+
 function read(): FavoriteEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    // Only the key's true absence (never persisted before) seeds the
+    // defaults — an explicitly emptied list persists as "[]", not null.
+    if (raw === null) return DEFAULT_FAVORITES;
     const arr = JSON.parse(raw) as unknown;
     if (!Array.isArray(arr)) return [];
     return arr

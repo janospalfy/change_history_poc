@@ -216,7 +216,7 @@ interface DragPos {
 }
 
 /** Favourites segment body — search box + saved "Views" (named filter
- *  shortcuts) and favorited "Objects", each reorderable via drag-and-drop
+ *  shortcuts) and favorited "Objects & folders", each reorderable via drag-and-drop
  *  (Figma node 4181:13907 / notes: "Favorites list in Directory panel",
  *  "Ordering by drag and drop"). Selecting the segment doesn't navigate —
  *  the main content stays on whatever page the user was already viewing. */
@@ -322,17 +322,22 @@ function FavouritesBody() {
 
   return (
     <nav className={styles.nav} aria-label="Favourites">
-      <div className={styles.favSearch}>
-        <TextInput
-          iconLead="MagnifyingGlass"
-          placeholder="Search by name"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Search favourites"
-        />
-      </div>
+      {!isEmpty && (
+        <div className={styles.favSearch}>
+          <TextInput
+            iconLead="MagnifyingGlass"
+            placeholder="Search by name"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search favourites"
+          />
+        </div>
+      )}
       {isEmpty ? (
-        <p className={styles.favEmpty}>No favourites yet. Star an object or save a view to pin it here.</p>
+        <p className={styles.favEmpty}>
+          <strong>No favorites yet.</strong> Add objects, directory folders or views to your Favorites for quick
+          access.
+        </p>
       ) : noMatches ? (
         <p className={styles.favEmpty}>No favourites match “{query.trim()}”.</p>
       ) : (
@@ -371,7 +376,7 @@ function FavouritesBody() {
           )}
           {filteredEntries.length > 0 && (
             <>
-              <p className={styles.favSectionLabel}>Objects</p>
+              <p className={styles.favSectionLabel}>Objects & folders</p>
               {filteredEntries.map((f) => {
                 const index = entries.indexOf(f);
                 return (

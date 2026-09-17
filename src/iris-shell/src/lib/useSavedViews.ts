@@ -30,10 +30,24 @@ export interface SavedView {
   state: SavedViewState;
 }
 
+/** Shown the first time the app runs, so the sidebar's Favourites panel
+ *  isn't empty out of the box. */
+const DEFAULT_VIEWS: SavedView[] = [
+  {
+    id: 'seed-view-isabella',
+    name: 'Isabella Clark search',
+    route: '#/users',
+    filterCount: 1,
+    state: { query: 'Isabella', filters: [], directories: ['entra-1', 'entra-2', 'ad-1', 'ad-2'] },
+  },
+];
+
 function read(): SavedView[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    // Only the key's true absence (never persisted before) seeds the
+    // defaults — an explicitly emptied list persists as "[]", not null.
+    if (raw === null) return DEFAULT_VIEWS;
     const arr = JSON.parse(raw) as unknown;
     if (!Array.isArray(arr)) return [];
     return arr.filter(
