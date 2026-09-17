@@ -67,6 +67,7 @@ const SECONDARY_NAV_ROUTES: Record<string, string> = {
 const ROUTE_TO_SECONDARY_NAV: Record<string, string> = {
   usersList: 'users',
   userDetail: 'users',
+  favoritesLink: 'users',
   groups: 'groups',
   devices: 'devices',
   agents: 'agents',
@@ -75,11 +76,14 @@ const ROUTE_TO_SECONDARY_NAV: Record<string, string> = {
   managementUnits: 'management-units',
 };
 
-/** Route name → directory view segment (Flat/Tree/Favourites). Entity/WIP
- *  routes are children of Flat; tree/favorites routes map to their segment. */
+/** Route name → directory view segment (Flat/Tree/Favourites). '#/favorites'
+ *  is a direct, bookmarkable link into the Favourites segment (landing on
+ *  the default Users list); clicking the segment itself doesn't navigate
+ *  here — see `sidebarViewOverride`. */
 const ROUTE_TO_VIEW: Record<string, string> = {
   usersList: 'flat',
   userDetail: 'flat',
+  favoritesLink: 'favourites',
   groups: 'flat',
   devices: 'flat',
   agents: 'flat',
@@ -89,14 +93,12 @@ const ROUTE_TO_VIEW: Record<string, string> = {
   treeRoot: 'tree',
   treeList: 'tree',
   treeDetail: 'tree',
-  favoritesList: 'favourites',
 };
 
-/** Landing route for each directory view segment. */
+/** Landing route for the segments that do navigate (Favourites doesn't). */
 const VIEW_ROUTES: Record<string, string> = {
   flat: '#/users',
   tree: '#/tree',
-  favourites: '#/favorites',
 };
 
 export interface AppShellProps {
@@ -132,7 +134,7 @@ export function AppShell({
   // `activeNav` and `aiOpen` are lifted to AppShellContext so they survive
   // page navigations (each page wraps its own AppShell, which would otherwise
   // remount and lose state).
-  const { aiOpen, setAiOpen, setSearchOpen } = useAppShell();
+  const { aiOpen, setAiOpen, setSearchOpen, sidebarViewOverride, setSidebarViewOverride } = useAppShell();
   const [pinned, setPinned] = useSidebarPinned();
   const [peeking, setPeeking] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(readInitialSidebarWidth);
@@ -153,6 +155,14 @@ export function AppShell({
   };
 
   const handleViewChange = (value: string) => {
+    // Favourites is a sidebar-only toggle (no route of its own) so the main
+    // content — whatever page the user was already on — stays put; Flat/Tree
+    // are real routes, so picking one navigates there and clears the override.
+    if (value === 'favourites') {
+      setSidebarViewOverride('favourites');
+      return;
+    }
+    setSidebarViewOverride(null);
     const target = VIEW_ROUTES[value];
     if (target) navigate(target);
   };
@@ -415,7 +425,7 @@ export function AppShell({
               activeNav={ROUTE_TO_SECONDARY_NAV[route.name] ?? ''}
               onNavChange={handleSecondaryNavChange}
               directoryLabel={secondarySidebar.directoryLabel}
-              view={ROUTE_TO_VIEW[route.name] ?? 'flat'}
+              view={sidebarViewOverride ?? (ROUTE_TO_VIEW[route.name] ?? 'flat')}
               onViewChange={handleViewChange}
             />
           )}

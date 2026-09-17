@@ -22,11 +22,26 @@ import { ActionBar } from '../../components/ActionBar/ActionBar.js';
 import { ResetPasswordModal } from '../UserDetailPage/ResetPasswordModal/ResetPasswordModal.js';
 import { DeleteUserModal } from '../UserDetailPage/DeleteUserModal/DeleteUserModal.js';
 import { NewUserModal, type NewUserModalProps } from './NewUserModal.js';
+import { SaveViewModal } from './SaveViewModal.js';
 import type { User } from './mockUsers.js';
 import styles from './UsersPage.module.css';
-import { useAdvancedSearch } from '../../lib/advancedSearchStore.js';
+import { useAdvancedSearch, type AdvancedFilter } from '../../lib/advancedSearchStore.js';
 import { AdvancedSearchButton } from '../../components/AdvancedSearch/AdvancedSearchButton.js';
 import { AppliedFiltersEmptyState } from '../../components/AdvancedSearch/AppliedFiltersEmptyState.js';
+import { useSavedViews, useApplyPendingSavedView } from '../../lib/useSavedViews.js';
+import { useFavorites } from '../../lib/useFavorites.js';
+
+/** Order-insensitive comparison of two filter sets, ignoring empty-value
+ *  entries — used to tell whether the current page state already matches
+ *  a saved view (see "Favorite action state" Figma dev note). */
+function filtersEqual(a: AdvancedFilter[], b: AdvancedFilter[]): boolean {
+  const normalize = (filters: AdvancedFilter[]) =>
+    filters
+      .filter((f) => f.value)
+      .map((f) => ({ fieldId: f.fieldId, value: f.value, operator: f.operator, secondValue: f.secondValue }))
+      .sort((x, y) => x.fieldId.localeCompare(y.fieldId));
+  return JSON.stringify(normalize(a)) === JSON.stringify(normalize(b));
+}
 
 /** Map a status string to its semantic badge tone. */
 function statusBadge(status: string): { tone: BadgeTone } {
@@ -200,15 +215,6 @@ function directoryKey(location: string): string {
   return 'entra-1';
 }
 
-/** Page-level actions shown in the heading's overflow menu. */
-const PAGE_ACTIONS_MENU_ITEMS: MenuEntry[] = [
-  { kind: 'item', label: 'Customize', icon: 'Pencil' },
-  { kind: 'divider' },
-  { kind: 'item', label: 'Add to favorites', icon: 'Star' },
-  { kind: 'divider' },
-  { kind: 'item', label: 'Ask AI', icon: 'Sparkle' },
-];
-
 const TABLE_SETTINGS_MENU_ITEMS: MenuEntry[] = [
   { kind: 'item', label: 'Adjust columns', icon: 'Columns' },
   { kind: 'item', label: 'Add columns', icon: 'ColumnsPlusLeft' },
@@ -225,11 +231,14 @@ const PAGE_SIZE_OPTIONS = [15, 20, 30, 40, 50];
  * UsersPage — the Directory Management → Users listing view.
  */
 export function UsersPage() {
-  const { openSearch, appliedFilters } = useAdvancedSearch();
+  const { openSearch, appliedFilters, setAppliedFilters } = useAdvancedSearch();
   const { users, addUser } = useUsers();
-  const { selectedDirectories } = useDirectory();
+  const { selectedDirectories, setSelectedDirectories } = useDirectory();
   const { aiOpen, setAiOpen, setAiContext } = useAppShell();
+  const { save: saveView, remove: removeView, views } = useSavedViews();
+  const { isFavorite, toggle: toggleFavorite } = useFavorites();
   const [newUserOpen, setNewUserOpen] = useState(false);
+  const [saveViewOpen, setSaveViewOpen] = useState(false);
   const [newUserKind, setNewUserKind] = useState<'entra' | 'ad'>('entra');
   const createMenuItems = useMemo<MenuEntry[]>(() => {
     const entraSelected = selectedDirectories.has('entra-1') || selectedDirectories.has('entra-2');
@@ -248,6 +257,18 @@ export function UsersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
   const [selected, setSelected] = useState<Set<RowKey>>(() => new Set());
+
+  // Picks up a saved view's filters queued by `openSavedView` (the sidebar
+  // Favourites panel navigates here, then this applies the snapshot) — also
+  // fires when a view is clicked while already on this page, since that
+  // navigate() is a same-route no-op that wouldn't otherwise remount us.
+  useApplyPendingSavedView('#/users', (state) => {
+    setQuery(state.query);
+    setSelectedDirectories(new Set(state.directories));
+    setAppliedFilters(state.filters);
+  });
+
+  const filterCount = (query.trim() ? 1 : 0) + appliedFilters.filter((f) => f.value).length;
 
   // Which user (if any) has a row-action modal open. `null` = closed.
   const [resetUser, setResetUser] = useState<User | null>(null);
@@ -295,6 +316,20 @@ export function UsersPage() {
     { kind: 'item', label: 'Copy', icon: 'Copy' },
     { kind: 'item', label: 'Move', icon: 'Folder' },
     { kind: 'item', label: 'Properties', icon: 'UserList', onSelect: () => navigate(`#/users/${u.id}?tab=general`) },
+    {
+      kind: 'item',
+      label: isFavorite(u.id) ? 'Remove from favourites' : 'Add to favourites',
+      icon: 'Star',
+      onSelect: () =>
+        toggleFavorite({
+          id: u.id,
+          name: u.name,
+          type: 'User',
+          icon: 'User',
+          description: u.description,
+          href: `#/users/${u.id}?tab=overview`,
+        }),
+    },
     { kind: 'divider' },
     { kind: 'item', label: 'Connections', icon: 'Plugs', onSelect: () => navigate(`#/users/${u.id}?tab=connections`) },
     { kind: 'item', label: 'Managed units', icon: 'Cube', onSelect: () => navigate(`#/users/${u.id}?tab=managed-units`) },
@@ -304,6 +339,40 @@ export function UsersPage() {
     { kind: 'item', label: 'Deprovision', icon: 'Prohibit', danger: true },
     { kind: 'item', label: 'Deactivate', icon: 'XCircle', danger: true },
     { kind: 'item', label: 'Delete', icon: 'Trash', danger: true, onSelect: () => setDeleteUser(u) },
+  ];
+
+  // A Favorite represents a saved *page state* (page + filters + search),
+  // not just a bookmark of the page — see Figma "Favorite action state" dev
+  // note. Any active search/filter is a customization, so the current state
+  // won't match the plain page favorite; it may instead match a saved view.
+  const hasCustomization = query.trim().length > 0 || appliedFilters.some((f) => f.value);
+  const matchingView = hasCustomization
+    ? views.find((v) => v.route === '#/users' && v.state.query === query.trim() && filtersEqual(v.state.filters, appliedFilters))
+    : undefined;
+  const isCurrentStateFavorited = hasCustomization ? !!matchingView : isFavorite('page-users');
+
+  const pageActionsMenuItems: MenuEntry[] = [
+    { kind: 'item', label: 'Customize', icon: 'Pencil' },
+    { kind: 'divider' },
+    {
+      kind: 'item',
+      label: isCurrentStateFavorited ? 'Remove from favourites' : 'Add to favourites',
+      icon: 'Star',
+      onSelect: () => {
+        if (isCurrentStateFavorited) {
+          if (matchingView) removeView(matchingView.id);
+          else toggleFavorite({ id: 'page-users', name: 'Users', type: 'Page', icon: 'Users', href: '#/users' });
+        } else if (hasCustomization) {
+          // Customized/filtered state: name + save it as a distinct view
+          // rather than toggling the plain page favorite directly.
+          setSaveViewOpen(true);
+        } else {
+          toggleFavorite({ id: 'page-users', name: 'Users', type: 'Page', icon: 'Users', href: '#/users' });
+        }
+      },
+    },
+    { kind: 'divider' },
+    { kind: 'item', label: 'Ask AI', icon: 'Sparkle' },
   ];
 
   return (
@@ -317,7 +386,7 @@ export function UsersPage() {
           <Menu
             ariaLabel="Page actions"
             align="end"
-            items={PAGE_ACTIONS_MENU_ITEMS}
+            items={pageActionsMenuItems}
             trigger={({ ref, onClick, expanded }) => (
               <Tooltip label="More options">
                 <IconButton
@@ -550,6 +619,23 @@ export function UsersPage() {
             `User created in ${draft.directory}. To open it, click View.`,
           );
         }}
+      />
+      <SaveViewModal
+        open={saveViewOpen}
+        onClose={() => setSaveViewOpen(false)}
+        filterCount={filterCount}
+        onSave={(name, includeFilters) =>
+          saveView({
+            name,
+            route: '#/users',
+            filterCount: includeFilters ? filterCount : 0,
+            state: {
+              query,
+              filters: includeFilters ? appliedFilters : [],
+              directories: Array.from(selectedDirectories),
+            },
+          })
+        }
       />
     </AppShell>
   );

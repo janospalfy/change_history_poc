@@ -1,0 +1,65 @@
+.fieldLabelRow {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-6, 6px);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+}
+
+.fieldLabelRow strong {
+  font-weight: var(--oi-text-body-s-strong-font-weight);
+  color: var(--oi-content-color-primary);
+}
+
+.fieldLabelRow span {
+  color: var(--oi-content-color-secondary);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oi-spacing-s);
+  width: 100%;
+}
+
+.helperText {
+  margin: 0;
+  font-size: var(--oi-text-caption-font-size);
+  line-height: var(--oi-text-caption-line-height);
+  color: var(--oi-content-color-secondary);
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-xs);
+  margin-top: var(--oi-spacing-l);
+}
+
+.filterCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--oi-spacing-s);
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  color: var(--oi-content-color-primary);
+  cursor: pointer;
+}
+
+/* Same blue count badge used for the sidebar's saved-view filter indicator
+   (Sidebar.module.css `.favRowBadge`) and the History tab's Add-filter
+   button, so "N active filters" reads consistently across the app. */
+.filterBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 3px;
+  border-radius: var(--oi-border-radius-default);
+  background-color: var(--oi-button-background-primary);
+  color: var(--oi-content-color-constant);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: var(--oi-text-caption-font-weight);
+}

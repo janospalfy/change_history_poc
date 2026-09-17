@@ -12,6 +12,7 @@ import { Menu, type MenuEntry } from '../Menu/Menu.js';
 import { showToast } from '../../lib/toastStore.js';
 import { NewUserModal, type NewUserModalProps } from '../../views/UsersPage/NewUserModal.js';
 import { NewGroupModal, type NewGroupDraft } from '../../views/GroupsPage/NewGroupModal.js';
+import { useFavorites } from '../../lib/useFavorites.js';
 import styles from './Tree.module.css';
 
 // Object types offered under the context menu's "Create" submenu. Mirrors
@@ -49,6 +50,7 @@ export function Tree() {
   const { nodeTree, getPath, getNodeName, moveObject, addObject } = useDirectory();
   const route = useRoute();
   const selectedId = selectedNodeId(route.name, route.params as Record<string, string>);
+  const { isFavorite, toggle: toggleFavorite } = useFavorites();
 
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [contextNodeId, setContextNodeId] = useState<string | null>(null);
@@ -105,10 +107,24 @@ export function Tree() {
     },
     { kind: 'item', label: 'View properties', icon: 'UserList' },
     { kind: 'item', label: 'Move', icon: 'Folder' },
-    { kind: 'item', label: 'Add to favorites', icon: 'Heart' },
+    {
+      kind: 'item',
+      label: contextNodeId && isFavorite(contextNodeId) ? 'Remove from favourites' : 'Add to favorites',
+      icon: 'Star',
+      onSelect: () => {
+        if (!contextNodeId) return;
+        toggleFavorite({
+          id: contextNodeId,
+          name: getNodeName(contextNodeId) ?? contextNodeId,
+          type: 'Folder',
+          icon: 'Folder',
+          href: `#/tree/${contextNodeId}`,
+        });
+      },
+    },
     { kind: 'divider' },
     { kind: 'item', label: 'Delete', icon: 'Trash', danger: true },
-  ], [contextIsAd]);
+  ], [contextIsAd, contextNodeId, isFavorite, getNodeName, toggleFavorite]);
 
   const createUser = (draft: Parameters<NewUserModalProps['onCreate']>[0]) => {
     const fullName = `${draft.firstName} ${draft.lastName}`.trim();

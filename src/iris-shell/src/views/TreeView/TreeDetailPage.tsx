@@ -142,12 +142,13 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
                 {
                   kind: 'item',
                   label: isFavorite(object.id) ? 'Remove from favourites' : 'Add to favourites',
-                  icon: 'Heart',
+                  icon: 'Star',
                   onSelect: () =>
                     toggleFavorite({
                       id: object.id,
                       name: object.name,
                       type: meta.label,
+                      icon: meta.icon,
                       description: object.description,
                       href: `#/tree/${nodeId}/${object.id}`,
                     }),

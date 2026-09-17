@@ -42,6 +42,15 @@ export interface AppShellContextValue {
    */
   setAiContext: Dispatch<SetStateAction<AiContextItem[]>>;
   clearAiContext: () => void;
+  /**
+   * When set, overrides the directory sidebar's Flat/Tree/Favourites segment
+   * regardless of route (Favourites doesn't have its own route — it's a
+   * sidebar-only toggle that should keep showing while the user browses
+   * whatever page they were on, surviving the AppShell remount that a page
+   * navigation causes). `null` means "derive the segment from the route".
+   */
+  sidebarViewOverride: string | null;
+  setSidebarViewOverride: (view: string | null) => void;
 }
 
 /**
@@ -70,6 +79,7 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeNav, setActiveNav] = useState('users');
   const [aiContext, setAiContext] = useState<AiContextItem[]>([]);
+  const [sidebarViewOverride, setSidebarViewOverride] = useState<string | null>(null);
   const clearAiContext = useCallback(() => setAiContext([]), []);
 
   const value = useMemo<AppShellContextValue>(
@@ -83,8 +93,10 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
       aiContext,
       setAiContext,
       clearAiContext,
+      sidebarViewOverride,
+      setSidebarViewOverride,
     }),
-    [aiOpen, searchOpen, activeNav, aiContext, clearAiContext],
+    [aiOpen, searchOpen, activeNav, aiContext, clearAiContext, sidebarViewOverride],
   );
 
   return <AppShellContext.Provider value={value}>{children}</AppShellContext.Provider>;

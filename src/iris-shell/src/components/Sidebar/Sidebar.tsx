@@ -1,11 +1,23 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type DragEvent as ReactDragEvent,
+} from 'react';
 import { cx } from '../../lib/cx.js';
 import { navigate } from '../../lib/router.js';
 import { useFavorites } from '../../lib/useFavorites.js';
+import { useSavedViews, openSavedView } from '../../lib/useSavedViews.js';
 import { useDirectory } from '../../lib/directoryStore.js';
 import { SegmentedControl } from '../SegmentedControl/SegmentedControl.js';
 import { MultiSelect, type MultiSelectOption } from '../MultiSelect/MultiSelect.js';
 import { NavItem } from '../NavItem/NavItem.js';
+import { TextInput } from '../TextInput/TextInput.js';
+import { Menu, type MenuEntry } from '../Menu/Menu.js';
+import { Icon } from '../Icon/Icon.js';
 import { Tree } from './Tree.js';
 import styles from './Sidebar.module.css';
 
@@ -29,7 +41,7 @@ export interface SidebarProps {
 const VIEW_OPTIONS = [
   { value: 'flat', label: 'Flat view', icon: 'BuildingOffice' },
   { value: 'tree', label: 'Tree view', icon: 'TreeView' },
-  { value: 'favourites', label: 'Favourites', icon: 'Heart' },
+  { value: 'favourites', label: 'Favourites', icon: 'Star' },
 ];
 
 /** Directories available in the directory multi-select. */
@@ -196,29 +208,299 @@ export function Sidebar({
   );
 }
 
-/** Favourites segment body — shortcuts to favorited objects. */
-function FavouritesBody() {
-  const { entries } = useFavorites();
+/** Which list a dragged row came from / is hovering over. */
+type FavList = 'views' | 'objects';
+interface DragPos {
+  list: FavList;
+  index: number;
+}
 
-  if (entries.length === 0) {
-    return (
-      <nav className={styles.nav} aria-label="Favourites">
-        <p className={styles.favEmpty}>No favourites yet. Star an object to pin it here.</p>
-      </nav>
-    );
-  }
+/** Favourites segment body — search box + saved "Views" (named filter
+ *  shortcuts) and favorited "Objects", each reorderable via drag-and-drop
+ *  (Figma node 4181:13907 / notes: "Favorites list in Directory panel",
+ *  "Ordering by drag and drop"). Selecting the segment doesn't navigate —
+ *  the main content stays on whatever page the user was already viewing. */
+function FavouritesBody() {
+  const { entries, remove: removeFavorite, reorder: reorderFavorites, rename: renameFavorite } = useFavorites();
+  const { views, remove: removeView, reorder: reorderViews, rename: renameView } = useSavedViews();
+  const [query, setQuery] = useState('');
+  const [dragOver, setDragOver] = useState<DragPos | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ list: FavList; id: string; x: number; y: number } | null>(null);
+  const [renaming, setRenaming] = useState<{ list: FavList; id: string } | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+
+  const trimmed = query.trim().toLowerCase();
+  const filteredViews = trimmed ? views.filter((v) => v.name.toLowerCase().includes(trimmed)) : views;
+  const filteredEntries = trimmed ? entries.filter((f) => f.name.toLowerCase().includes(trimmed)) : entries;
+  // Reordering needs a stable index into the *full* list — disabled while a
+  // search filter is active so a filtered row's index can't be applied to
+  // the wrong (unfiltered) position.
+  const canReorder = trimmed.length === 0;
+
+  // The drag source is read straight off the drop event's DataTransfer
+  // rather than component state set by the earlier dragstart — state set in
+  // one native drag event isn't guaranteed to have committed/re-rendered by
+  // the time a later one fires, which made drops silently no-op.
+  const handleDrop = (e: ReactDragEvent, list: FavList, dropIndex: number) => {
+    const raw = e.dataTransfer.getData('application/x-favorite-drag');
+    if (!raw) return;
+    const source = JSON.parse(raw) as DragPos;
+    if (source.list !== list || source.index === dropIndex) return;
+    if (list === 'views') {
+      const next = [...views];
+      const [moved] = next.splice(source.index, 1);
+      next.splice(dropIndex, 0, moved);
+      reorderViews(next);
+    } else {
+      const next = [...entries];
+      const [moved] = next.splice(source.index, 1);
+      next.splice(dropIndex, 0, moved);
+      reorderFavorites(next);
+    }
+  };
+  const startDrag = (e: ReactDragEvent, list: FavList, index: number) => {
+    e.dataTransfer.setData('application/x-favorite-drag', JSON.stringify({ list, index }));
+    // Firefox refuses to start a drag at all without a plain-text fallback.
+    e.dataTransfer.setData('text/plain', '');
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const openContextMenu = (e: ReactMouseEvent, list: FavList, id: string) => {
+    e.preventDefault();
+    // Keyboard-invoked context menus (ContextMenu key / Shift+F10) dispatch a
+    // `contextmenu` event with clientX/clientY = 0 — anchor at the row's
+    // bottom-left instead of the viewport corner.
+    if (e.clientX === 0 && e.clientY === 0) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      setContextMenu({ list, id, x: rect.left, y: rect.bottom });
+      return;
+    }
+    setContextMenu({ list, id, x: e.clientX, y: e.clientY });
+  };
+
+  const startRename = (list: FavList, id: string, currentName: string) => {
+    setRenaming({ list, id });
+    setRenameValue(currentName);
+  };
+  const commitRename = () => {
+    if (renaming) {
+      const name = renameValue.trim();
+      if (name) {
+        if (renaming.list === 'views') renameView(renaming.id, name);
+        else renameFavorite(renaming.id, name);
+      }
+    }
+    setRenaming(null);
+  };
+
+  const contextMenuItems = useMemo<MenuEntry[]>(() => {
+    if (!contextMenu) return [];
+    const { list, id } = contextMenu;
+    const item = list === 'views' ? views.find((v) => v.id === id) : entries.find((f) => f.id === id);
+    if (!item) return [];
+    return [
+      {
+        kind: 'item',
+        label: 'Open',
+        icon: 'Eye',
+        onSelect: () => (list === 'views' ? openSavedView(item as (typeof views)[number]) : navigate((item as (typeof entries)[number]).href)),
+      },
+      { kind: 'item', label: 'Rename', icon: 'NotePencil', onSelect: () => startRename(list, id, item.name) },
+      { kind: 'divider' },
+      {
+        kind: 'item',
+        label: 'Remove from favorites',
+        icon: 'Star',
+        onSelect: () => (list === 'views' ? removeView(id) : removeFavorite(id)),
+      },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextMenu, views, entries]);
+
+  const isEmpty = views.length === 0 && entries.length === 0;
+  const noMatches = !isEmpty && filteredViews.length === 0 && filteredEntries.length === 0;
 
   return (
     <nav className={styles.nav} aria-label="Favourites">
-      {entries.map((f) => (
-        <NavItem
-          key={f.id}
-          icon="Heart"
-          label={f.name}
-          hideIndicator
-          onClick={() => navigate(f.href)}
+      <div className={styles.favSearch}>
+        <TextInput
+          iconLead="MagnifyingGlass"
+          placeholder="Search by name"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search favourites"
         />
-      ))}
+      </div>
+      {isEmpty ? (
+        <p className={styles.favEmpty}>No favourites yet. Star an object or save a view to pin it here.</p>
+      ) : noMatches ? (
+        <p className={styles.favEmpty}>No favourites match “{query.trim()}”.</p>
+      ) : (
+        <>
+          {filteredViews.length > 0 && (
+            <>
+              <p className={styles.favSectionLabel}>Views</p>
+              {filteredViews.map((v) => {
+                const index = views.indexOf(v);
+                return (
+                  <FavRow
+                    key={v.id}
+                    icon="Star"
+                    label={v.name}
+                    badge={v.filterCount}
+                    onSelect={() => openSavedView(v)}
+                    onContextMenu={(e) => openContextMenu(e, 'views', v.id)}
+                    draggable={canReorder}
+                    onDragStart={(e) => startDrag(e, 'views', index)}
+                    onDragOver={() => setDragOver({ list: 'views', index })}
+                    onDrop={(e) => {
+                      handleDrop(e, 'views', index);
+                      setDragOver(null);
+                    }}
+                    onDragEnd={() => setDragOver(null)}
+                    dragOver={dragOver?.list === 'views' && dragOver.index === index}
+                    renaming={renaming?.list === 'views' && renaming.id === v.id}
+                    renameValue={renameValue}
+                    onRenameChange={setRenameValue}
+                    onRenameCommit={commitRename}
+                    onRenameCancel={() => setRenaming(null)}
+                  />
+                );
+              })}
+            </>
+          )}
+          {filteredEntries.length > 0 && (
+            <>
+              <p className={styles.favSectionLabel}>Objects</p>
+              {filteredEntries.map((f) => {
+                const index = entries.indexOf(f);
+                return (
+                  <FavRow
+                    key={f.id}
+                    icon={f.icon}
+                    label={f.name}
+                    onSelect={() => navigate(f.href)}
+                    onContextMenu={(e) => openContextMenu(e, 'objects', f.id)}
+                    draggable={canReorder}
+                    onDragStart={(e) => startDrag(e, 'objects', index)}
+                    onDragOver={() => setDragOver({ list: 'objects', index })}
+                    onDrop={(e) => {
+                      handleDrop(e, 'objects', index);
+                      setDragOver(null);
+                    }}
+                    onDragEnd={() => setDragOver(null)}
+                    dragOver={dragOver?.list === 'objects' && dragOver.index === index}
+                    renaming={renaming?.list === 'objects' && renaming.id === f.id}
+                    renameValue={renameValue}
+                    onRenameChange={setRenameValue}
+                    onRenameCommit={commitRename}
+                    onRenameCancel={() => setRenaming(null)}
+                  />
+                );
+              })}
+            </>
+          )}
+        </>
+      )}
+      <Menu
+        ariaLabel="Favourite item actions"
+        items={contextMenuItems}
+        open={contextMenu !== null}
+        onOpenChange={(o) => {
+          if (!o) setContextMenu(null);
+        }}
+        position={contextMenu ?? undefined}
+      />
     </nav>
+  );
+}
+
+/** Single draggable row shared by the Views and Objects sections — replaces
+ *  `NavItem` here because it needs a trailing filter-count badge, a
+ *  right-click context menu (Open/Rename/Remove), and inline rename. */
+function FavRow({
+  icon,
+  label,
+  badge,
+  onSelect,
+  onContextMenu,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  dragOver,
+  renaming,
+  renameValue,
+  onRenameChange,
+  onRenameCommit,
+  onRenameCancel,
+}: {
+  icon: string;
+  label: string;
+  badge?: number;
+  onSelect: () => void;
+  onContextMenu: (e: ReactMouseEvent) => void;
+  draggable: boolean;
+  onDragStart: (e: ReactDragEvent) => void;
+  onDragOver: () => void;
+  onDrop: (e: ReactDragEvent) => void;
+  onDragEnd: () => void;
+  dragOver: boolean;
+  renaming: boolean;
+  renameValue: string;
+  onRenameChange: (value: string) => void;
+  onRenameCommit: () => void;
+  onRenameCancel: () => void;
+}) {
+  return (
+    <div
+      className={cx(styles.favRow, dragOver && styles.favRowDragOver)}
+      draggable={draggable && !renaming}
+      onDragStart={onDragStart}
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragOver();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop(e);
+      }}
+      onDragEnd={onDragEnd}
+      onContextMenu={onContextMenu}
+    >
+      {renaming ? (
+        <span className={styles.favRowMain}>
+          <span className={styles.favRowIcon} aria-hidden="true">
+            <Icon name={icon} size="16px" />
+          </span>
+          <input
+            autoFocus
+            className={styles.favRowRenameInput}
+            value={renameValue}
+            onChange={(e) => onRenameChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onRenameCommit();
+              if (e.key === 'Escape') onRenameCancel();
+            }}
+            onBlur={onRenameCommit}
+            aria-label={`Rename ${label}`}
+          />
+        </span>
+      ) : (
+        <button type="button" className={styles.favRowMain} onClick={onSelect}>
+          <span className={styles.favRowIcon} aria-hidden="true">
+            <Icon name={icon} size="16px" />
+          </span>
+          <span className={styles.favRowLabel}>{label}</span>
+        </button>
+      )}
+      {!!badge && (
+        <span className={styles.favRowFilterIndicator}>
+          <Icon name="FunnelSimple" size="16px" />
+          <span className={styles.favRowBadge}>{badge}</span>
+        </span>
+      )}
+    </div>
   );
 }

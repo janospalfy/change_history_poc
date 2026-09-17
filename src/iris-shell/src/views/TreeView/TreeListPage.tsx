@@ -234,12 +234,13 @@ export function TreeListPage({ nodeId }: TreeListPageProps) {
       {
         kind: 'item',
         label: fav ? 'Remove from favourites' : 'Add to favourites',
-        icon: 'Heart',
+        icon: 'Star',
         onSelect: () =>
           toggleFavorite({
             id: o.id,
             name: o.name,
             type: OBJECT_TYPE_META[o.type].label,
+            icon: OBJECT_TYPE_META[o.type].icon,
             description: o.description,
             href: hrefFor(o, nodeId),
           }),
@@ -290,12 +291,13 @@ export function TreeListPage({ nodeId }: TreeListPageProps) {
               {
                 kind: 'item',
                 label: isFavorite(nodeId) ? 'Remove from favourites' : 'Add to favourites',
-                icon: 'Heart',
+                icon: 'Star',
                 onSelect: () =>
                   toggleFavorite({
                     id: nodeId,
                     name: nodeName ?? 'Directory',
                     type: 'Folder',
+                    icon: 'Folder',
                     href: `#/tree/${nodeId}`,
                   }),
               },

@@ -11,7 +11,6 @@ import { UsersPage } from './views/UsersPage/UsersPage.js';
 import { UserDetailPage } from './views/UserDetailPage/UserDetailPage.js';
 import { TreeListPage } from './views/TreeView/TreeListPage.js';
 import { TreeDetailPage } from './views/TreeView/TreeDetailPage.js';
-import { FavoritesPage } from './views/FavoritesView/FavoritesPage.js';
 import { WipPage } from './views/WipPage/WipPage.js';
 import { InsightsPage } from './views/InsightsPage/InsightsPage.js';
 import { ServicesPage } from './views/ServicesPage/ServicesPage.js';
@@ -32,6 +31,7 @@ export default function App() {
         <AppShellProvider>
           {route.name === 'userDetail' && <UserDetailPage userId={route.params.id} />}
           {route.name === 'usersList' && <UsersPage />}
+          {route.name === 'favoritesLink' && <UsersPage />}
           {(route.name === 'treeRoot' || route.name === 'treeList') && (
             <TreeListPage
               nodeId={route.name === 'treeList' ? route.params.nodeId : FIRST_NODE_ID}
@@ -40,17 +40,16 @@ export default function App() {
           {route.name === 'treeDetail' && (
             <TreeDetailPage nodeId={route.params.nodeId} objectId={route.params.objectId} />
           )}
-          {route.name === 'favoritesList' && <FavoritesPage />}
           {route.name === 'groups' && <GroupsPage />}
           {route.name === 'groupDetail' && <GroupDetailPage groupId={route.params.id} />}
-          {route.name === 'devices' && <WipPage title="Devices" icon="Devices" />}
-          {route.name === 'agents' && <WipPage title="Agents" icon="Robot" />}
-          {route.name === 'applications' && <WipPage title="Applications" icon="Browsers" />}
+          {route.name === 'devices' && <WipPage title="Devices" icon="Devices" href="#/devices" />}
+          {route.name === 'agents' && <WipPage title="Agents" icon="Robot" href="#/agents" />}
+          {route.name === 'applications' && <WipPage title="Applications" icon="Browsers" href="#/applications" />}
           {route.name === 'accessTemplates' && (
-            <WipPage title="Access templates" icon="UserCircleCheck" />
+            <WipPage title="Access templates" icon="UserCircleCheck" href="#/access-templates" />
           )}
           {route.name === 'managementUnits' && (
-            <WipPage title="Management units" icon="FolderSimpleStar" />
+            <WipPage title="Management units" icon="FolderSimpleStar" href="#/management-units" />
           )}
           {route.name === 'insights' && <InsightsPage />}
           {route.name === 'services' && <ServicesPage />}

@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import { showToast } from './toastStore.js';
+import { navigate } from './router.js';
 
 /**
  * useFavorites — a global list of "favorited" directory objects, persisted to
@@ -17,6 +18,8 @@ export interface FavoriteEntry {
   name: string;
   /** Human label, e.g. an object-type label. */
   type: string;
+  /** Icon name matching the object's type (see `OBJECT_TYPE_META`). */
+  icon: string;
   description?: string;
   /** Hash route the row links to. */
   href: string;
@@ -28,10 +31,14 @@ function read(): FavoriteEntry[] {
     if (!raw) return [];
     const arr = JSON.parse(raw) as unknown;
     if (!Array.isArray(arr)) return [];
-    return arr.filter(
-      (e): e is FavoriteEntry =>
-        !!e && typeof (e as FavoriteEntry).id === 'string' && typeof (e as FavoriteEntry).href === 'string',
-    );
+    return arr
+      .filter(
+        (e): e is FavoriteEntry =>
+          !!e && typeof (e as FavoriteEntry).id === 'string' && typeof (e as FavoriteEntry).href === 'string',
+      )
+      // Entries saved before `icon` existed fall back to a generic star so
+      // old localStorage data doesn't render with a blank icon slot.
+      .map((e) => ({ ...e, icon: e.icon || 'Star' }));
   } catch {
     return [];
   }
@@ -63,6 +70,9 @@ export interface FavoritesApi {
   /** Add if absent, remove if present. */
   toggle: (entry: FavoriteEntry) => void;
   remove: (id: string) => void;
+  /** Replace the full list order (drag-and-drop reordering). */
+  reorder: (nextOrder: FavoriteEntry[]) => void;
+  rename: (id: string, name: string) => void;
 }
 
 export function useFavorites(): FavoritesApi {
@@ -70,12 +80,26 @@ export function useFavorites(): FavoritesApi {
 
   const toggle = useCallback((entry: FavoriteEntry) => {
     const exists = current.some((e) => e.id === entry.id);
-    current = exists ? current.filter((e) => e.id !== entry.id) : [...current, entry];
-    persist();
-    emit();
-    showToast(
-      exists ? `${entry.name} removed from favourites` : `${entry.name} added to favourites`,
-    );
+    if (exists) {
+      current = current.filter((e) => e.id !== entry.id);
+      persist();
+      emit();
+      // Matches Figma "Removed from Favorites" toast — no action buttons.
+      showToast(`${entry.name} removed from Favorites.`);
+    } else {
+      current = [...current, entry];
+      persist();
+      emit();
+      // Matches Figma "Added to Favorites" toast — Undo reverses it, View opens it.
+      showToast(
+        `${entry.name} added to Favorites.`,
+        () => toggle(entry),
+        undefined,
+        'Undo',
+        () => navigate(entry.href),
+        'View',
+      );
+    }
   }, []);
 
   const remove = useCallback((id: string) => {
@@ -83,10 +107,22 @@ export function useFavorites(): FavoritesApi {
     current = current.filter((e) => e.id !== id);
     persist();
     emit();
-    if (entry) showToast(`${entry.name} removed from favourites`);
+    if (entry) showToast(`${entry.name} removed from Favorites.`);
   }, []);
 
   const isFavorite = useCallback((id: string) => entries.some((e) => e.id === id), [entries]);
 
-  return { entries, isFavorite, toggle, remove };
+  const reorder = useCallback((nextOrder: FavoriteEntry[]) => {
+    current = nextOrder;
+    persist();
+    emit();
+  }, []);
+
+  const rename = useCallback((id: string, name: string) => {
+    current = current.map((e) => (e.id === id ? { ...e, name } : e));
+    persist();
+    emit();
+  }, []);
+
+  return { entries, isFavorite, toggle, remove, reorder, rename };
 }

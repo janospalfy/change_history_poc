@@ -21,6 +21,7 @@ import { isActiveDirectoryLocation } from '../../lib/directoryData.js';
 import type { Group } from './mockGroups.js';
 import { MoveGroupsModal } from './MoveGroupsModal.js';
 import { DeleteUserModal } from '../UserDetailPage/DeleteUserModal/DeleteUserModal.js';
+import { useFavorites } from '../../lib/useFavorites.js';
 
 const TABS = [
   { value: 'overview', label: 'Overview' },
@@ -37,6 +38,7 @@ export function GroupDetailPage({ groupId }: { groupId: string }) {
   const route = useRoute();
   const { getGroup, updateGroup, addGroup, removeGroup } = useGroups();
   const group = getGroup(groupId);
+  const { isFavorite, toggle: toggleFavorite } = useFavorites();
   const isAdGroup = isActiveDirectoryLocation(group?.location);
   const [tab, setTab] = useState(route.name === 'groupDetail' ? route.params.tab ?? 'overview' : 'overview');
   const [editing, setEditing] = useState(false);
@@ -131,6 +133,22 @@ export function GroupDetailPage({ groupId }: { groupId: string }) {
                 <div className={styles.actionContainer}>
                      {isAdGroup && <button type="button" className={styles.ghostAction} onClick={() => setMoveOpen(true)}>Move</button>}
                      <button type="button" className={styles.ghostAction} onClick={() => { addGroup({ ...group, id: `group-copy-${Date.now()}`, name: `Copy of ${group.name}` }); showToast(`${group.name} copied.`); }}>Copy</button>
+                     <button
+                       type="button"
+                       className={styles.ghostAction}
+                       onClick={() =>
+                         toggleFavorite({
+                           id: group.id,
+                           name: group.name,
+                           type: 'Group',
+                           icon: 'UsersThree',
+                           description: group.description,
+                           href: `#/groups/${group.id}?tab=overview`,
+                         })
+                       }
+                     >
+                       {isFavorite(group.id) ? 'Remove from favourites' : 'Add to favourites'}
+                     </button>
                 </div>
                 <div className={`${styles.actionContainer} ${styles.dangerActions}`}>
                      <button type="button" className={styles.ghostDangerAction} onClick={() => { updateGroup(group.id, { status: 'Inactive' }); showToast(`${group.name} deprovisioned.`); }}>Deprovision</button>

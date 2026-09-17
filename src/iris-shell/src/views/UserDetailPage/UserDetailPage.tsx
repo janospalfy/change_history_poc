@@ -23,6 +23,7 @@ import { showToast } from '../../lib/toastStore.js';
 import type { User } from '../UsersPage/mockUsers.js';
 import styles from './UserDetailPage.module.css';
 import { isActiveDirectoryLocation } from '../../lib/directoryData.js';
+import { useFavorites } from '../../lib/useFavorites.js';
 
 const TABS = [
   { value: 'overview', label: 'Overview' },
@@ -50,6 +51,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
   const { users, getUser, getUserIndex, updateUser } = useUsers();
   const route = useRoute();
   const user = getUser(userId);
+  const { isFavorite, toggle: toggleFavorite } = useFavorites();
   const [tab, setTab] = useState(() => route.name === 'userDetail' ? route.params.tab ?? 'general' : 'general');
   const handleTabChange = (value: string) => {
     setTab(value);
@@ -154,6 +156,20 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
               items={[
                 { kind: 'item', label: 'Reset password', icon: 'Password', onSelect: () => setResetOpen(true) },
                 ...(isAdUser ? [{ kind: 'item' as const, label: 'Move', icon: 'Folder', onSelect: () => setMoveOpen(true) }] : []),
+                {
+                  kind: 'item',
+                  label: isFavorite(user.id) ? 'Remove from favourites' : 'Add to favourites',
+                  icon: 'Star',
+                  onSelect: () =>
+                    toggleFavorite({
+                      id: user.id,
+                      name: user.name,
+                      type: 'User',
+                      icon: 'User',
+                      description: user.description,
+                      href: `#/users/${user.id}?tab=overview`,
+                    }),
+                },
                 { kind: 'item', label: 'Delete', icon: 'Trash', danger: true, onSelect: () => setDeleteOpen(true) },
               ]}
               trigger={({ ref, onClick, expanded }) => (

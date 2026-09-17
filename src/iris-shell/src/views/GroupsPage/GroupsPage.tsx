@@ -23,13 +23,11 @@ import styles from './GroupsPage.module.css';
 import { useAdvancedSearch } from '../../lib/advancedSearchStore.js';
 import { AdvancedSearchButton } from '../../components/AdvancedSearch/AdvancedSearchButton.js';
 import { AppliedFiltersEmptyState } from '../../components/AdvancedSearch/AppliedFiltersEmptyState.js';
+import { useFavorites } from '../../lib/useFavorites.js';
 
-const PAGE_ACTIONS: MenuEntry[] = [
+const PAGE_ACTIONS_BASE: MenuEntry[] = [
   { kind: 'item', label: 'Customize', icon: 'Pencil' },
   { kind: 'divider' },
-  { kind: 'item', label: 'Add to favorites', icon: 'Star' },
-  { kind: 'divider' },
-  { kind: 'item', label: 'Ask AI', icon: 'Sparkle' },
 ];
 
 const TABLE_SETTINGS: MenuEntry[] = [
@@ -45,6 +43,7 @@ export function GroupsPage() {
   const { appliedFilters } = useAdvancedSearch();
   const { selectedDirectories } = useDirectory();
   const { groups, addGroup, updateGroup, removeGroup } = useGroups();
+  const { isFavorite, toggle: toggleFavorite } = useFavorites();
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
@@ -90,6 +89,20 @@ export function GroupsPage() {
     { kind: 'item', label: 'Properties', icon: 'UsersThree', onSelect: () => navigate(`#/groups/${group.id}?tab=general`) },
     { kind: 'item', label: 'Copy', icon: 'Copy', onSelect: () => copyGroups([group]) },
     ...(isActiveDirectoryLocation(group.location) ? [{ kind: 'item' as const, label: 'Move', icon: 'Folder', onSelect: () => { setSelected(new Set([group.id])); setMoveGroupsOpen(true); } }] : []),
+    {
+      kind: 'item',
+      label: isFavorite(group.id) ? 'Remove from favourites' : 'Add to favourites',
+      icon: 'Star',
+      onSelect: () =>
+        toggleFavorite({
+          id: group.id,
+          name: group.name,
+          type: 'Group',
+          icon: 'UsersThree',
+          description: group.description,
+          href: `#/groups/${group.id}?tab=general`,
+        }),
+    },
     { kind: 'divider' },
     { kind: 'item', label: 'Memberships', icon: 'Users', onSelect: () => navigate(`#/groups/${group.id}?tab=memberships`) },
     { kind: 'item', label: 'Managed units', icon: 'Cube', onSelect: () => navigate(`#/groups/${group.id}?tab=managed-units`) },
@@ -97,6 +110,19 @@ export function GroupsPage() {
     { kind: 'divider' },
     { kind: 'item', label: 'Deprovision', icon: 'Prohibit', danger: true, onSelect: () => deprovisionGroups([group]) },
     { kind: 'item', label: 'Delete', icon: 'Trash', danger: true, onSelect: () => setDeleteGroup(group) },
+  ];
+
+  const pageActionsMenuItems: MenuEntry[] = [
+    ...PAGE_ACTIONS_BASE,
+    {
+      kind: 'item',
+      label: isFavorite('page-groups') ? 'Remove from favourites' : 'Add to favourites',
+      icon: 'Star',
+      onSelect: () =>
+        toggleFavorite({ id: 'page-groups', name: 'Groups', type: 'Page', icon: 'UsersThree', href: '#/groups' }),
+    },
+    { kind: 'divider' },
+    { kind: 'item', label: 'Ask AI', icon: 'Sparkle' },
   ];
 
   const columns: DataTableColumn<Group>[] = [
@@ -112,7 +138,7 @@ export function GroupsPage() {
       <ContentHeader
         icon="UsersThree"
         title="Groups"
-        actions={<Menu ariaLabel="Page actions" align="end" items={PAGE_ACTIONS} trigger={({ ref, onClick, expanded }) => <Tooltip label="More options"><IconButton ref={ref as Ref<HTMLButtonElement>} icon="DotsThree" ariaLabel="Page actions" aria-haspopup="menu" aria-expanded={expanded} onClick={onClick} /></Tooltip>} />}
+        actions={<Menu ariaLabel="Page actions" align="end" items={pageActionsMenuItems} trigger={({ ref, onClick, expanded }) => <Tooltip label="More options"><IconButton ref={ref as Ref<HTMLButtonElement>} icon="DotsThree" ariaLabel="Page actions" aria-haspopup="menu" aria-expanded={expanded} onClick={onClick} /></Tooltip>} />}
         search={<TextInput iconLead="MagnifyingGlass" placeholder="Search groups" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} aria-label="Search groups" />}
         toolbarActions={<><span className={styles.toolbarSeparator} aria-hidden="true" /><AdvancedSearchButton /><Button variant="primary" iconLead="Plus" onClick={() => setNewGroupOpen(true)}>Create</Button></>}
       />

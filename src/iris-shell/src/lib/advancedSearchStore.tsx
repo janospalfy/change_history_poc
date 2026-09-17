@@ -38,6 +38,10 @@ interface AdvancedSearchContextValue {
   setAppliedCount: (count: number) => void;
   setDraftFilters: (filters: AdvancedFilter[]) => void;
   applyFilters: () => void;
+  /** Sets both draft and applied filters directly (e.g. restoring a saved
+   *  view), bypassing the normal draft → apply flow so there's no stale-
+   *  closure gap between the two state updates. */
+  setAppliedFilters: (filters: AdvancedFilter[]) => void;
   clearFilters: () => void;
   setGroupConditions: (conditions: FilterGroupCondition[]) => void;
   setFilterGroups: (groups: FilterGroup[]) => void;
@@ -85,6 +89,11 @@ export function AdvancedSearchProvider({ children }: { children: ReactNode }) {
         draftFilters.filter((filter) => filter.value).length +
         groupConditions.filter((condition) => condition.value).length,
       );
+    },
+    setAppliedFilters: (filters: AdvancedFilter[]) => {
+      setDraftFilters(filters);
+      setAppliedFilters(filters);
+      setAppliedCount(filters.filter((filter) => filter.value).length);
     },
     clearFilters: () => {
       setDraftFilters([]);

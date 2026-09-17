@@ -16,7 +16,7 @@ export type Route =
   | { name: 'treeRoot'; params: Record<string, never> }
   | { name: 'treeList'; params: { nodeId: string } }
   | { name: 'treeDetail'; params: { nodeId: string; objectId: string } }
-  | { name: 'favoritesList'; params: Record<string, never> }
+  | { name: 'favoritesLink'; params: Record<string, never> }
   | { name: 'groups'; params: Record<string, never> }
   | { name: 'groupDetail'; params: { id: string; tab?: string } }
   | { name: 'devices'; params: Record<string, never> }
@@ -43,7 +43,7 @@ const ROUTES: RouteDef[] = [
   { name: 'treeDetail', pattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'] },
   { name: 'treeList', pattern: /^#\/tree\/([^/]+)$/, keys: ['nodeId'] },
   { name: 'treeRoot', pattern: /^#\/tree$/, keys: [] },
-  { name: 'favoritesList', pattern: /^#\/favorites$/, keys: [] },
+  { name: 'favoritesLink', pattern: /^#\/favorites$/, keys: [] },
   { name: 'groups', pattern: /^#\/groups$/, keys: [] },
   { name: 'groupDetail', pattern: /^#\/groups\/([^/?]+)(?:\?tab=([^&]+))?$/, keys: ['id', 'tab'] },
   { name: 'devices', pattern: /^#\/devices$/, keys: [] },
