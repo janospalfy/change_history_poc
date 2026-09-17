@@ -291,3 +291,18 @@
     min-width: max-content;
   }
 }
+
+/* Absorbs leftover width once every grow column has hit its max-width, so
+   the header/row border-bottom and background stay flush with the table's
+   true right edge instead of stopping short and leaving a blank gap before
+   the pinned action column. Compounded with .headCell/.cell (not a bare
+   modifier) and placed last so it wins over the compact/light variants
+   above regardless of density or appearance. */
+.headCell.filler,
+.cell.filler {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding-inline: 0;
+  border-right: 0;
+}

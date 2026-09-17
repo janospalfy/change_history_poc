@@ -108,6 +108,13 @@ export function DataTable<TRow extends DataTableRow>({
    *  (which is --oi-size-l wide). */
   const firstColOffset = selectable ? 'var(--oi-size-l)' : '0';
 
+  /* Real grow columns should claim 100% of any leftover width themselves
+     (matching how wide columns are meant to keep expanding); the filler
+     only needs to absorb space itself when no column opts into growing,
+     so a table of purely fixed-width columns doesn't leave an unstyled gap. */
+  const hasGrowColumn = columns.some((col) => col.grow);
+  const fillerStyle: CSSProperties = { flex: hasGrowColumn ? '0 0 0' : '1 1 0' };
+
   /* Track horizontal scroll position so pinned columns render an edge shadow
      only while there is content scrolled underneath them. */
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -186,6 +193,7 @@ export function DataTable<TRow extends DataTableRow>({
             <span className={styles.headLabel}>{col.header}</span>
           </HeadCell>
         ))}
+        <div className={cx(styles.headCell, styles.filler)} style={fillerStyle} aria-hidden="true" />
         <HeadCell width="44px" className={styles.actionCell} pin="end" aria-label="Table settings">
           {headerAction}
         </HeadCell>
@@ -245,6 +253,7 @@ export function DataTable<TRow extends DataTableRow>({
                   {col.cell(row, i)}
                 </BodyCell>
               ))}
+              <div className={cx(styles.cell, styles.filler)} style={fillerStyle} aria-hidden="true" />
               <BodyCell width="44px" className={styles.actionCell} pin="end">
                 {rowActions ? (
                   rowActions(row, i)
