@@ -14,7 +14,7 @@ let currentSupportingText: string | undefined;
 let currentAction: (() => void) | undefined;
 let currentActionLabel = 'View';
 let currentSecondaryAction: (() => void) | undefined;
-let currentSecondaryLabel = 'Dismiss';
+let currentSecondaryLabel: string | undefined;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -22,7 +22,7 @@ function emit() {
 }
 
 /** Show a toast from anywhere in the app. */
-export function showToast(message: string, action?: () => void, supportingText?: string, actionLabel = 'View', secondaryAction?: () => void, secondaryLabel = 'Dismiss'): void {
+export function showToast(message: string, action?: () => void, supportingText?: string, actionLabel = 'View', secondaryAction?: () => void, secondaryLabel?: string): void {
   current = message;
   currentSupportingText = supportingText;
   currentAction = action;
@@ -43,7 +43,7 @@ export interface ToastController {
   action?: () => void;
   actionLabel: string;
   secondaryAction?: () => void;
-  secondaryLabel: string;
+  secondaryLabel?: string;
   dismiss: () => void;
 }
 
@@ -56,7 +56,7 @@ export function useToastMessage(): ToastController {
     currentAction = undefined;
     currentActionLabel = 'View';
     currentSecondaryAction = undefined;
-    currentSecondaryLabel = 'Dismiss';
+    currentSecondaryLabel = undefined;
     emit();
   }, []);
   const supportingText = useSyncExternalStore(subscribe, () => currentSupportingText);

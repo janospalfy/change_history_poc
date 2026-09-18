@@ -98,33 +98,37 @@ export function useFavorites(): FavoritesApi {
   const toggle = useCallback((entry: FavoriteEntry) => {
     const exists = current.some((e) => e.id === entry.id);
     if (exists) {
+      const index = current.findIndex((e) => e.id === entry.id);
       current = current.filter((e) => e.id !== entry.id);
       persist();
       emit();
-      // Matches Figma "Removed from Favorites" toast — no action buttons.
-      showToast(`${entry.name} removed from Favorites.`);
+      showToast(`${entry.name} removed from Favorites.`, () => {
+        current = [...current.slice(0, index), entry, ...current.slice(index)];
+        persist();
+        emit();
+      }, undefined, 'Undo', undefined, 'Dismiss');
     } else {
       current = [...current, entry];
       persist();
       emit();
-      // Matches Figma "Added to Favorites" toast — Undo reverses it, View opens it.
-      showToast(
-        `${entry.name} added to Favorites.`,
-        () => toggle(entry),
-        undefined,
-        'Undo',
-        () => navigate(entry.href),
-        'View',
-      );
+      // Matches Figma "Added to Favorites" toast — a single View action, no Undo.
+      showToast(`${entry.name} added to Favorites.`, () => navigate(entry.href), undefined, 'View');
     }
   }, []);
 
   const remove = useCallback((id: string) => {
+    const index = current.findIndex((e) => e.id === id);
     const entry = current.find((e) => e.id === id);
     current = current.filter((e) => e.id !== id);
     persist();
     emit();
-    if (entry) showToast(`${entry.name} removed from Favorites.`);
+    if (entry) {
+      showToast(`${entry.name} removed from Favorites.`, () => {
+        current = [...current.slice(0, index), entry, ...current.slice(index)];
+        persist();
+        emit();
+      }, undefined, 'Undo', undefined, 'Dismiss');
+    }
   }, []);
 
   const isFavorite = useCallback((id: string) => entries.some((e) => e.id === id), [entries]);

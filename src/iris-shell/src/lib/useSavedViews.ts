@@ -141,28 +141,23 @@ export function useSavedViews(): SavedViewsApi {
     current = [...current, view];
     persist();
     emit();
-    // Matches Figma "Added to Favorites" toast — Undo reverses it, View opens it.
-    showToast(
-      `${view.name} added to Favorites.`,
-      () => {
-        current = current.filter((v) => v.id !== view.id);
-        persist();
-        emit();
-      },
-      undefined,
-      'Undo',
-      () => openSavedView(view),
-      'View',
-    );
+    // Matches Figma "Added to Favorites" toast — a single View action, no Undo.
+    showToast(`${view.name} added to Favorites.`, () => openSavedView(view), undefined, 'View');
   }, []);
 
   const remove = useCallback((id: string) => {
+    const index = current.findIndex((v) => v.id === id);
     const view = current.find((v) => v.id === id);
     current = current.filter((v) => v.id !== id);
     persist();
     emit();
-    // Matches Figma "Removed from Favorites" toast — no action buttons.
-    if (view) showToast(`${view.name} removed from Favorites.`);
+    if (view) {
+      showToast(`${view.name} removed from Favorites.`, () => {
+        current = [...current.slice(0, index), view, ...current.slice(index)];
+        persist();
+        emit();
+      }, undefined, 'Undo', undefined, 'Dismiss');
+    }
   }, []);
 
   const rename = useCallback((id: string, name: string) => {
