@@ -216,7 +216,7 @@ interface DragPos {
 }
 
 /** Favourites segment body — search box + saved "Views" (named filter
- *  shortcuts) and favorited "Objects & folders", each reorderable via drag-and-drop
+ *  shortcuts) and favorited "Objects and folders", each reorderable via drag-and-drop
  *  (Figma node 4181:13907 / notes: "Favorites list in Directory panel",
  *  "Ordering by drag and drop"). Selecting the segment doesn't navigate —
  *  the main content stays on whatever page the user was already viewing. */
@@ -383,7 +383,7 @@ function FavouritesBody() {
                     : styles.favSectionLabel
                 }
               >
-                Objects & folders
+                Objects and folders
               </p>
               {filteredEntries.map((f) => {
                 const index = entries.indexOf(f);
