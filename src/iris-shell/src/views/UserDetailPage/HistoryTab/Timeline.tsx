@@ -48,8 +48,8 @@ export interface TimelineProps {
    *  instead — the varied, actually-informative part of that story. */
   showTargetObject?: boolean;
   /** True count of operations in the dataset before search/filters are
-   *  applied — lets the summary label read "12/45 operations shown" instead
-   *  of comparing the filtered count to itself. Defaults to the
+   *  applied — lets the summary label read "12 of 45 operations shown"
+   *  instead of comparing the filtered count to itself. Defaults to the
    *  (already-filtered) `groups` total when the caller has no filters. */
   totalOperationCount?: number;
 }
@@ -128,10 +128,16 @@ export function Timeline({
     <div className={styles.wrap}>
       <div className={styles.summary}>
         <span className={styles.summaryLabel}>
-          {totalOperations === 0 ? 'No operations shown' : `${shownOperations}/${totalOperations} operations shown`}
+          {totalOperations === 0 ? 'No operations shown' : `${shownOperations} of ${totalOperations} operations shown`}
         </span>
-        {!forceExpandAll && groups.length > 0 && (
-          <button type="button" className={styles.summaryToggle} onClick={toggleAll}>
+        {groups.length > 0 && (
+          <button
+            type="button"
+            className={cx(styles.summaryToggle, forceExpandAll && styles.summaryToggleHidden)}
+            onClick={toggleAll}
+            tabIndex={forceExpandAll ? -1 : 0}
+            aria-hidden={forceExpandAll}
+          >
             <Icon name={isAllExpanded ? 'ArrowsInSimple' : 'ArrowsOutSimple'} size="16px" />
             <span>{isAllExpanded ? 'Collapse all' : 'Expand all'}</span>
           </button>

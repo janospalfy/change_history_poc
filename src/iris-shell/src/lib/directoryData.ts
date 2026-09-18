@@ -123,7 +123,7 @@ const TREE: RawNode[] = [
       },
       {
         id: 'entra-directories',
-        name: 'Entra Directories',
+        name: 'Entra ID directories',
         type: 'container',
         description: 'Microsoft Entra ID tenants.',
         children: [

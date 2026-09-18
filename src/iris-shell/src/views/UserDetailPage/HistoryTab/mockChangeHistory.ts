@@ -13,6 +13,36 @@ export type OperationType =
 /** Matches the Figma `Status Badge` component's variants exactly. */
 export type OperationStatus = 'Completed' | 'Pending' | 'Denied' | 'Canceled';
 
+const MONTH_INDEX: Record<string, number> = {
+  January: 1,
+  February: 2,
+  March: 3,
+  April: 4,
+  May: 5,
+  June: 6,
+  July: 7,
+  August: 8,
+  September: 9,
+  October: 10,
+  November: 11,
+  December: 12,
+};
+
+/** Converts the long-form UTC timestamp mock data is authored in (e.g.
+ *  "August 29, 2026 15:02:44 UTC", shared with the timeline's date-group
+ *  headers) into the numeric "M/D/YYYY HH:MM:SS UTC" format the sidesheet's
+ *  Requested/Completed/Last updated on fields — and the "Last updated on"
+ *  filter's options — use (Figma node 1458:25187, e.g.
+ *  "11/13/2024 18:30:51 UTC"). */
+export function formatSidesheetTimestamp(raw: string): string {
+  const match = /^([A-Za-z]+) (\d{1,2}), (\d{4}) (\d{2}:\d{2}:\d{2}) UTC$/.exec(raw);
+  if (!match) return raw;
+  const [, monthName, day, year, time] = match;
+  const month = MONTH_INDEX[monthName];
+  if (!month) return raw;
+  return `${month}/${day}/${year} ${time} UTC`;
+}
+
 /** Simplified verb shown as the sidesheet's "Type" field (Operation Details
  *  section), matching node 1454:27046 exactly (e.g. "Modify"). */
 export const OPERATION_TYPE_VERB: Record<OperationType, string> = {
@@ -85,7 +115,7 @@ export interface ChangeHistoryGroup {
  *  define its own `workflowActivities` (Figma node 1312:12553). */
 export const DEFAULT_DEPROVISION_WORKFLOW: WorkflowActivity[] = [
   {
-    name: 'User Account Deprovisioning',
+    name: 'User account deprovisioning',
     timestamp: '12:05:43',
     policy: 'Built-in Policy - User Default Deprovisioning',
     notes: [
@@ -96,11 +126,11 @@ export const DEFAULT_DEPROVISION_WORKFLOW: WorkflowActivity[] = [
     ],
     change: { label: 'The user name is changed', oldValue: 'alexvu', newValue: 'alexvu - Deprovisioned' },
   },
-  { name: 'Group Membership Removal', timestamp: '12:05:12', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['All group memberships are removed.'] },
-  { name: 'Exchange Mailbox Deprovisioning', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The Exchange mailbox is hidden from address lists.'] },
-  { name: 'Home Folder Deprovisioning', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ["Access to the user's home folder is revoked."] },
-  { name: 'User Account Realocation', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The account is moved to the Deprovisioned Users container.'] },
-  { name: 'User Account Permanent Deletion', timestamp: '12:05:34', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The account is scheduled for permanent deletion after the retention period.'] },
+  { name: 'Group membership removal', timestamp: '12:05:12', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['All group memberships are removed.'] },
+  { name: 'Exchange mailbox deprovisioning', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The Exchange mailbox is hidden from address lists.'] },
+  { name: 'Home folder deprovisioning', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ["Access to the user's home folder is revoked."] },
+  { name: 'User account reallocation', timestamp: '12:05:43', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The account is moved to the Deprovisioned Users container.'] },
+  { name: 'User account permanent deletion', timestamp: '12:05:34', policy: 'Built-in Policy - User Default Deprovisioning', notes: ['The account is scheduled for permanent deletion after the retention period.'] },
 ];
 
 
@@ -128,7 +158,7 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
   { type: 'renamed', label: 'Rename user' },
   { type: 'groupMembershipChange', label: 'Add group membership' },
   { type: 'deprovision', label: 'Deprovision user' },
-  { type: 'undoDeprovision', label: 'Un-deprovision user' },
+  { type: 'undoDeprovision', label: 'Undo deprovisioning' },
   { type: 'groupMembershipChange', label: 'Remove group membership' },
 ];
 
@@ -366,7 +396,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         lastUpdatedOn: 'August 29, 2026 15:02:44 UTC',
         changes: [
           {
-            property: 'E-Mail Address',
+            property: 'Email address',
             attribute: '(mail)',
             changeNote: 'Replace value · Operation initiator',
             oldValue: 'noah.kim@saasii.io',
@@ -532,7 +562,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         lastUpdatedOn: 'September 1, 2026 08:55:12 UTC',
         changes: [
           {
-            property: 'User Password',
+            property: 'User password',
             attribute: '(edsaPassword)',
             changeNote: 'Replace value · Operation initiator',
             oldValue: '********',
@@ -544,7 +574,7 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
         id: 'ID: 1-5098',
         time: '08:40:03',
         type: 'undoDeprovision',
-        label: 'Un-deprovision user',
+        label: 'Undo deprovisioning',
         actor: 'isabella.clark (O1D.local)',
         status: 'Completed',
         date: 'September 1, 2026',

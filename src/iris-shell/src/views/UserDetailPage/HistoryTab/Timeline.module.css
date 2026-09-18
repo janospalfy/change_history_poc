@@ -30,7 +30,7 @@
   width: 100%;
 }
 
-/* "N/N operations shown" summary — sits above the list so it's visible
+/* "N of N operations shown" summary — sits above the list so it's visible
    without scrolling to the end, regardless of how many pages have loaded.
    The expand/collapse-all toggle shares this row, right-aligned. */
 .summary {
@@ -73,6 +73,14 @@
 .summaryToggle:focus-visible {
   outline: var(--oi-border-width-l) var(--oi-border-style-solid) var(--oi-border-color-focus);
   outline-offset: var(--oi-border-width-l);
+}
+
+/* Keeps the toggle's own height reserved (rather than unmounting it) so the
+   summary row doesn't shrink and shift the timeline below it whenever a
+   search/filter forces every group open. */
+.summaryToggleHidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .list {

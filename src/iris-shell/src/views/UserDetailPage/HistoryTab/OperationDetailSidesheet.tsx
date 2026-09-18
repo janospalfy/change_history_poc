@@ -10,7 +10,7 @@ import { DescriptionList } from '../../../components/DescriptionList/Description
 import { Badge } from '../../../components/Badge/Badge.js';
 import { Link } from '../../../components/Link/Link.js';
 import { showToast } from '../../../lib/toastStore.js';
-import { OPERATION_TYPE_VERB, DEFAULT_DEPROVISION_WORKFLOW, type ChangeHistoryOperation, type OperationType, type WorkflowActivity } from './mockChangeHistory.js';
+import { OPERATION_TYPE_VERB, DEFAULT_DEPROVISION_WORKFLOW, formatSidesheetTimestamp, type ChangeHistoryOperation, type OperationType, type WorkflowActivity } from './mockChangeHistory.js';
 import styles from './OperationDetailSidesheet.module.css';
 
 const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
@@ -63,8 +63,8 @@ export function OperationDetailSidesheet({
         </Link>
       ),
     },
-    { label: 'Requested', value: operation.requestedAt },
-    { label: 'Completed', value: operation.requestedAt },
+    { label: 'Requested', value: formatSidesheetTimestamp(operation.requestedAt) },
+    { label: 'Completed', value: formatSidesheetTimestamp(operation.requestedAt) },
     { label: 'Status', value: <Badge>{operation.status}</Badge> },
   ];
 
@@ -81,7 +81,7 @@ export function OperationDetailSidesheet({
       ),
     },
     { label: 'Type', value: OPERATION_TYPE_VERB[operation.type] },
-    { label: 'Last updated on', value: operation.lastUpdatedOn },
+    { label: 'Last updated on', value: formatSidesheetTimestamp(operation.lastUpdatedOn) },
   ];
 
   const exportMenuItems = [

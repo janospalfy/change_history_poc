@@ -19,6 +19,7 @@ import { OperationDetailSidesheet } from './OperationDetailSidesheet.js';
 import {
   MOCK_CHANGE_HISTORY,
   MOCK_USER_ACTIVITY,
+  formatSidesheetTimestamp,
   type ChangeHistoryGroup,
   type ChangeHistoryOperation,
   type OperationType,
@@ -26,8 +27,8 @@ import {
 import styles from './HistoryTab.module.css';
 
 const VIEW_ITEMS = [
-  { value: 'changeHistory', label: 'Change History' },
-  { value: 'userActivity', label: 'User Activity' },
+  { value: 'changeHistory', label: 'Change history' },
+  { value: 'userActivity', label: 'User activity' },
 ];
 
 /** A native date input with the browser's calendar icon replaced by the
@@ -169,14 +170,14 @@ function uniqueOptions(operations: ChangeHistoryOperation[], fieldId: string): {
     const value = getFieldValue(op, fieldId);
     if (value && !seen.has(value)) {
       seen.add(value);
-      options.push({ value, label: value });
+      options.push({ value, label: fieldId === 'lastUpdatedOn' ? formatSidesheetTimestamp(value) : value });
     }
   }
   return options;
 }
 
 /** Distinct property names across every operation's `changes` list (e.g.
- *  "E-Mail Address", "User Password") — an operation can touch several, so
+ *  "Email address", "User password") — an operation can touch several, so
  *  this can't be derived via `getFieldValue`/`uniqueOptions` like the
  *  single-valued fields above. */
 function uniqueChangedPropertyOptions(operations: ChangeHistoryOperation[]): { value: string; label: string }[] {

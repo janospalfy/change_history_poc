@@ -70,7 +70,7 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
   }, [nodeId, prev, next]);
 
   const breadcrumb = useMemo<Crumb[]>(() => {
-    const crumbs: Crumb[] = [{ label: 'Directory Management' }];
+    const crumbs: Crumb[] = [{ label: 'Directory management' }];
     crumbs.push({ label: '…' });
     crumbs.push({ label: getNodeName(nodeId) ?? 'Directory', onClick: () => navigate(`#/tree/${nodeId}`) });
     crumbs.push({ label: object?.name ?? 'Object' });
@@ -79,7 +79,7 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
 
   if (!object) {
     return (
-      <AppShell breadcrumb={[{ label: 'Directory Management' }, { label: 'Not found' }]}>
+      <AppShell breadcrumb={[{ label: 'Directory management' }, { label: 'Not found' }]}>
         <div className={styles.missing}>
           <h1 className={styles.missingTitle}>Object not found</h1>
           <p className={styles.missingBody}>

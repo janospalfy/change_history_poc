@@ -88,7 +88,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
     return (
       <AppShell
         breadcrumb={[
-          { label: 'Directory Management' },
+          { label: 'Directory management' },
           { label: 'Users', onClick: () => navigate('#/users') },
           { label: 'Not found' },
         ]}
@@ -115,7 +115,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
   return (
     <AppShell
       breadcrumb={[
-        { label: 'Directory Management' },
+        { label: 'Directory management' },
         { label: 'Users', onClick: () => navigate('#/users') },
         { label: user.name },
       ]}

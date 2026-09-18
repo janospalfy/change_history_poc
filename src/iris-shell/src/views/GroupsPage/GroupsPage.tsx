@@ -134,7 +134,7 @@ export function GroupsPage() {
   ];
 
   return (
-    <AppShell breadcrumb={[{ label: 'Directory Management' }, { label: 'Groups' }]}>
+    <AppShell breadcrumb={[{ label: 'Directory management' }, { label: 'Groups' }]}>
       <ContentHeader
         icon="UsersThree"
         title="Groups"

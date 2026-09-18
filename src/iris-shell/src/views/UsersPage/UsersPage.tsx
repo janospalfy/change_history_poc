@@ -377,7 +377,7 @@ export function UsersPage() {
 
   return (
     <AppShell
-      breadcrumb={[{ label: 'Directory Management' }, { label: 'Users' }]}
+      breadcrumb={[{ label: 'Directory management' }, { label: 'Users' }]}
     >
       <ContentHeader
         icon="Users"

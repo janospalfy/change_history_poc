@@ -36,7 +36,7 @@ export const PAGE_ITEMS: CommandItem[] = [
     label: 'Users',
     icon: 'Users',
     hash: '#/users',
-    secondary: 'Directory Management',
+    secondary: 'Directory management',
     keywords: 'directory people accounts groups',
   },
   {

@@ -254,7 +254,7 @@ export function TreeListPage({ nodeId }: TreeListPageProps) {
 
   const breadcrumb = useMemo<Crumb[]>(() => {
     const path = getPath(nodeId);
-    const crumbs: Crumb[] = [{ label: 'Directory Management' }];
+    const crumbs: Crumb[] = [{ label: 'Directory management' }];
     if (path.length > 1) crumbs.push({ label: '…' });
     const current = path[path.length - 1];
     crumbs.push({ label: current?.name ?? nodeName ?? 'Unknown' });
@@ -263,7 +263,7 @@ export function TreeListPage({ nodeId }: TreeListPageProps) {
 
   if (!known) {
     return (
-      <AppShell breadcrumb={[{ label: 'Directory Management' }, { label: 'Not found' }]}>
+      <AppShell breadcrumb={[{ label: 'Directory management' }, { label: 'Not found' }]}>
         <div className={styles.missing}>
           <h1 className={styles.missingTitle}>Directory not found</h1>
           <p className={styles.missingBody}>

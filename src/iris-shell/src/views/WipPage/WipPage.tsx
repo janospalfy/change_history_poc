@@ -34,7 +34,7 @@ export function WipPage({ title, icon, href }: WipPageProps) {
   ];
 
   return (
-    <AppShell breadcrumb={[{ label: 'Directory Management' }, { label: title }]}>
+    <AppShell breadcrumb={[{ label: 'Directory management' }, { label: title }]}>
       <ContentHeader
         icon={icon}
         title={title}

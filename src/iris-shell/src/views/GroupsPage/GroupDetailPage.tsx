@@ -70,14 +70,14 @@ export function GroupDetailPage({ groupId }: { groupId: string }) {
 
   if (!group) {
     return (
-      <AppShell breadcrumb={[{ label: 'Directory Management' }, { label: 'Groups' }, { label: 'Not found' }]}>
+      <AppShell breadcrumb={[{ label: 'Directory management' }, { label: 'Groups' }, { label: 'Not found' }]}>
         <div className={styles.empty}><h1>Group not found</h1><Button variant="secondary" onClick={() => navigate('#/groups')}>Back to Groups</Button></div>
       </AppShell>
     );
   }
 
   return (
-    <AppShell breadcrumb={[{ label: 'Directory Management' }, { label: 'Groups', onClick: () => navigate('#/groups') }, { label: group.name }]}>
+    <AppShell breadcrumb={[{ label: 'Directory management' }, { label: 'Groups', onClick: () => navigate('#/groups') }, { label: group.name }]}>
       <ContentHeader
         variant="detail"
         icon="UsersThree"
