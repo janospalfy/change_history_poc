@@ -133,7 +133,7 @@ function CopyObjectIdButton({ objectId, userName }: { objectId: string; userName
 const COLUMNS: DataTableColumn<User>[] = [
   {
     key: 'name',
-    header: 'Displayname',
+    header: 'Display name',
     icon: 'IdentificationCard',
     width: '180px',
     cell: (u) => (
