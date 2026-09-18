@@ -28,7 +28,7 @@ import { THEMES } from './lib/useTheme.js';
 // preference; this prevents a flash if no preference is stored.
 const STORED_THEME = localStorage.getItem('ars.theme');
 const VALID = THEMES.map((t) => t.value) as string[];
-const initial = STORED_THEME && VALID.includes(STORED_THEME) ? STORED_THEME : 'dark';
+const initial = STORED_THEME && VALID.includes(STORED_THEME) ? STORED_THEME : 'light';
 document.body.classList.add(`theme-${initial}`);
 
 const rootEl = document.getElementById('root');
