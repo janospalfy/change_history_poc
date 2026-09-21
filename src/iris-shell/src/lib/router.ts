@@ -11,11 +11,11 @@ import { useEffect, useState } from 'react';
  */
 
 export type Route =
-  | { name: 'userDetail'; params: { id: string; tab?: string } }
+  | { name: 'userDetail'; params: { id: string; tab?: string; op?: string } }
   | { name: 'usersList'; params: Record<string, never> }
   | { name: 'treeRoot'; params: Record<string, never> }
   | { name: 'treeList'; params: { nodeId: string } }
-  | { name: 'treeDetail'; params: { nodeId: string; objectId: string } }
+  | { name: 'treeDetail'; params: { nodeId: string; objectId: string; tab?: string; op?: string } }
   | { name: 'favoritesLink'; params: Record<string, never> }
   | { name: 'groups'; params: Record<string, never> }
   | { name: 'groupDetail'; params: { id: string; tab?: string } }
@@ -33,46 +33,57 @@ export type RouteName = Route['name'];
 
 interface RouteDef {
   name: RouteName;
-  pattern: RegExp;
+  pathPattern: RegExp;
   keys: string[];
+  /** Optional query-string params (e.g. `?tab=history&op=ID:1-4098`) — read
+   *  independently of path params and of each other's order. */
+  queryKeys?: string[];
 }
 
 const ROUTES: RouteDef[] = [
-  { name: 'userDetail', pattern: /^#\/users\/([^/?]+)(?:\?tab=([^&]+))?$/, keys: ['id', 'tab'] },
-  { name: 'usersList', pattern: /^#\/users$/, keys: [] },
-  { name: 'treeDetail', pattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'] },
-  { name: 'treeList', pattern: /^#\/tree\/([^/]+)$/, keys: ['nodeId'] },
-  { name: 'treeRoot', pattern: /^#\/tree$/, keys: [] },
-  { name: 'favoritesLink', pattern: /^#\/favorites$/, keys: [] },
-  { name: 'groups', pattern: /^#\/groups$/, keys: [] },
-  { name: 'groupDetail', pattern: /^#\/groups\/([^/?]+)(?:\?tab=([^&]+))?$/, keys: ['id', 'tab'] },
-  { name: 'devices', pattern: /^#\/devices$/, keys: [] },
-  { name: 'agents', pattern: /^#\/agents$/, keys: [] },
-  { name: 'applications', pattern: /^#\/applications$/, keys: [] },
-  { name: 'accessTemplates', pattern: /^#\/access-templates$/, keys: [] },
-  { name: 'managementUnits', pattern: /^#\/management-units$/, keys: [] },
-  { name: 'insights', pattern: /^#\/insights$/, keys: [] },
-  { name: 'services', pattern: /^#\/services$/, keys: [] },
-  { name: 'identityHome', pattern: /^#\/identity$/, keys: [] },
-  { name: 'safeguardHome', pattern: /^#\/safeguard$/, keys: [] },
+  { name: 'userDetail', pathPattern: /^#\/users\/([^/]+)$/, keys: ['id'], queryKeys: ['tab', 'op'] },
+  { name: 'usersList', pathPattern: /^#\/users$/, keys: [] },
+  { name: 'treeDetail', pathPattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'], queryKeys: ['tab', 'op'] },
+  { name: 'treeList', pathPattern: /^#\/tree\/([^/]+)$/, keys: ['nodeId'] },
+  { name: 'treeRoot', pathPattern: /^#\/tree$/, keys: [] },
+  { name: 'favoritesLink', pathPattern: /^#\/favorites$/, keys: [] },
+  { name: 'groups', pathPattern: /^#\/groups$/, keys: [] },
+  { name: 'groupDetail', pathPattern: /^#\/groups\/([^/]+)$/, keys: ['id'], queryKeys: ['tab'] },
+  { name: 'devices', pathPattern: /^#\/devices$/, keys: [] },
+  { name: 'agents', pathPattern: /^#\/agents$/, keys: [] },
+  { name: 'applications', pathPattern: /^#\/applications$/, keys: [] },
+  { name: 'accessTemplates', pathPattern: /^#\/access-templates$/, keys: [] },
+  { name: 'managementUnits', pathPattern: /^#\/management-units$/, keys: [] },
+  { name: 'insights', pathPattern: /^#\/insights$/, keys: [] },
+  { name: 'services', pathPattern: /^#\/services$/, keys: [] },
+  { name: 'identityHome', pathPattern: /^#\/identity$/, keys: [] },
+  { name: 'safeguardHome', pathPattern: /^#\/safeguard$/, keys: [] },
 ];
 
 const DEFAULT = '#/insights';
 
 function parseHash(hash: string | null | undefined): Route {
   const h = hash || DEFAULT;
+  const queryIndex = h.indexOf('?');
+  const path = queryIndex === -1 ? h : h.slice(0, queryIndex);
+  const query = new URLSearchParams(queryIndex === -1 ? '' : h.slice(queryIndex + 1));
   for (const r of ROUTES) {
-    const m = h.match(r.pattern);
+    const m = path.match(r.pathPattern);
     if (m) {
       const params: Record<string, string> = {};
       r.keys.forEach((k, i) => {
         params[k] = decodeURIComponent(m[i + 1]);
+      });
+      r.queryKeys?.forEach((k) => {
+        const v = query.get(k);
+        if (v !== null) params[k] = v;
       });
       return { name: r.name, params } as Route;
     }
   }
   return { name: 'usersList', params: {} };
 }
+
 
 /**
  * Programmatic navigation. Updates the URL hash (and triggers `hashchange`

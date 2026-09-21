@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../AppShell/AppShell.js';
-import { navigate } from '../../lib/router.js';
+import { navigate, navigateReplace, useRoute } from '../../lib/router.js';
 import { isTypingTarget } from '../../lib/keyboard.js';
 import { useDirectory } from '../../lib/directoryStore.js';
 import { OBJECT_TYPE_META, type DirectoryObject } from '../../lib/directoryData.js';
@@ -35,15 +35,32 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
   const { getObject, getSiblings, getPath, getNodeName, updateObjectDetails } = useDirectory();
   const object = getObject(nodeId, objectId);
   const { isFavorite, toggle: toggleFavorite } = useFavorites();
+  const route = useRoute();
 
-  const [tab, setTab] = useState(PRIMARY_TAB);
+  const [tab, setTab] = useState(() => (route.name === 'treeDetail' ? route.params.tab ?? PRIMARY_TAB : PRIMARY_TAB));
   const [resetOpen, setResetOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Reset to the primary tab whenever the object changes.
+  // Reset to the primary tab (or the URL's tab, e.g. for a fresh deep link)
+  // whenever the object changes.
   useEffect(() => {
-    setTab(PRIMARY_TAB);
+    setTab(route.name === 'treeDetail' ? route.params.tab ?? PRIMARY_TAB : PRIMARY_TAB);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objectId]);
+
+  const handleTabChange = (value: string) => {
+    setTab(value);
+    // Switching tabs closes any operation open in the History sidesheet.
+    navigateReplace(`#/tree/${nodeId}/${objectId}?tab=${value}`);
+  };
+  const selectedOperationId = route.name === 'treeDetail' ? route.params.op ?? null : null;
+  const handleSelectOperation = (operationId: string | null) => {
+    navigate(
+      operationId
+        ? `#/tree/${nodeId}/${objectId}?tab=history&op=${encodeURIComponent(operationId)}`
+        : `#/tree/${nodeId}/${objectId}?tab=history`,
+    );
+  };
 
   const siblings = getSiblings(nodeId);
   const idx = siblings.findIndex((s) => s.id === objectId);
@@ -168,7 +185,7 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
             />
           </>
         }
-        tabs={<Tabs items={tabs} value={tab} onChange={setTab} ariaLabel="Object detail sections" />}
+        tabs={<Tabs items={tabs} value={tab} onChange={handleTabChange} ariaLabel="Object detail sections" />}
       />
 
       <div className={styles.content}>
@@ -185,7 +202,11 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
             onMembershipChange={(groupMembershipIds) => updateObjectDetails(object.id, { groupMembershipIds })}
           />
         ) : tab === 'history' ? (
-          <HistoryTab subjectName={object.name} />
+          <HistoryTab
+            subjectName={object.name}
+            selectedOperationId={selectedOperationId}
+            onSelectOperation={handleSelectOperation}
+          />
         ) : (
           <Card title={tabs.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>

@@ -55,7 +55,12 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
   const [tab, setTab] = useState(() => route.name === 'userDetail' ? route.params.tab ?? 'general' : 'general');
   const handleTabChange = (value: string) => {
     setTab(value);
+    // Switching tabs closes any operation open in the History sidesheet.
     navigateReplace(`#/users/${userId}?tab=${value}`);
+  };
+  const selectedOperationId = route.name === 'userDetail' ? route.params.op ?? null : null;
+  const handleSelectOperation = (operationId: string | null) => {
+    navigate(operationId ? `#/users/${userId}?tab=history&op=${encodeURIComponent(operationId)}` : `#/users/${userId}?tab=history`);
   };
   const [resetOpen, setResetOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -206,7 +211,13 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
           </div>
         )}
         {tab === 'memberships' && <UserMemberships user={user} onMembershipChange={(groupMembershipIds) => updateUser(user.id, { groupMembershipIds })} />}
-        {tab === 'history' && <HistoryTab subjectName={user.name} />}
+        {tab === 'history' && (
+          <HistoryTab
+            subjectName={user.name}
+            selectedOperationId={selectedOperationId}
+            onSelectOperation={handleSelectOperation}
+          />
+        )}
         {tab !== 'overview' && tab !== 'general' && tab !== 'user-details' && tab !== 'memberships' && tab !== 'history' && (
           <Card title={TABS.find((t) => t.value === tab)?.label}>
             <p className={styles.placeholder}>Coming soon.</p>

@@ -270,13 +270,33 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
   return { allOperations, latestDate, latestDateOnly: toDateOnly(latestDate), filterFields };
 }
 
+/** Which dataset (Change History vs User Activity) a given operation id
+ *  belongs to — lets a deep-linked `op` param resolve to the right view on
+ *  first render, without needing the view itself in the URL (operation ids
+ *  are unique across both mock datasets). */
+function findOperationView(opId: string | null): 'changeHistory' | 'userActivity' | null {
+  if (!opId) return null;
+  if (MOCK_CHANGE_HISTORY.some((group) => group.operations.some((op) => op.id === opId))) return 'changeHistory';
+  if (MOCK_USER_ACTIVITY.some((group) => group.operations.some((op) => op.id === opId))) return 'userActivity';
+  return null;
+}
+
+export interface HistoryTabProps {
+  subjectName: string;
+  /** The operation currently open in the detail sidesheet, derived from the
+   *  URL — never stored as local state (see "Deep-Linking" pattern). */
+  selectedOperationId: string | null;
+  /** Navigates to (or away from, when passed `null`) an operation's unique URL. */
+  onSelectOperation: (operationId: string | null) => void;
+}
+
 /**
  * HistoryTab — the User Detail page's "History" tab. Hosts the Change
  * History / User Activity toggle, search + export + filter toolbar, and
  * (further down the audit) the grouped timeline and operation sidesheet.
  */
-export function HistoryTab({ subjectName }: { subjectName: string }) {
-  const [view, setView] = useState('changeHistory');
+export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation }: HistoryTabProps) {
+  const [view, setView] = useState(() => findOperationView(selectedOperationId) ?? 'changeHistory');
   const [query, setQuery] = useState('');
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
@@ -286,7 +306,6 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
   const [timeFrom, setTimeFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [timeTo, setTimeTo] = useState('');
-  const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const filterIdRef = useRef(0);
 
   const activeDataset = view === 'changeHistory' ? MOCK_CHANGE_HISTORY : MOCK_USER_ACTIVITY;
@@ -327,14 +346,14 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
     setTimeFrom('');
     setDateTo(latestDateOnly);
     setTimeTo('');
-    setSelectedOpId(null);
+    onSelectOperation(null);
   }
   if (dateFrom === '' && dateTo === '') {
     setDateFrom(latestDateOnly);
     setDateTo(latestDateOnly);
   }
 
-  const selectedIndex = allOperations.findIndex((op) => op.id === selectedOpId);
+  const selectedIndex = allOperations.findIndex((op) => op.id === selectedOperationId);
   const selectedOperation: ChangeHistoryOperation | null =
     selectedIndex >= 0 ? allOperations[selectedIndex] : null;
 
@@ -684,8 +703,8 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
         {filteredGroups.length > 0 ? (
           <Timeline
             groups={filteredGroups}
-            onSelectOperation={(op) => setSelectedOpId(op.id)}
-            selectedOperationId={selectedOpId}
+            onSelectOperation={(op) => onSelectOperation(op.id)}
+            selectedOperationId={selectedOperationId}
             forceExpandAll={hasActiveFilters}
             showTargetObject={view === 'userActivity'}
             totalOperationCount={allOperations.length}
@@ -698,10 +717,10 @@ export function HistoryTab({ subjectName }: { subjectName: string }) {
       <OperationDetailSidesheet
         operation={selectedOperation}
         open={selectedOperation !== null}
-        onClose={() => setSelectedOpId(null)}
-        onPrevious={() => selectedIndex > 0 && setSelectedOpId(allOperations[selectedIndex - 1].id)}
+        onClose={() => onSelectOperation(null)}
+        onPrevious={() => selectedIndex > 0 && onSelectOperation(allOperations[selectedIndex - 1].id)}
         onNext={() =>
-          selectedIndex < allOperations.length - 1 && setSelectedOpId(allOperations[selectedIndex + 1].id)
+          selectedIndex < allOperations.length - 1 && onSelectOperation(allOperations[selectedIndex + 1].id)
         }
         hasPrevious={selectedIndex > 0}
         hasNext={selectedIndex >= 0 && selectedIndex < allOperations.length - 1}
