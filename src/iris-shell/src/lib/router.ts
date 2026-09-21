@@ -11,11 +11,11 @@ import { useEffect, useState } from 'react';
  */
 
 export type Route =
-  | { name: 'userDetail'; params: { id: string; tab?: string; op?: string } }
+  | { name: 'userDetail'; params: { id: string; tab?: string; op?: string; export?: string } }
   | { name: 'usersList'; params: Record<string, never> }
   | { name: 'treeRoot'; params: Record<string, never> }
   | { name: 'treeList'; params: { nodeId: string } }
-  | { name: 'treeDetail'; params: { nodeId: string; objectId: string; tab?: string; op?: string } }
+  | { name: 'treeDetail'; params: { nodeId: string; objectId: string; tab?: string; op?: string; export?: string } }
   | { name: 'favoritesLink'; params: Record<string, never> }
   | { name: 'groups'; params: Record<string, never> }
   | { name: 'groupDetail'; params: { id: string; tab?: string } }
@@ -41,9 +41,9 @@ interface RouteDef {
 }
 
 const ROUTES: RouteDef[] = [
-  { name: 'userDetail', pathPattern: /^#\/users\/([^/]+)$/, keys: ['id'], queryKeys: ['tab', 'op'] },
+  { name: 'userDetail', pathPattern: /^#\/users\/([^/]+)$/, keys: ['id'], queryKeys: ['tab', 'op', 'export'] },
   { name: 'usersList', pathPattern: /^#\/users$/, keys: [] },
-  { name: 'treeDetail', pathPattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'], queryKeys: ['tab', 'op'] },
+  { name: 'treeDetail', pathPattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'], queryKeys: ['tab', 'op', 'export'] },
   { name: 'treeList', pathPattern: /^#\/tree\/([^/]+)$/, keys: ['nodeId'] },
   { name: 'treeRoot', pathPattern: /^#\/tree$/, keys: [] },
   { name: 'favoritesLink', pathPattern: /^#\/favorites$/, keys: [] },

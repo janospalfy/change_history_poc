@@ -24,6 +24,8 @@ const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
   deleted: 'dotRemove',
 };
 
+export type ExportFormat = 'html' | 'xml' | 'csv' | 'pdf';
+
 export interface OperationDetailSidesheetProps {
   operation: ChangeHistoryOperation | null;
   open: boolean;
@@ -32,6 +34,8 @@ export interface OperationDetailSidesheetProps {
   onNext: () => void;
   hasPrevious: boolean;
   hasNext: boolean;
+  /** Fired after a successful export, so the URL can reflect it (deep-linkable "exported" state). */
+  onExport: (format: ExportFormat) => void;
 }
 
 /**
@@ -47,6 +51,7 @@ export function OperationDetailSidesheet({
   onNext,
   hasPrevious,
   hasNext,
+  onExport,
 }: OperationDetailSidesheetProps) {
   if (!operation) return null;
 
@@ -89,25 +94,37 @@ export function OperationDetailSidesheet({
       kind: 'item' as const,
       label: 'Export as HTML',
       icon: 'FileHtml',
-      onSelect: () => showToast('Export successful', undefined, 'This operation has been exported as HTML.'),
+      onSelect: () => {
+        showToast('Export successful', undefined, 'This operation has been exported as HTML.');
+        onExport('html');
+      },
     },
     {
       kind: 'item' as const,
       label: 'Export as XML',
       icon: 'FileCode',
-      onSelect: () => showToast('Export successful', undefined, 'This operation has been exported as XML.'),
+      onSelect: () => {
+        showToast('Export successful', undefined, 'This operation has been exported as XML.');
+        onExport('xml');
+      },
     },
     {
       kind: 'item' as const,
       label: 'Export as CSV',
       icon: 'FileCsv',
-      onSelect: () => showToast('Export successful', undefined, 'This operation has been exported as CSV.'),
+      onSelect: () => {
+        showToast('Export successful', undefined, 'This operation has been exported as CSV.');
+        onExport('csv');
+      },
     },
     {
       kind: 'item' as const,
       label: 'Export as PDF',
       icon: 'FilePdf',
-      onSelect: () => showToast('Export successful', undefined, 'This operation has been exported as PDF.'),
+      onSelect: () => {
+        showToast('Export successful', undefined, 'This operation has been exported as PDF.');
+        onExport('pdf');
+      },
     },
   ];
 

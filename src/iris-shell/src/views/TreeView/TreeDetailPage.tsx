@@ -61,6 +61,14 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
         : `#/tree/${nodeId}/${objectId}?tab=history`,
     );
   };
+  const handleExportOperation = (format: string) => {
+    if (!selectedOperationId) return;
+    // Replace, not push — the export is a status update on the operation's
+    // own URL, not a new place to navigate back to.
+    navigateReplace(
+      `#/tree/${nodeId}/${objectId}?tab=history&op=${encodeURIComponent(selectedOperationId)}&export=${format}`,
+    );
+  };
 
   const siblings = getSiblings(nodeId);
   const idx = siblings.findIndex((s) => s.id === objectId);
@@ -206,6 +214,7 @@ export function TreeDetailPage({ nodeId, objectId }: TreeDetailPageProps) {
             subjectName={object.name}
             selectedOperationId={selectedOperationId}
             onSelectOperation={handleSelectOperation}
+            onExportOperation={handleExportOperation}
           />
         ) : (
           <Card title={tabs.find((t) => t.value === tab)?.label}>

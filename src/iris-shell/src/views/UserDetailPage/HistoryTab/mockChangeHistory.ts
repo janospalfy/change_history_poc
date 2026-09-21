@@ -164,6 +164,12 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
 
+// Status overrides for specific generated operations, so a story's status
+// doesn't have to follow the formulaic seed % GENERATED_STATUSES.length.
+const GENERATED_STATUS_OVERRIDES: Record<number, OperationStatus> = {
+  3026: 'Completed', // July 5, 2026 — Remove group membership from IT Security
+};
+
 // Named overrides for specific generated group-membership operations, so a
 // handful of filler rows read as real stories instead of generic placeholders.
 const GENERATED_GROUP_NAME_OVERRIDES: Record<number, string> = {
@@ -193,7 +199,7 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
   const { type, label: rawLabel } = GENERATED_TYPES[seed % GENERATED_TYPES.length];
   const opId = 3000 + seed;
   const actor = GENERATED_ACTOR_OVERRIDES[opId] ?? GENERATED_ACTORS[seed % GENERATED_ACTORS.length];
-  const status = GENERATED_STATUSES[seed % GENERATED_STATUSES.length];
+  const status = GENERATED_STATUS_OVERRIDES[opId] ?? GENERATED_STATUSES[seed % GENERATED_STATUSES.length];
   const groupName = GENERATED_GROUP_NAME_OVERRIDES[opId] ?? `Group-${opId}`;
   const isRemove = rawLabel === 'Remove group membership';
   // Named after the group being joined/left, matching the console's

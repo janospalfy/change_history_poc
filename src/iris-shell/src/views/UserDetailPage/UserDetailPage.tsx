@@ -62,6 +62,12 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
   const handleSelectOperation = (operationId: string | null) => {
     navigate(operationId ? `#/users/${userId}?tab=history&op=${encodeURIComponent(operationId)}` : `#/users/${userId}?tab=history`);
   };
+  const handleExportOperation = (format: string) => {
+    if (!selectedOperationId) return;
+    // Replace, not push \u2014 the export is a status update on the operation's
+    // own URL, not a new place to navigate back to.
+    navigateReplace(`#/users/${userId}?tab=history&op=${encodeURIComponent(selectedOperationId)}&export=${format}`);
+  };
   const [resetOpen, setResetOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
@@ -216,6 +222,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
             subjectName={user.name}
             selectedOperationId={selectedOperationId}
             onSelectOperation={handleSelectOperation}
+            onExportOperation={handleExportOperation}
           />
         )}
         {tab !== 'overview' && tab !== 'general' && tab !== 'user-details' && tab !== 'memberships' && tab !== 'history' && (

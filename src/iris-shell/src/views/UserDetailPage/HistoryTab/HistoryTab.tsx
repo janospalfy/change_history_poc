@@ -15,7 +15,7 @@ import {
   type FilterFieldConfig,
 } from '../../../components/Filters/Filters.js';
 import { Timeline } from './Timeline.js';
-import { OperationDetailSidesheet } from './OperationDetailSidesheet.js';
+import { OperationDetailSidesheet, type ExportFormat } from './OperationDetailSidesheet.js';
 import {
   MOCK_CHANGE_HISTORY,
   MOCK_USER_ACTIVITY,
@@ -288,6 +288,8 @@ export interface HistoryTabProps {
   selectedOperationId: string | null;
   /** Navigates to (or away from, when passed `null`) an operation's unique URL. */
   onSelectOperation: (operationId: string | null) => void;
+  /** Fired after a successful export, so the URL can reflect it. */
+  onExportOperation: (format: ExportFormat) => void;
 }
 
 /**
@@ -295,7 +297,7 @@ export interface HistoryTabProps {
  * History / User Activity toggle, search + export + filter toolbar, and
  * (further down the audit) the grouped timeline and operation sidesheet.
  */
-export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation }: HistoryTabProps) {
+export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation, onExportOperation }: HistoryTabProps) {
   const [view, setView] = useState(() => findOperationView(selectedOperationId) ?? 'changeHistory');
   const [query, setQuery] = useState('');
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
@@ -724,6 +726,7 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
         }
         hasPrevious={selectedIndex > 0}
         hasNext={selectedIndex >= 0 && selectedIndex < allOperations.length - 1}
+        onExport={onExportOperation}
       />
     </div>
   );
