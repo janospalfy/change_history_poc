@@ -528,16 +528,11 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
                     aria-label={
                       activeFilters.length > 0 ? `Add filter, ${activeFilters.length} active` : 'Add filter'
                     }
-                    className={activeFilters.length > 0 ? styles.filterButtonActive : undefined}
                     onClick={onClick}
                   >
                     Filter
                   </Button>
-                  {activeFilters.length > 0 && (
-                    <span className={styles.filterCountBadge} aria-hidden="true">
-                      {activeFilters.length}
-                    </span>
-                  )}
+                  {activeFilters.length > 0 && <span className={styles.filterDot} aria-hidden="true" />}
                 </span>
               </Tooltip>
             )}

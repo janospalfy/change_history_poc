@@ -44,10 +44,14 @@
 
 .chip {
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
+  height: var(--oi-size-m);
   /* Each chip is keyed by filter id, so only newly-added chips animate. */
   animation: filters-chip-in var(--oi-motion-duration-short) var(--oi-motion-ease-default);
+  border: var(--oi-border-width-default) var(--oi-border-style-solid) var(--oi-border-color-strong);
   border-radius: var(--oi-border-radius-l);
+  overflow: hidden;
+  background-color: var(--oi-background-color-primary);
   box-shadow: var(--oi-shadow-low);
 }
 
@@ -69,87 +73,71 @@
   }
 }
 
-.chipRemove,
-.chipBody {
+/* A chip is a row of segments (field, rule, value, remove) separated by
+   hairline dividers, forming one continuous bordered pill. */
+.segment,
+.valueSegment,
+.chipRemove {
   display: inline-flex;
   align-items: center;
-  border: var(--oi-border-width-default) var(--oi-border-style-solid)
-    var(--oi-border-color-default);
-  background-color: var(--oi-background-color-primary);
+  gap: var(--oi-spacing-xs);
+  padding-left: var(--oi-spacing-6);
+  padding-right: var(--oi-spacing-4);
   color: var(--oi-content-color-primary);
+}
+
+.valueSegment,
+.chipRemove {
+  border: none;
+  background-color: transparent;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
-/* Left segment: removes the filter. Rounded on the left only so it butts up
-   against the body segment. */
 .chipRemove {
-  padding: var(--oi-spacing-xs);
-  border-right: none;
-  border-top-left-radius: var(--oi-border-radius-l);
-  border-bottom-left-radius: var(--oi-border-radius-l);
+  padding-inline: var(--oi-spacing-6);
 }
 
+.valueSegment:hover,
 .chipRemove:hover {
   background-color: var(--oi-background-color-secondary);
 }
 
-/* Right segment: opens the value menu. Rounded on the right only. */
-.chipBody {
-  gap: var(--oi-spacing-s);
-  padding-block: var(--oi-border-width-l);
-  padding-left: var(--oi-spacing-xs);
-  padding-right: var(--oi-spacing-s);
-  border-top-right-radius: var(--oi-border-radius-l);
-  border-bottom-right-radius: var(--oi-border-radius-l);
-  font: inherit;
-  text-align: left;
-}
-
-.chipBody:hover {
-  background-color: var(--oi-background-color-secondary);
-}
-
-.chipRemove:focus-visible,
-.chipBody:focus-visible {
+.valueSegment:focus-visible,
+.chipRemove:focus-visible {
   outline: var(--oi-border-width-l) var(--oi-border-style-solid)
     var(--oi-border-color-focus);
-  outline-offset: var(--oi-border-width-l);
+  outline-offset: calc(-1 * var(--oi-border-width-l));
 }
 
-.fieldLabel {
-  font-size: var(--oi-text-body-s-font-size);
-  line-height: var(--oi-text-body-s-line-height);
-  font-weight: var(--oi-text-body-s-font-weight);
-  color: var(--oi-content-color-primary);
-  white-space: nowrap;
+/* Hairline separator between two segments of the same chip. */
+.divider {
+  flex-shrink: 0;
+  width: var(--oi-border-width-default);
+  background-color: var(--oi-border-color-muted);
 }
 
-/* The "is" pill between field and value. */
-.rulePill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding-inline: var(--oi-spacing-xs);
-  border-radius: var(--oi-border-radius-s);
-  background-color: var(--oi-background-color-tertiary);
-  font-size: var(--oi-text-body-s-font-size);
-  line-height: var(--oi-text-body-s-line-height);
-  font-weight: var(--oi-text-body-s-font-weight);
-  color: var(--oi-content-color-primary);
-  white-space: nowrap;
-}
-
-.value {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--oi-spacing-xs);
-}
-
+.fieldLabel,
 .valueLabel {
   font-size: var(--oi-text-body-s-font-size);
   line-height: var(--oi-text-body-s-line-height);
   font-weight: var(--oi-text-body-s-font-weight);
   color: var(--oi-content-color-primary);
+  white-space: nowrap;
+}
+
+/* The rule segment (e.g. an "equals" icon + label) reads as secondary,
+   muted content next to the field/value segments. */
+.ruleIcon {
+  color: var(--oi-content-color-tertiary);
+}
+
+.ruleLabel {
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  font-weight: var(--oi-text-body-s-font-weight);
+  color: var(--oi-content-color-tertiary);
   white-space: nowrap;
 }
 
@@ -161,6 +149,7 @@
   color: var(--oi-content-color-tertiary);
   white-space: nowrap;
 }
+
 
 /* Decorative checkbox shown in a filter value menu row \u2014 the row's own
    click handler toggles the value, so the checkbox itself must not

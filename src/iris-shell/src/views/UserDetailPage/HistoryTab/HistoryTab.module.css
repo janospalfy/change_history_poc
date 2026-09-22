@@ -48,11 +48,6 @@
   margin-left: calc(var(--oi-spacing-xxl) - var(--oi-spacing-l));
 }
 
-.filterButtonActive {
-  background-color: var(--oi-background-color-tertiary);
-  color: var(--oi-content-color-primary);
-}
-
 /* Positions the active-filter-count badge against the labeled Filter
    button's corner (Button itself has no position: relative). */
 .filterButtonWrap {
@@ -60,24 +55,21 @@
   display: inline-flex;
 }
 
-/* Count of active property filters, pinned to the Add-filter button's
-   corner as a small rounded-square chip (not a circular badge). */
-.filterCountBadge {
+/* Small blue dot pinned to the top-right of the Filter button's funnel
+   icon (not the button's own corner) when one or more filters are active
+   (Figma: node 1393:17844). Offsets are derived from the Button
+   component's own box model: 1px border + 12px inline padding puts the
+   20px icon's right edge at 33px, and centering that icon in the 32px-tall
+   button puts its top edge at 6px \u2014 so the dot centers on (33, 6). */
+.filterDot {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 16px;
-  height: 16px;
-  padding-inline: 3px;
-  border-radius: 4px;
-  background-color: var(--oi-button-background-primary);
-  color: var(--oi-content-color-constant);
-  font-size: 10px;
-  line-height: 1;
-  font-weight: var(--oi-text-caption-font-weight);
+  top: 3px;
+  left: 30px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--oi-border-radius-max);
+  background-color: var(--oi-base-color-brand);
+  border: var(--oi-border-width-default) var(--oi-border-style-solid) var(--oi-background-color-primary);
 }
 
 /* Filters is built for the full-width Users page; drop its outer padding

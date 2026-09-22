@@ -172,32 +172,22 @@ export function Filters({
             };
           });
 
-          const chipHeader = (
-            <>
-              <span className={styles.fieldLabel}>{field.label}</span>
-              <span className={styles.rulePill}>{rule}</span>
-            </>
-          );
-
           const selectBody = (
             args?: { ref: Ref<HTMLElement>; onClick: () => void; expanded: boolean },
           ) => (
             <button
               ref={args?.ref as Ref<HTMLButtonElement>}
               type="button"
-              className={styles.chipBody}
+              className={styles.valueSegment}
               onClick={args?.onClick}
               aria-haspopup={hasMenu ? 'menu' : undefined}
               aria-expanded={args?.expanded}
             >
-              {chipHeader}
               {selectedOptions.length > 0 ? (
-                <span className={styles.value}>
-                  <span className={styles.valueLabel}>
-                    {selectedOptions.length === 1
-                      ? selectedOptions[0].label
-                      : `${selectedOptions[0].label} +${selectedOptions.length - 1}`}
-                  </span>
+                <span className={styles.valueLabel}>
+                  {selectedOptions.length === 1
+                    ? selectedOptions[0].label
+                    : `${selectedOptions[0].label} +${selectedOptions.length - 1}`}
                 </span>
               ) : (
                 <span className={styles.valuePlaceholder}>{placeholder}</span>
@@ -207,17 +197,17 @@ export function Filters({
 
           return (
             <div key={filter.id} className={styles.chip}>
-              <button
-                type="button"
-                className={styles.chipRemove}
-                onClick={() => onRemove(filter.id)}
-                aria-label={`Remove ${field.label} filter`}
-              >
-                <Icon name="X" size="16px" />
-              </button>
+              <div className={styles.segment}>
+                <span className={styles.fieldLabel}>{field.label}</span>
+              </div>
+              <div className={styles.divider} aria-hidden="true" />
+              <div className={styles.segment}>
+                <Icon name="Equals" size="16px" className={styles.ruleIcon} />
+                <span className={styles.ruleLabel}>{rule}</span>
+              </div>
+              <div className={styles.divider} aria-hidden="true" />
               {isDate ? (
-                <div className={styles.chipBody}>
-                  {chipHeader}
+                <div className={styles.segment}>
                   <input
                     type="date"
                     className={styles.dateInput}
@@ -236,6 +226,15 @@ export function Filters({
               ) : (
                 selectBody()
               )}
+              <div className={styles.divider} aria-hidden="true" />
+              <button
+                type="button"
+                className={styles.chipRemove}
+                onClick={() => onRemove(filter.id)}
+                aria-label={`Remove ${field.label} filter`}
+              >
+                <Icon name="X" size="16px" />
+              </button>
             </div>
           );
         })}
