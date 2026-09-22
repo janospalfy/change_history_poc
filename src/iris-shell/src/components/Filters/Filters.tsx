@@ -19,12 +19,14 @@ export interface FilterFieldConfig {
   label: string;
   /**
    * How the value is chosen. `'select'` (default) opens a menu of `options`;
-   * `'date'` renders a native date picker in the chip.
+   * `'date'` renders a native date picker in the chip; `'text'` renders a
+   * free-text input (e.g. searching by name or ID) instead of a fixed list.
    */
-  type?: 'select' | 'date';
+  type?: 'select' | 'date' | 'text';
   /** Rule shown in the chip's pill (defaults to "is"). */
   rule?: string;
-  /** Placeholder shown while no value is chosen (defaults to "Select value"). */
+  /** Placeholder shown while no value is chosen (defaults to "Select value",
+   *  or "Enter a value" for `'text'` fields). */
   placeholder?: string;
   /** Values the user can pick from. Used when `type` is `'select'`. */
   options?: FilterOption[];
@@ -41,7 +43,7 @@ export interface FilterFieldConfig {
 export interface ActiveFilter {
   id: string;
   fieldId: string;
-  /** Used when the field's type is `'date'`. */
+  /** Used when the field's type is `'date'` or `'text'`. */
   value?: string;
   /** Selected values for a `'select'` field — more than one may be chosen. */
   values?: string[];
@@ -49,10 +51,81 @@ export interface ActiveFilter {
 
 /**
  * A field can be configured only if it has a value-selection UI: a `date`
- * picker, or a `select` with at least one option.
+ * picker, a `text` input, or a `select` with at least one option.
  */
 export function fieldHasValueUi(field: FilterFieldConfig): boolean {
-  return field.type === 'date' || (field.options?.length ?? 0) > 0;
+  return field.type === 'date' || field.type === 'text' || (field.options?.length ?? 0) > 0;
+}
+
+/** Callbacks a field's own value can be set through directly from the
+ *  "Add filter" menu's nested submenu, without first creating a blank chip. */
+export interface AddFilterMenuCallbacks {
+  /** Add a blank filter chip for the given field id (used for `'date'` fields,
+   *  which are configured in the chip itself rather than a value submenu). */
+  onAddFilter: (fieldId: string) => void;
+  /** Toggle a value for a `'select'`, `selectionMode: 'multi'` field — creates
+   *  the filter chip if one doesn't exist yet for that field. */
+  onToggleFieldValue: (fieldId: string, value: string) => void;
+  /** Replace the value for a `'select'`, `selectionMode: 'single'` field —
+   *  creates the filter chip if one doesn't exist yet for that field. */
+  onSelectFieldValue: (fieldId: string, value: string) => void;
+}
+
+/**
+ * Builds the "Add filter" menu's entries: fields without a value UI are
+ * disabled placeholders; `'date'` and `'text'` fields just add a blank chip
+ * (their value is set in the chip itself, not a fixed list); every other
+ * field is a nested submenu of its values (checkboxes for multi-select, a
+ * radio-like list for single-select) so a value can be picked without first
+ * adding a blank chip.
+ */
+export function buildAddFilterMenuItems(
+  fields: FilterFieldConfig[],
+  filters: ActiveFilter[],
+  { onAddFilter, onToggleFieldValue, onSelectFieldValue }: AddFilterMenuCallbacks,
+): MenuEntry[] {
+  return [...fields]
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((f): MenuEntry => {
+      if (!fieldHasValueUi(f)) {
+        return { kind: 'item', label: f.label, disabled: true };
+      }
+      if (f.type === 'date' || f.type === 'text') {
+        const active = filters.some((flt) => flt.fieldId === f.id);
+        return { kind: 'item', label: f.label, selected: active, onSelect: () => onAddFilter(f.id) };
+      }
+      const existing = filters.find((flt) => flt.fieldId === f.id);
+      const selectedValues = existing?.values ?? [];
+      const isSingle = f.selectionMode === 'single';
+      const items: MenuEntry[] = (f.options ?? []).map((o) => {
+        const isSelected = selectedValues.includes(o.value);
+        if (isSingle) {
+          return {
+            kind: 'item',
+            label: o.label,
+            selected: isSelected,
+            onSelect: () => onSelectFieldValue(f.id, o.value),
+          };
+        }
+        return {
+          kind: 'item',
+          label: o.label,
+          visual: (
+            <Checkbox
+              checked={isSelected}
+              tabIndex={-1}
+              aria-hidden="true"
+              readOnly
+              className={styles.menuCheckbox}
+            />
+          ),
+          checkbox: true,
+          selected: isSelected,
+          onSelect: () => onToggleFieldValue(f.id, o.value),
+        };
+      });
+      return { kind: 'submenu', label: f.label, selected: selectedValues.length > 0, items };
+    });
 }
 
 export interface FiltersProps {
@@ -66,6 +139,12 @@ export interface FiltersProps {
   onToggleValue: (filterId: string, value: string) => void;
   /** Replace the value on an existing `'select'`, `selectionMode: 'single'` filter chip. */
   onSelectValue: (filterId: string, value: string) => void;
+  /** Toggle a value for a `'select'`, `selectionMode: 'multi'` field from the
+   *  "Add filter" menu's nested submenu — creates the chip if needed. */
+  onToggleFieldValue: (fieldId: string, value: string) => void;
+  /** Replace the value for a `'select'`, `selectionMode: 'single'` field from
+   *  the "Add filter" menu's nested submenu — creates the chip if needed. */
+  onSelectFieldValue: (fieldId: string, value: string) => void;
   /** Remove a single filter chip. */
   onRemove: (filterId: string) => void;
   /** Remove all filter chips. */
@@ -76,8 +155,9 @@ export interface FiltersProps {
 /**
  * Filters — the filter bar shown below the toolbar once one or more filters
  * are active. Each chip has a remove segment and a body that opens a value
- * menu; the "Add Filter" control reopens the field menu and "Clear selection"
- * removes everything. Renders nothing when there are no active filters.
+ * menu; the "Add Filter" control reopens the field menu (with a nested
+ * value submenu per field) and "Clear selection" removes everything.
+ * Renders nothing when there are no active filters.
  */
 export function Filters({
   filters,
@@ -86,6 +166,8 @@ export function Filters({
   onValueChange,
   onToggleValue,
   onSelectValue,
+  onToggleFieldValue,
+  onSelectFieldValue,
   onRemove,
   onClear,
   className,
@@ -107,19 +189,11 @@ export function Filters({
 
   const fieldById = new Map(fields.map((f) => [f.id, f]));
 
-  const addItems: MenuEntry[] = [...fields]
-    .sort((a, b) => a.label.localeCompare(b.label))
-    .map((f) => {
-      // Only fields with a value-selection UI can be meaningfully configured, so
-      // disable the rest until their UI exists.
-      const supported = fieldHasValueUi(f);
-      return {
-        kind: 'item',
-        label: f.label,
-        disabled: !supported,
-        onSelect: supported ? () => onAddFilter(f.id) : undefined,
-      };
-    });
+  const addItems = buildAddFilterMenuItems(fields, filters, {
+    onAddFilter,
+    onToggleFieldValue,
+    onSelectFieldValue,
+  });
 
   return (
     <div
@@ -135,12 +209,13 @@ export function Filters({
           if (!field) return null;
 
           const rule = field.rule ?? 'is';
-          const placeholder = field.placeholder ?? 'Select value';
           const isDate = field.type === 'date';
+          const isText = field.type === 'text';
+          const placeholder = field.placeholder ?? (isText ? 'Enter a value' : 'Select value');
           const isSingle = field.selectionMode === 'single';
           const selectedValues = filter.values ?? [];
           const selectedOptions = (field.options ?? []).filter((o) => selectedValues.includes(o.value));
-          const hasMenu = !isDate && (field.options?.length ?? 0) > 0;
+          const hasMenu = !isDate && !isText && (field.options?.length ?? 0) > 0;
 
           const valueItems: MenuEntry[] = (field.options ?? []).map((o) => {
             const isSelected = selectedValues.includes(o.value);
@@ -212,6 +287,17 @@ export function Filters({
                     type="date"
                     className={styles.dateInput}
                     value={filter.value ?? ''}
+                    onChange={(e) => onValueChange(filter.id, e.target.value)}
+                    aria-label={`${field.label} value`}
+                  />
+                </div>
+              ) : isText ? (
+                <div className={styles.segment}>
+                  <input
+                    type="text"
+                    className={styles.textInput}
+                    value={filter.value ?? ''}
+                    placeholder={placeholder}
                     onChange={(e) => onValueChange(filter.id, e.target.value)}
                     aria-label={`${field.label} value`}
                   />

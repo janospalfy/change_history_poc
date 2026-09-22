@@ -189,6 +189,34 @@
   border-radius: var(--oi-border-radius-s);
 }
 
+/* Free-text value input for a `'text'` filter chip (e.g. Name, Operation
+   ID) — borderless/transparent so it blends into the chip segment, sized
+   to the chip's own text rather than the browser default. */
+.textInput {
+  width: 140px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: var(--oi-content-color-primary);
+  font-family: inherit;
+  font-size: var(--oi-text-body-s-font-size);
+  line-height: var(--oi-text-body-s-line-height);
+  font-weight: var(--oi-text-body-s-font-weight);
+}
+
+.textInput::placeholder {
+  font-style: italic;
+  color: var(--oi-content-color-tertiary);
+}
+
+.textInput:focus-visible {
+  outline: var(--oi-border-width-l) var(--oi-border-style-solid)
+    var(--oi-border-color-focus);
+  outline-offset: var(--oi-border-width-l);
+  border-radius: var(--oi-border-radius-s);
+}
+
 /* --- Ghost buttons (Add Filter / Clear selection) ---------------------- */
 
 .ghostBtn {

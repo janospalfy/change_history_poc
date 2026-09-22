@@ -81,6 +81,15 @@ export interface MenuSubmenuEntry {
   selected?: boolean;
   onOpen?: () => void;
   items: MenuEntry[];
+  /**
+   * Which side the flyout opens on. `'auto'` (default) opens to the right
+   * and flips to the left only if it would overflow the viewport. `'left'`
+   * always opens to the left of the row and clamps to the viewport instead
+   * of ever falling back to the right — use this when the parent menu
+   * itself already sits near the right edge, so a right-opening flyout
+   * would run off-screen.
+   */
+  openSide?: 'auto' | 'left';
 }
 
 export type MenuEntry =
@@ -338,14 +347,23 @@ function SubmenuItem({ item, close }: { item: MenuSubmenuEntry; close: () => voi
     cancelClose();
     item.onOpen?.();
     rowRef.current?.focus();
-    const r = rowRef.current?.getBoundingClientRect();
-    if (r) setPos({ top: r.top, left: r.right });
+    // Only seed the naive (unflipped) position on the closed \u2192 open
+    // transition. If it's already open (e.g. a click arrives after hover
+    // already opened and corrected it), leave the corrected position alone
+    // \u2014 the layout effect below only re-runs when `open` itself changes,
+    // so overwriting `pos` here again would leave it stuck un-corrected.
+    if (!open) {
+      const r = rowRef.current?.getBoundingClientRect();
+      if (r) setPos({ top: r.top, left: item.openSide === 'left' ? r.left : r.right });
+    }
     setOpen(true);
   };
 
-  // Once the flyout has measured, keep it on-screen: flip to the left of the
-  // row if it would overflow the right edge, and clamp vertically. Mirrors
-  // the pointer-anchored menu's clamping.
+  // Once the flyout has measured, keep it on-screen. `openSide: 'left'`
+  // always opens to the left of the row, clamped to the viewport rather
+  // than ever falling back to the right; otherwise (the default) it opens
+  // to the right and flips left only if it would overflow. Vertically it
+  // always clamps, mirroring the pointer-anchored menu's clamping.
   useLayoutEffect(() => {
     if (!open || !subRef.current || !rowRef.current) return;
     const sub = subRef.current;
@@ -353,17 +371,22 @@ function SubmenuItem({ item, close }: { item: MenuSubmenuEntry; close: () => voi
     const sw = sub.offsetWidth;
     const sh = sub.offsetHeight;
     const margin = 4;
-    let left = r.right;
-    if (left + sw > window.innerWidth - margin) {
-      // Flip to the left of the row; clamp if it still doesn't fit.
+    let left: number;
+    if (item.openSide === 'left') {
       left = Math.max(margin, r.left - sw);
+    } else {
+      left = r.right;
+      if (left + sw > window.innerWidth - margin) {
+        // Flip to the left of the row; clamp if it still doesn't fit.
+        left = Math.max(margin, r.left - sw);
+      }
     }
     let top = r.top;
     if (top + sh > window.innerHeight - margin) {
       top = Math.max(margin, window.innerHeight - sh - margin);
     }
     setPos((p) => (p && (p.left !== left || p.top !== top) ? { top, left } : p));
-  }, [open]);
+  }, [open, item.openSide]);
 
   useEffect(() => () => cancelClose(), []);
 

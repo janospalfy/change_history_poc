@@ -10,7 +10,7 @@ import { Icon } from '../../../components/Icon/Icon.js';
 import { showToast } from '../../../lib/toastStore.js';
 import {
   Filters,
-  fieldHasValueUi,
+  buildAddFilterMenuItems,
   type ActiveFilter,
   type FilterFieldConfig,
 } from '../../../components/Filters/Filters.js';
@@ -249,9 +249,9 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
   const allOperations = dataset.flatMap((group) => group.operations);
   const latestDate = allOperations.reduce((latest, op) => Math.max(latest, getOperationTimestamp(op)), 0);
   const filterFields: FilterFieldConfig[] = [
-    { id: 'name', label: 'Name', options: uniqueOptions(allOperations, 'name') },
+    { id: 'name', label: 'Name', type: 'text', rule: 'contains' },
     { id: 'reason', label: 'Reason', options: uniqueOptions(allOperations, 'reason') },
-    { id: 'operationId', label: 'Operation ID', options: uniqueOptions(allOperations, 'operationId') },
+    { id: 'operationId', label: 'Operation ID', type: 'text', rule: 'contains' },
     { id: 'requestedBy', label: 'Requested by', options: uniqueOptions(allOperations, 'requestedBy') },
     { id: 'status', label: 'Status', options: uniqueOptions(allOperations, 'status') },
     { id: 'logonComputer', label: 'Logon computer', options: uniqueOptions(allOperations, 'logonComputer') },
@@ -264,7 +264,7 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
       options: uniqueOptions(allOperations, 'activeRolesAdmin'),
     },
     { id: 'targetObject', label: 'Target object', options: uniqueOptions(allOperations, 'targetObject') },
-    { id: 'lastUpdatedOn', label: 'Last updated on', options: uniqueOptions(allOperations, 'lastUpdatedOn') },
+    { id: 'lastUpdatedOn', label: 'Last updated on', type: 'date' },
     { id: 'propertyChanged', label: 'Property changed', options: uniqueChangedPropertyOptions(allOperations) },
   ];
   return { allOperations, latestDate, latestDateOnly: toDateOnly(latestDate), filterFields };
@@ -335,6 +335,7 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
     () => buildDatasetContext(displayDataset),
     [displayDataset],
   );
+  const filterFieldById = useMemo(() => new Map(filterFields.map((f) => [f.id, f])), [filterFields]);
 
   // Switching views swaps the whole dataset out from under any active
   // filters, so reset them rather than leaving stale/mismatched selections.
@@ -380,6 +381,21 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
           op.id.toLowerCase().includes(trimmedQuery);
         const matchesType = activeTypes.length === 0 || activeTypes.includes(BUCKET_BY_TYPE[op.type]);
         const matchesFilters = activeFilters.every((filter) => {
+          const field = filterFieldById.get(filter.fieldId);
+          // 'date'/'text' fields are configured via a single `value` (not the
+          // `values` list used by 'select' fields) — an exact-day match for
+          // dates, a case-insensitive substring match for free text.
+          if (field?.type === 'date') {
+            if (!filter.value) return true;
+            const raw = getFieldValue(op, filter.fieldId);
+            const ts = new Date(raw).getTime();
+            return !Number.isNaN(ts) && toDateOnly(ts) === filter.value;
+          }
+          if (field?.type === 'text') {
+            const query = (filter.value ?? '').trim().toLowerCase();
+            if (!query) return true;
+            return getFieldValue(op, filter.fieldId).toLowerCase().includes(query);
+          }
           const values = filter.values ?? [];
           if (values.length === 0) return true;
           if (filter.fieldId === 'propertyChanged') {
@@ -407,7 +423,7 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
         return matchesQuery && matchesType && matchesFilters && matchesDate;
       }),
     })).filter((group) => group.operations.length > 0);
-  }, [displayDataset, trimmedQuery, activeTypes, activeFilters, dateRule, relativeCutoff, fromStart, fromEnd, toEnd, timeFrom]);
+  }, [displayDataset, trimmedQuery, activeTypes, activeFilters, filterFieldById, dateRule, relativeCutoff, fromStart, fromEnd, toEnd, timeFrom]);
 
   const toggleType = (value: string) => {
     setActiveTypes((prev) =>
@@ -434,17 +450,33 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
   const removeFilter = (id: string) => setActiveFilters((prev) => prev.filter((f) => f.id !== id));
   const clearFilters = () => setActiveFilters([]);
 
-  const addFilterMenuItems = [...filterFields]
-    .sort((a, b) => a.label.localeCompare(b.label))
-    .map((field) => {
-      const supported = fieldHasValueUi(field);
-      return {
-        kind: 'item' as const,
-        label: field.label,
-        disabled: !supported,
-        onSelect: supported ? () => addFilter(field.id) : undefined,
-      };
+  // Field-scoped variants used by the "Add filter" menu's nested value
+  // submenu — they create the filter chip for the field on first pick
+  // instead of requiring a blank chip to exist already.
+  const addOrToggleFieldValue = (fieldId: string, value: string) =>
+    setActiveFilters((prev) => {
+      const existing = prev.find((f) => f.fieldId === fieldId);
+      if (existing) {
+        const values = existing.values ?? [];
+        const nextValues = values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
+        return prev.map((f) => (f === existing ? { ...f, values: nextValues } : f));
+      }
+      filterIdRef.current += 1;
+      return [...prev, { id: `hf${filterIdRef.current}`, fieldId, values: [value] }];
     });
+  const addOrSelectFieldValue = (fieldId: string, value: string) =>
+    setActiveFilters((prev) => {
+      const existing = prev.find((f) => f.fieldId === fieldId);
+      if (existing) return prev.map((f) => (f === existing ? { ...f, values: [value] } : f));
+      filterIdRef.current += 1;
+      return [...prev, { id: `hf${filterIdRef.current}`, fieldId, values: [value] }];
+    });
+
+  const addFilterMenuItems = buildAddFilterMenuItems(filterFields, activeFilters, {
+    onAddFilter: addFilter,
+    onToggleFieldValue: addOrToggleFieldValue,
+    onSelectFieldValue: addOrSelectFieldValue,
+  });
 
   const exportSubjectLabel = view === 'changeHistory' ? 'Change history' : 'User activity';
   const exportMenuItems = [
@@ -688,6 +720,8 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
               onValueChange={setFilterValue}
               onToggleValue={toggleFilterValue}
               onSelectValue={selectFilterValue}
+              onToggleFieldValue={addOrToggleFieldValue}
+              onSelectFieldValue={addOrSelectFieldValue}
               onRemove={removeFilter}
               onClear={clearFilters}
               className={styles.propertyFilters}
