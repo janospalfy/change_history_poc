@@ -120,8 +120,8 @@
 .dateFilterTag {
   display: inline-flex;
   align-items: stretch;
-  height: var(--oi-size-s);
-  border-radius: 4px;
+  height: var(--oi-size-m);
+  border-radius: var(--oi-border-radius-l);
   border: var(--oi-border-width-default) solid var(--oi-border-color-default);
   background-color: var(--oi-background-color-primary);
 }
@@ -314,8 +314,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--oi-spacing-s);
-  height: var(--oi-size-s);
-  border-radius: 4px;
+  height: var(--oi-size-m);
+  border-radius: var(--oi-border-radius-l);
   border: var(--oi-border-width-default) solid var(--oi-border-color-default);
   background-color: var(--oi-background-color-primary);
   color: var(--oi-content-color-tertiary);
