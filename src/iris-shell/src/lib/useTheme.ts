@@ -17,7 +17,8 @@ export interface ThemeDef {
 
 const CORE_THEMES: ThemeDef[] = [
   { value: 'light', label: 'Light', icon: 'Sun', bodyClass: 'theme-light', group: 'core' },
-  { value: 'dark', label: 'Dark', icon: 'Moon', bodyClass: 'theme-dark', group: 'core' },
+  // Dark is temporarily disabled (not yet fully token-audited); light is the
+  // only default. Re-add here to bring it back.
   { value: 'hc-light', label: 'High contrast light', icon: 'SunDim', bodyClass: 'theme-hc-light', group: 'core' },
   { value: 'hc-dark', label: 'High contrast dark', icon: 'MoonStars', bodyClass: 'theme-hc-dark', group: 'core' },
 ];
@@ -39,7 +40,8 @@ function readInitialTheme(): ThemeValue {
   for (const t of THEMES) {
     if (document.body.classList.contains(t.bodyClass)) return t.value;
   }
-  return (localStorage.getItem(STORAGE_KEY) as ThemeValue | null) ?? 'light';
+  const stored = localStorage.getItem(STORAGE_KEY) as ThemeValue | null;
+  return stored && THEMES.some((t) => t.value === stored) ? stored : 'light';
 }
 
 export interface UseThemeResult {
