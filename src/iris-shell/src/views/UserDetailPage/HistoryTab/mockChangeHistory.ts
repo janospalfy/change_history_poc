@@ -159,27 +159,22 @@ const GENERATED_TYPES: { type: OperationType; label: string }[] = [
   { type: 'groupMembershipChange', label: 'Add group membership' },
   { type: 'deprovision', label: 'Deprovision user' },
   { type: 'undoDeprovision', label: 'Undo deprovisioning' },
-  { type: 'groupMembershipChange', label: 'Remove group membership' },
 ];
 
 const GENERATED_STATUSES: OperationStatus[] = ['Completed', 'Pending', 'Denied', 'Canceled'];
 
 // Status overrides for specific generated operations, so a story's status
 // doesn't have to follow the formulaic seed % GENERATED_STATUSES.length.
-const GENERATED_STATUS_OVERRIDES: Record<number, OperationStatus> = {
-  3026: 'Completed', // July 5, 2026 — Remove group membership from IT Security
-};
+const GENERATED_STATUS_OVERRIDES: Record<number, OperationStatus> = {};
 
 // Named overrides for specific generated group-membership operations, so a
 // handful of filler rows read as real stories instead of generic placeholders.
-const GENERATED_GROUP_NAME_OVERRIDES: Record<number, string> = {
-  3026: 'IT Security', // July 5, 2026 — Remove group membership
-};
+const GENERATED_GROUP_NAME_OVERRIDES: Record<number, string> = {};
 
 // Actor overrides for specific generated operations, e.g. to avoid a
 // misleading actor for a particular story.
 const GENERATED_ACTOR_OVERRIDES: Record<number, string> = {
-  3062: 'administrator (O1D.local)', // May 30, 2026 — Remove group membership
+  3062: 'administrator (O1D.local)', // May 30, 2026 — avoid a misleading actor
 };
 
 // Cycled independently of type/actor/status (different length, so it
@@ -201,15 +196,11 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
   const actor = GENERATED_ACTOR_OVERRIDES[opId] ?? GENERATED_ACTORS[seed % GENERATED_ACTORS.length];
   const status = GENERATED_STATUS_OVERRIDES[opId] ?? GENERATED_STATUSES[seed % GENERATED_STATUSES.length];
   const groupName = GENERATED_GROUP_NAME_OVERRIDES[opId] ?? `Group-${opId}`;
-  const isRemove = rawLabel === 'Remove group membership';
-  // Named after the group being joined/left, matching the console's
-  // "Add <object> to <group>" convention (e.g. "Add user to VPN Users group").
-  const label =
-    type === 'groupMembershipChange'
-      ? isRemove
-        ? `Remove user from ${groupName} group`
-        : `Add user to ${groupName} group`
-      : rawLabel;
+  // Named after the group being joined, matching the console's "Add
+  // <object> to <group>" convention (e.g. "Add user to VPN Users group").
+  // Removal operations aren't generated — every hand-authored and generated
+  // 'Remove user from ... group' row has been intentionally dropped.
+  const label = type === 'groupMembershipChange' ? `Add user to ${groupName} group` : rawLabel;
   const hour = 8 + (seed % 10);
   const minute = (seed * 7) % 60;
   const second = (seed * 13) % 60;
@@ -247,9 +238,9 @@ function buildGeneratedOperation(dateLabel: string, seed: number): ChangeHistory
               {
                 property: 'Member Of',
                 attribute: '(memberOf)',
-                changeNote: `${isRemove ? 'Remove' : 'Add'} value · Operation initiator`,
-                oldValue: isRemove ? groupName : '<not a member>',
-                newValue: isRemove ? '<not a member>' : groupName,
+                changeNote: 'Add value · Operation initiator',
+                oldValue: '<not a member>',
+                newValue: groupName,
               },
             ]
           : type === 'renamed'
@@ -331,17 +322,17 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         id: 'ID: 1-4095',
         time: '07:30:12',
         type: 'groupMembershipChange',
-        label: 'Add user to IT Support group',
+        label: 'Add user to Helpdesk group',
         actor: 'administrator (O1D.local)',
         status: 'Completed',
         date: 'September 2, 2026',
         name: 'Isabella Clark (O1D.local/Test OU)',
-        reason: 'New role requires IT Support access',
+        reason: 'New role requires Helpdesk access',
         requestedAt: 'September 2, 2026 07:30:12 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
         activeRolesAdmin: 'Yes',
-        targetObject: 'IT Support (O1D.local/Test OU)',
+        targetObject: 'Helpdesk (O1D.local/Test OU)',
         lastUpdatedOn: 'September 2, 2026 07:30:12 UTC',
         changes: [
           {
@@ -349,7 +340,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
             attribute: '(memberOf)',
             changeNote: 'Add value · Operation initiator',
             oldValue: '<not a member>',
-            newValue: 'IT Support',
+            newValue: 'Helpdesk',
           },
         ],
       },
@@ -416,10 +407,10 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         type: 'deprovision',
         label: 'Deprovision user',
         actor: 'peter.kim (O1D.local)',
-        status: 'Canceled',
+        status: 'Completed',
         date: 'August 29, 2026',
         name: 'Contractor Temp (O1D.local/Test OU)',
-        reason: 'Contract extended - deprovisioning canceled by hiring manager',
+        reason: 'Deprovisioned due to inactivity',
         requestedAt: 'August 29, 2026 14:50:19 UTC',
         logonComputer: 'ActiveRolesVm2.O1D.local',
         logonSite: 'Default-First-Site-Name',
@@ -663,32 +654,6 @@ export const MOCK_USER_ACTIVITY: ChangeHistoryGroup[] = [
             changeNote: 'Add value · Operation initiator',
             oldValue: '<not a member>',
             newValue: 'VPN Users',
-          },
-        ],
-      },
-      {
-        id: 'ID: 1-5058',
-        time: '17:45:02',
-        type: 'groupMembershipChange',
-        label: 'Remove user from Legacy Contractors group',
-        actor: 'isabella.clark (O1D.local)',
-        status: 'Completed',
-        date: 'August 25, 2026',
-        name: 'Isabella Clark (O1D.local/Test OU)',
-        reason: 'Access review cleanup',
-        requestedAt: 'August 25, 2026 17:45:02 UTC',
-        logonComputer: 'WKS-ICLARK.O1D.local',
-        logonSite: 'Default-First-Site-Name',
-        activeRolesAdmin: 'No',
-        targetObject: 'Legacy Contractors (O1D.local/Test OU)',
-        lastUpdatedOn: 'August 25, 2026 17:45:02 UTC',
-        changes: [
-          {
-            property: 'Member Of',
-            attribute: '(memberOf)',
-            changeNote: 'Remove value · Operation initiator',
-            oldValue: 'Legacy Contractors',
-            newValue: '<not a member>',
           },
         ],
       },
