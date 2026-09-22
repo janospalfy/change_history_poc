@@ -482,12 +482,6 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
   const exportMenuItems = [
     {
       kind: 'item' as const,
-      label: 'Export as HTML',
-      icon: 'FileHtml',
-      onSelect: () => showToast('Export successful', undefined, `${exportSubjectLabel} has been exported as HTML.`),
-    },
-    {
-      kind: 'item' as const,
       label: 'Export as XML',
       icon: 'FileCode',
       onSelect: () => showToast('Export successful', undefined, `${exportSubjectLabel} has been exported as XML.`),

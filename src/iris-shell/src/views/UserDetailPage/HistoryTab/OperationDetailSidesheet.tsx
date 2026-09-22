@@ -24,7 +24,7 @@ const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
   deleted: 'dotRemove',
 };
 
-export type ExportFormat = 'html' | 'xml' | 'csv' | 'pdf';
+export type ExportFormat = 'xml' | 'csv' | 'pdf';
 
 export interface OperationDetailSidesheetProps {
   operation: ChangeHistoryOperation | null;
@@ -90,15 +90,6 @@ export function OperationDetailSidesheet({
   ];
 
   const exportMenuItems = [
-    {
-      kind: 'item' as const,
-      label: 'Export as HTML',
-      icon: 'FileHtml',
-      onSelect: () => {
-        showToast('Export successful', undefined, 'This operation has been exported as HTML.');
-        onExport('html');
-      },
-    },
     {
       kind: 'item' as const,
       label: 'Export as XML',
