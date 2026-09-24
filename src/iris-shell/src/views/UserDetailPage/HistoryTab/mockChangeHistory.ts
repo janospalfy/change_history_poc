@@ -382,7 +382,7 @@ export const MOCK_CHANGE_HISTORY: ChangeHistoryGroup[] = [
         status: 'Completed',
         date: 'August 29, 2026',
         name: 'My OU (O1D.local/Test OU)',
-        reason: 'Email address correction required',
+        reason: 'Update user details',
         requestedAt: 'August 29, 2026 15:02:44 UTC',
         logonComputer: 'ActiveRolesVm.O1D.local',
         logonSite: 'Default-First-Site-Name',
