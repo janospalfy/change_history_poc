@@ -243,7 +243,7 @@ function WorkflowAccordion({ activities }: { activities: WorkflowActivity[] }) {
   return (
     <>
       <div className={styles.sectionHeaderRow}>
-        <h3 className={styles.sectionTitle}>Workflow Activities and Policy Actions</h3>
+        <h3 className={styles.sectionTitle}>Workflow activities and policy actions</h3>
         {activities.length > 0 && (
           <button type="button" className={styles.summaryToggle} onClick={toggleAll}>
             <Icon name={isAllExpanded ? 'ArrowsInSimple' : 'ArrowsOutSimple'} size="16px" />
