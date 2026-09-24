@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type Ref } from 'react';
+import { useEffect, useMemo, useRef, useState, type Ref } from 'react';
 import { cx } from '../../../lib/cx.js';
 import { SegmentedToggle } from '../../../components/SegmentedToggle/SegmentedToggle.js';
 import { TextInput } from '../../../components/TextInput/TextInput.js';
@@ -283,6 +283,8 @@ function findOperationView(opId: string | null): 'changeHistory' | 'userActivity
 
 export interface HistoryTabProps {
   subjectName: string;
+  /** Shareable field filters encoded as `fieldId=value;fieldId=value`. */
+  initialFilterQuery?: string;
   /** The operation currently open in the detail sidesheet, derived from the
    *  URL — never stored as local state (see "Deep-Linking" pattern). */
   selectedOperationId: string | null;
@@ -297,7 +299,7 @@ export interface HistoryTabProps {
  * History / User Activity toggle, search + export + filter toolbar, and
  * (further down the audit) the grouped timeline and operation sidesheet.
  */
-export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation, onExportOperation }: HistoryTabProps) {
+export function HistoryTab({ subjectName, initialFilterQuery, selectedOperationId, onSelectOperation, onExportOperation }: HistoryTabProps) {
   const [view, setView] = useState(() => findOperationView(selectedOperationId) ?? 'changeHistory');
   const [query, setQuery] = useState('');
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
@@ -336,6 +338,34 @@ export function HistoryTab({ subjectName, selectedOperationId, onSelectOperation
     [displayDataset],
   );
   const filterFieldById = useMemo(() => new Map(filterFields.map((f) => [f.id, f])), [filterFields]);
+  const hydratedFilterQuery = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!initialFilterQuery || hydratedFilterQuery.current === initialFilterQuery) return;
+    hydratedFilterQuery.current = initialFilterQuery;
+    const values = new Map(initialFilterQuery.split(';').map((part) => {
+      const separator = part.indexOf('=');
+      return separator === -1 ? [part, ''] : [part.slice(0, separator), part.slice(separator + 1)];
+    }));
+    const requestedByQuery = values.get('requestedBy');
+    const status = values.get('status');
+    const nextFilters: ActiveFilter[] = [];
+    const requestedByOptions = filterFieldById.get('requestedBy')?.options ?? [];
+    const requestedBy = requestedByOptions.find(
+      (option) => option.value === requestedByQuery || option.value.startsWith(`${requestedByQuery} (`),
+    )?.value;
+    if (requestedBy && filterFieldById.get('requestedBy')) {
+      nextFilters.push({ id: `hf${nextFilters.length + 1}`, fieldId: 'requestedBy', values: [requestedBy] });
+    }
+    if (status && filterFieldById.get('status')) {
+      nextFilters.push({ id: `hf${nextFilters.length + 1}`, fieldId: 'status', values: [status] });
+    }
+    if (nextFilters.length > 0) {
+      filterIdRef.current = nextFilters.length;
+      setActiveFilters(nextFilters);
+    }
+  }, [initialFilterQuery, filterFieldById]);
+
 
   // Switching views swaps the whole dataset out from under any active
   // filters, so reset them rather than leaving stale/mismatched selections.

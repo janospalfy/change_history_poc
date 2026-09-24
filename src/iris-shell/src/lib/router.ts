@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
  */
 
 export type Route =
-  | { name: 'userDetail'; params: { id: string; tab?: string; op?: string; export?: string } }
+  | { name: 'userDetail'; params: { id: string; tab?: string; op?: string; export?: string; filters?: string } }
   | { name: 'usersList'; params: Record<string, never> }
   | { name: 'treeRoot'; params: Record<string, never> }
   | { name: 'treeList'; params: { nodeId: string } }
@@ -41,7 +41,7 @@ interface RouteDef {
 }
 
 const ROUTES: RouteDef[] = [
-  { name: 'userDetail', pathPattern: /^#\/users\/([^/]+)$/, keys: ['id'], queryKeys: ['tab', 'op', 'export'] },
+  { name: 'userDetail', pathPattern: /^#\/users\/([^/]+)$/, keys: ['id'], queryKeys: ['tab', 'op', 'export', 'filters'] },
   { name: 'usersList', pathPattern: /^#\/users$/, keys: [] },
   { name: 'treeDetail', pathPattern: /^#\/tree\/([^/]+)\/([^/]+)$/, keys: ['nodeId', 'objectId'], queryKeys: ['tab', 'op', 'export'] },
   { name: 'treeList', pathPattern: /^#\/tree\/([^/]+)$/, keys: ['nodeId'] },

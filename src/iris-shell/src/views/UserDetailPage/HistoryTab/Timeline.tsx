@@ -3,7 +3,7 @@ import { cx } from '../../../lib/cx.js';
 import { Icon } from '../../../components/Icon/Icon.js';
 import { Badge } from '../../../components/Badge/Badge.js';
 import { Tooltip } from '../../../components/Tooltip/Tooltip.js';
-import type { ChangeHistoryGroup, ChangeHistoryOperation, OperationType } from './mockChangeHistory.js';
+import { formatDateLabel, type ChangeHistoryGroup, type ChangeHistoryOperation, type OperationType } from './mockChangeHistory.js';
 import styles from './Timeline.module.css';
 
 const DOT_CLASS_BY_TYPE: Record<OperationType, string> = {
@@ -162,7 +162,7 @@ export function Timeline({
                   <span className={cx(styles.chevron, isExpanded && styles.chevronExpanded)}>
                     <Icon name="CaretRight" size="16px" />
                   </span>
-                  <span className={styles.date}>{group.date}</span>
+                  <span className={styles.date}>{formatDateLabel(group.date)}</span>
                   <span className={styles.count}>
                     {group.operations.length} operation{group.operations.length === 1 ? '' : 's'}
                   </span>

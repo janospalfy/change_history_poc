@@ -221,6 +221,7 @@ export function UserDetailPage({ userId }: UserDetailPageProps) {
           <HistoryTab
             subjectName={user.name}
             selectedOperationId={selectedOperationId}
+            initialFilterQuery={route.name === 'userDetail' ? route.params.filters : undefined}
             onSelectOperation={handleSelectOperation}
             onExportOperation={handleExportOperation}
           />

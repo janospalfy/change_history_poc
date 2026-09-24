@@ -28,19 +28,23 @@ const MONTH_INDEX: Record<string, number> = {
   December: 12,
 };
 
-/** Converts the long-form UTC timestamp mock data is authored in (e.g.
- *  "August 29, 2026 15:02:44 UTC", shared with the timeline's date-group
- *  headers) into the numeric "M/D/YYYY HH:MM:SS UTC" format the sidesheet's
- *  Requested/Completed/Last updated on fields — and the "Last updated on"
- *  filter's options — use (Figma node 1458:25187, e.g.
- *  "11/13/2024 18:30:51 UTC"). */
+/** Converts the long-form UTC timestamp mock data is authored in to the
+ *  technical-communications format: "29 August 2026 15:02:44 UTC". */
 export function formatSidesheetTimestamp(raw: string): string {
   const match = /^([A-Za-z]+) (\d{1,2}), (\d{4}) (\d{2}:\d{2}:\d{2}) UTC$/.exec(raw);
   if (!match) return raw;
   const [, monthName, day, year, time] = match;
   const month = MONTH_INDEX[monthName];
   if (!month) return raw;
-  return `${month}/${day}/${year} ${time} UTC`;
+  return `${day} ${monthName} ${year} ${time} UTC`;
+}
+
+/** Formats timeline date-group labels as "DD Month YEAR". */
+export function formatDateLabel(raw: string): string {
+  const match = /^([A-Za-z]+) (\d{1,2}), (\d{4})$/.exec(raw);
+  if (!match) return raw;
+  const [, monthName, day, year] = match;
+  return `${day} ${monthName} ${year}`;
 }
 
 /** Simplified verb shown as the sidesheet's "Type" field (Operation Details
