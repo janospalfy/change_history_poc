@@ -181,6 +181,7 @@ export function Menu({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = isControlled ? openProp : internalOpen;
   const [pos, setPos] = useState<MenuPos | null>(null);
+  const anchorRef = useRef<HTMLSpanElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -201,13 +202,13 @@ export function Menu({
   // scroll/resize so a trigger-anchored menu tracks its trigger.
   useEffect(() => {
     if (!open) return;
-    if (!position && !triggerRef.current) return;
+    if (!position && !anchorRef.current) return;
     const compute = () => {
       if (position) {
         setPos({ top: position.y, left: position.x, align: 'start' });
         return;
       }
-      const t = triggerRef.current;
+      const t = anchorRef.current;
       if (!t) return;
       const rect = t.getBoundingClientRect();
       // Once the menu is mounted+measured, decide the flip here so a scroll/
@@ -265,7 +266,7 @@ export function Menu({
   useLayoutEffect(() => {
     if (!open || position || topAnchor != null) return;
     const el = menuRef.current;
-    const t = triggerRef.current;
+    const t = anchorRef.current;
     if (!el || !t) return;
     const top = resolveTriggerTop(t.getBoundingClientRect(), el.offsetHeight);
     setPos((p) => (p && p.top !== top ? { ...p, top } : p));
@@ -279,7 +280,7 @@ export function Menu({
       const target = e.target as Element | null;
       if (
         target?.closest?.('[data-oi-menu]') ||
-        (target && triggerRef.current?.contains(target))
+        (target && anchorRef.current?.contains(target))
       )
         return;
       close();
@@ -300,7 +301,9 @@ export function Menu({
 
   return (
     <>
-      {trigger?.({ ref: triggerRef, onClick: toggle, expanded: !!open })}
+      <span ref={anchorRef} className={styles.triggerAnchor}>
+        {trigger?.({ ref: triggerRef, onClick: toggle, expanded: !!open })}
+      </span>
       {open && pos &&
         createPortal(
           <div

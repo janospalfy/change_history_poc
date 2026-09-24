@@ -209,10 +209,9 @@ export function Tooltip({
   }
   const child = Children.only(children) as ReactElement;
   const childProps = child.props as Record<string, unknown>;
-  // React 19 exposes the consumer's ref on the element object so we can
-  // compose with it rather than clobber it.
-  const childRef =
-    (child as ReactElement & { ref?: Ref<HTMLElement> }).ref ?? undefined;
+  // React 19 exposes the consumer's ref through props; keeping it in the
+  // composed callback preserves menu trigger refs through this wrapper.
+  const childRef = (childProps.ref as Ref<HTMLElement> | undefined) ?? undefined;
 
   const composedRef = useCallback(
     (node: HTMLElement | null) => {
@@ -284,9 +283,12 @@ export function Tooltip({
     },
     onPointerDown: (e: PointerEvent<HTMLElement>) => {
       (childProps.onPointerDown as ((e: PointerEvent<HTMLElement>) => void) | undefined)?.(e);
-      // Pressing the trigger hides the tip and blocks the follow-up focus
-      // from re-showing it until the pointer leaves and returns.
+      // Pressing the trigger blocks the follow-up focus from re-showing the
+      // tip, but keeps the trigger mounted until its click handler runs.
       clickDismissedRef.current = true;
+    },
+    onClick: (e: MouseEvent<HTMLElement>) => {
+      (childProps.onClick as ((e: MouseEvent<HTMLElement>) => void) | undefined)?.(e);
       hide();
     },
     // `cloneElement`'s props are typed as `Partial<P> & Attributes`. With
