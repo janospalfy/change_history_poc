@@ -10,6 +10,7 @@ import {
 import { createPortal } from 'react-dom';
 import { cx } from '../../lib/cx.js';
 import { Icon } from '../Icon/Icon.js';
+import { TextInput } from '../TextInput/TextInput.js';
 import styles from './Menu.module.css';
 
 const SECTION_KIND = 'section';
@@ -81,6 +82,8 @@ export interface MenuSubmenuEntry {
   selected?: boolean;
   onOpen?: () => void;
   items: MenuEntry[];
+  search?: { placeholder?: string; ariaLabel?: string };
+  footerActions?: MenuFooterAction[];
   /**
    * Which side the flyout opens on. `'auto'` (default) opens to the right
    * and flips to the left only if it would overflow the viewport. `'left'`
@@ -103,6 +106,11 @@ export interface MenuTriggerArgs {
   ref: Ref<HTMLElement>;
   onClick: () => void;
   expanded: boolean;
+}
+
+export interface MenuFooterAction {
+  label: string;
+  onSelect: () => void;
 }
 
 export interface MenuProps {
@@ -136,6 +144,8 @@ export interface MenuProps {
    * trigger's right edge.
    */
   rightAnchor?: number;
+  search?: { placeholder?: string; ariaLabel?: string };
+  footerActions?: MenuFooterAction[];
 }
 
 interface MenuPos {
@@ -176,6 +186,8 @@ export function Menu({
   position,
   topAnchor,
   rightAnchor,
+  search,
+  footerActions,
 }: MenuProps) {
   const isControlled = openProp !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
@@ -184,6 +196,8 @@ export function Menu({
   const anchorRef = useRef<HTMLSpanElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [query, setQuery] = useState('');
 
   const setOpen = useCallback(
     (v: boolean) => {
@@ -196,6 +210,9 @@ export function Menu({
   const close = useCallback(() => setOpen(false), [setOpen]);
 
   const toggle = useCallback(() => setOpen(!open), [setOpen, open]);
+  const visibleItems = search
+    ? items.filter((item) => item.kind !== 'item' || item.label.toLowerCase().includes(query.trim().toLowerCase()))
+    : items;
 
   // Position the floating menu. In `position` mode it anchors at the pointer
   // coordinates; otherwise it drops below the trigger. Recompute on
@@ -299,6 +316,11 @@ export function Menu({
     };
   }, [open, close]);
 
+  useEffect(() => {
+    if (open && search) searchRef.current?.focus();
+    if (!open) setQuery('');
+  }, [open, search]);
+
   return (
     <>
       <span ref={anchorRef} className={styles.triggerAnchor}>
@@ -321,7 +343,30 @@ export function Menu({
             }}
             onKeyDown={(e) => handleArrowNav(e, menuRef)}
           >
-            {items.map((item, i) => renderItem(item, i, close))}
+            {search && (
+              <div className={styles.search}>
+                <TextInput
+                  ref={searchRef}
+                  iconLead="MagnifyingGlass"
+                  placeholder={search.placeholder ?? 'Search...'}
+                  aria-label={search.ariaLabel ?? 'Search options'}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </div>
+            )}
+            {visibleItems.length > 0
+              ? visibleItems.map((item, i) => renderItem(item, i, close))
+              : <div className={styles.searchEmpty}>No matches</div>}
+            {footerActions && footerActions.length > 0 && (
+              <div className={styles.footer}>
+                {footerActions.map((action) => (
+                  <button key={action.label} type="button" className={styles.footerAction} onClick={action.onSelect}>
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>,
           document.body,
         )}
@@ -334,7 +379,12 @@ function SubmenuItem({ item, close }: { item: MenuSubmenuEntry; close: () => voi
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const rowRef = useRef<HTMLButtonElement | null>(null);
   const subRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [query, setQuery] = useState('');
+  const visibleItems = item.search
+    ? item.items.filter((entry) => entry.kind !== 'item' || entry.label.toLowerCase().includes(query.trim().toLowerCase()))
+    : item.items;
 
   const cancelClose = () => {
     if (closeTimer.current) {
@@ -392,6 +442,11 @@ function SubmenuItem({ item, close }: { item: MenuSubmenuEntry; close: () => voi
   }, [open, item.openSide]);
 
   useEffect(() => () => cancelClose(), []);
+
+  useEffect(() => {
+    if (open && item.search) searchRef.current?.focus();
+    if (!open) setQuery('');
+  }, [open, item.search]);
 
   return (
     <>
@@ -451,7 +506,30 @@ function SubmenuItem({ item, close }: { item: MenuSubmenuEntry; close: () => voi
               handleArrowNav(e, subRef);
             }}
           >
-            {item.items.map((it, i) => renderItem(it, i, close))}
+            {item.search && (
+              <div className={styles.search}>
+                <TextInput
+                  ref={searchRef}
+                  iconLead="MagnifyingGlass"
+                  placeholder={item.search.placeholder ?? 'Search...'}
+                  aria-label={item.search.ariaLabel ?? `Search ${item.label} options`}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </div>
+            )}
+            {visibleItems.length > 0
+              ? visibleItems.map((it, i) => renderItem(it, i, close))
+              : <div className={styles.searchEmpty}>No matches</div>}
+            {item.footerActions && item.footerActions.length > 0 && (
+              <div className={styles.footer}>
+                {item.footerActions.map((action) => (
+                  <button key={action.label} type="button" className={styles.footerAction} onClick={action.onSelect}>
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>,
           document.body,
         )}

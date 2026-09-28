@@ -124,7 +124,27 @@ export function buildAddFilterMenuItems(
           onSelect: () => onToggleFieldValue(f.id, o.value),
         };
       });
-      return { kind: 'submenu', label: f.label, selected: selectedValues.length > 0, items };
+      const selectAll = () => {
+        for (const option of f.options ?? []) {
+          if (!selectedValues.includes(option.value)) onToggleFieldValue(f.id, option.value);
+        }
+      };
+      const clearAll = () => {
+        for (const value of selectedValues) onToggleFieldValue(f.id, value);
+      };
+      return {
+        kind: 'submenu',
+        label: f.label,
+        selected: selectedValues.length > 0,
+        items,
+        search: { placeholder: 'Search...', ariaLabel: `Search ${f.label} options` },
+        footerActions: !isSingle
+          ? [
+              { label: 'Select all', onSelect: selectAll },
+              { label: 'Clear all', onSelect: clearAll },
+            ]
+          : undefined,
+      };
     });
 }
 
@@ -247,6 +267,15 @@ export function Filters({
             };
           });
 
+          const selectAllValues = () => {
+            for (const option of field.options ?? []) {
+              if (!selectedValues.includes(option.value)) onToggleValue(filter.id, option.value);
+            }
+          };
+          const clearAllValues = () => {
+            for (const value of selectedValues) onToggleValue(filter.id, value);
+          };
+
           const selectBody = (
             args?: { ref: Ref<HTMLElement>; onClick: () => void; expanded: boolean },
           ) => (
@@ -307,6 +336,15 @@ export function Filters({
                   ariaLabel={`${field.label} value`}
                   align="start"
                   items={valueItems}
+                  search={{ placeholder: 'Search...', ariaLabel: `Search ${field.label} options` }}
+                  footerActions={
+                    !isSingle
+                      ? [
+                          { label: 'Select all', onSelect: selectAllValues },
+                          { label: 'Clear all', onSelect: clearAllValues },
+                        ]
+                      : undefined
+                  }
                   trigger={(triggerArgs) => selectBody(triggerArgs)}
                 />
               ) : (

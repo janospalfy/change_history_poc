@@ -250,7 +250,7 @@ function buildDatasetContext(dataset: ChangeHistoryGroup[]) {
   const latestDate = allOperations.reduce((latest, op) => Math.max(latest, getOperationTimestamp(op)), 0);
   const filterFields: FilterFieldConfig[] = [
     { id: 'name', label: 'Name', type: 'text', rule: 'contains' },
-    { id: 'reason', label: 'Reason', options: uniqueOptions(allOperations, 'reason') },
+    { id: 'reason', label: 'Reason', type: 'text', rule: 'contains' },
     { id: 'operationId', label: 'Operation ID', type: 'text', rule: 'contains' },
     { id: 'requestedBy', label: 'Requested by', options: uniqueOptions(allOperations, 'requestedBy') },
     { id: 'status', label: 'Status', options: uniqueOptions(allOperations, 'status') },
