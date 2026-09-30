@@ -325,11 +325,13 @@ export function HistoryTab({ subjectName, initialFilterQuery, selectedOperationI
     () =>
       activeDataset.map((group) => ({
         ...group,
-        operations: group.operations.map((op) =>
-          view === 'changeHistory'
-            ? { ...op, name: subjectLabel, targetObject: subjectLabel }
-            : { ...op, actor: subjectActor, name: op.targetObject },
-        ),
+        operations: group.operations
+          .filter((op) => subjectName !== 'Noah Kim' || (op.type !== 'deprovision' && op.type !== 'undoDeprovision'))
+          .map((op) =>
+            view === 'changeHistory'
+              ? { ...op, name: subjectLabel, targetObject: subjectLabel }
+              : { ...op, actor: subjectActor, name: op.targetObject },
+          ),
       })),
     [activeDataset, view, subjectLabel, subjectActor],
   );
@@ -555,7 +557,7 @@ export function HistoryTab({ subjectName, initialFilterQuery, selectedOperationI
   return (
     <div className={styles.root}>
       <div className={styles.toolbar}>
-        <SegmentedToggle items={VIEW_ITEMS} value={view} onChange={setView} ariaLabel="History view" />
+        <SegmentedToggle items={VIEW_ITEMS} value={view} onChange={(value) => setView(value as typeof view)} ariaLabel="History view" />
         <span className={styles.divider} aria-hidden="true" />
         <TextInput
           iconLead="MagnifyingGlass"
