@@ -212,9 +212,7 @@ export const MOCK_USERS: User[] = [
     objectId: 'a3f1b2c4-7d9e-4f2a-b8c3-1d2e3f4a5b6c',
     location: 'AD-2\\OU1',
     groupMembershipIds: makeMembershipIds(3),
-    // Deliberately typo'd ("noa" not "noah") to test the History tab's
-    // change-tracking against a real-world data-entry mistake scenario.
-    details: { ...makeDetails('Noah Kim', 'Noah.Kim'), email: 'noa.kim@saasii.io' },
+    details: { ...makeDetails('Noah Kim', 'Noah.Kim'), email: 'noah.kim@saasii.io' },
   },
   {
     id: 'mason-patel',
